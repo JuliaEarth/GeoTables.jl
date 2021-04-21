@@ -11,7 +11,7 @@ Geometries are loaded in pure Julia using packages such as
 [Shapefile.jl](https://github.com/JuliaGeo/Shapefile.jl) and
 [GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl).
 This means that there are no dependencies on heavy external
-libraries such as GDAL.
+libraries (e.g. GDAL).
 
 ## Usage
 
