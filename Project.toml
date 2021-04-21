@@ -3,7 +3,15 @@ uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
+Shapefile = "8e980c4a-a4fe-5da2-b3a7-4b4b0353a2f4"
+
 [compat]
+GeoInterface = "0.5"
+Meshes = "0.12"
+Shapefile = "0.7"
 julia = "1"
 
 [extras]
