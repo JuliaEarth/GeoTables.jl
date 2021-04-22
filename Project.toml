@@ -4,14 +4,18 @@ authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+GADM = "a8dd9ffe-31dc-4cf5-a379-ea69100a8233"
 GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
 Shapefile = "8e980c4a-a4fe-5da2-b3a7-4b4b0353a2f4"
+Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [compat]
+GADM = "0.2"
 GeoInterface = "0.5"
 Meshes = "0.12"
 Shapefile = "0.7"
+Tables = "1.4"
 julia = "1"
 
 [extras]

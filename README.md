@@ -7,18 +7,17 @@ geometries to [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl)
 geometries that are compatible with the
 [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) ecosystem. 
 
-Geometries are loaded in pure Julia using packages such as
-[Shapefile.jl](https://github.com/JuliaGeo/Shapefile.jl) and
-[GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl).
-This means that there are no dependencies on heavy external
-libraries (e.g. GDAL).
+Geometries are loaded from disk in pure Julia whenever possible
+using packages such as [Shapefile.jl](https://github.com/JuliaGeo/Shapefile.jl)
+and [GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl), or
+(down)loaded from the internet using the
+[GADM.jl](https://github.com/JuliaGeo/GADM.jl) package.
 
 ## Usage
 
-The package provides a single `load` function to load data as a
-[Tables.jl](https://github.com/JuliaData/Tables.jl) table
-that implements the `Meshes.Data` trait. This means that this
-table can be passed directly to GeoStats.jl as geospatial data:
+### Loading data from disk
+
+The `load` function loads data from disk:
 
 ```julia
 julia> using GeoTables
@@ -26,28 +25,45 @@ julia> using GeoTables
 julia> table = GeoTables.load("/path/to/file.shp")
 4 GeoTable{2,Float64}
   variables
-    └─ACRES (Union{Missing, Float64})
-    └─Hectares (Union{Missing, Float64})
-    └─MACROZONA (Union{Missing, String})
-    └─PERIMETER (Union{Missing, Float64})
-    └─area_m2 (Union{Missing, Float64})
+    └─ACRES (Float64)
+    └─Hectares (Float64)
+    └─MACROZONA (String)
+    └─PERIMETER (Float64)
+    └─area_m2 (Float64)
   domain: 4 GeometrySet{2,Float64}
 ```
 
-The result can be easily converted into any other table type:
+### Loading data from GADM
+
+The `gadm` function (down)loads data from the GADM project:
 
 ```julia
-using DataFrames
-
-df = table |> DataFrame
+julia> t = GeoTables.gadm("BRA", children=true)
+27 GeoTable{2,Float64}
+  variables
+    └─CC_1 (String)
+    └─ENGTYPE_1 (String)
+    └─GID_0 (String)
+    └─GID_1 (String)
+    └─HASC_1 (String)
+    └─NAME_0 (String)
+    └─NAME_1 (String)
+    └─NL_NAME_1 (String)
+    └─TYPE_1 (String)
+    └─VARNAME_1 (String)
+  domain: 27 GeometrySet{2,Float64}
 ```
 
-and converted back to geospatial data with:
+### Performance tips
+
+The result can be easily converted into any other table type
+to avoid converting the geometries every time the underlying
+domain is queried.
 
 ```julia
 using GeoStats
 
-df |> GeoData
+table |> GeoData
 ```
 
 ## Asking for help

@@ -1,73 +1,20 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENSE in the project root.
+# ------------------------------------------------------------------
+
 module GeoTables
 
 using Meshes
 
+import Tables
 import Meshes
+
+import GADM
 import Shapefile as SHP
 import GeoInterface as GI
 
-# ---------------------
-# CONVERSION FUNCTIONS
-# ---------------------
-
-coords2point(coords) = Point(coords)
-
-coords2multipoint(coords) = Multi(coords2point.(coords))
-
-coords2chain(coords) = Chain(Point.(coords))
-
-coords2multichain(coords) = Multi(coords2chain.(coords))
-
-function coords2poly(coords)
-  chains = [Point.(coord) for coord in coords]
-  PolyArea(chains[begin], chains[begin+1:end])
-end
-
-coords2multipoly(coords) = Multi(coords2poly.(coords))
-
-function geom2meshes(geom)
-  gtype  = GI.geotype(geom)
-  coords = GI.coordinates(geom)
-  if gtype == :Point
-    coords2point(coords)
-  elseif gtype == :LineString
-    coords2chain(coords)
-  elseif gtype == :MultiLineString
-    coords2multichain(coords)
-  elseif gtype == :Polygon
-    coords2poly(coords)
-  elseif gtype == :MultiPolygon
-    coords2multipoly(coords)
-  end
-end
-
-# --------------
-# GEOTABLE TYPE
-# --------------
-
-"""
-    GeoTable{𝒯}
-
-A geospatial table where the underlying table of type `𝒯`
-is converted lazily row-by-row to contain geometries from
-Meshes.jl for computational geometry in pure Julia.
-
-This table type implements the `Meshes.Data` trait and is
-therefore ready to use with the GeoStats.jl ecosystem.
-"""
-struct GeoTable{𝒯} <: Meshes.Data
-  table::𝒯
-end
-
-function Meshes.domain(t::GeoTable{𝒯}) where {𝒯<:SHP.Table}
-  geoms = SHP.shapes(t.table)
-  items = geom2meshes.(geoms)
-  Meshes.Collection(items)
-end
-
-function Meshes.values(t::GeoTable{𝒯}) where {𝒯<:SHP.Table}
-  SHP.getdbf(t.table)
-end
+include("conversion.jl")
+include("geotable.jl")
 
 """
     load(fname)
@@ -85,6 +32,22 @@ function load(fname)
   else
     throw(ErrorException("Unknown file format"))
   end
+  GeoTable(table)
+end
+
+"""
+    gadm(country, subregions...; children=true)
+
+(Down)load GADM table using `GADM.get` and convert
+the `geometry` column to Meshes.jl geometries.
+
+If `children` is `true`, return the table with the
+geometries of the subregions, otherwise return a single
+geometry for the final subregion in the specification.
+"""
+function gadm(country, subregions...; children=false)
+  data  = GADM.get(country, subregions...; children=children)
+  table = children ? data[2] : data
   GeoTable(table)
 end
 
