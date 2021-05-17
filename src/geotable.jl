@@ -17,18 +17,20 @@ struct GeoTable{𝒯} <: Meshes.Data
 end
 
 function Meshes.domain(t::GeoTable)
-  gcol = geomcolumn(t.table)
-  geoms = Tables.getcolumn(t.table, gcol)
+  table = getfield(t, :table)
+  gcol  = geomcolumn(table)
+  geoms = Tables.getcolumn(table, gcol)
   items = geom2meshes.(geoms)
   Meshes.Collection(items)
 end
 
 function Meshes.values(t::GeoTable)
-  gcol = geomcolumn(t.table)
-  sche = Tables.schema(t.table)
-  vars = setdiff(sche.names, [gcol])
-  cols = map(vars) do var
-    var => Tables.getcolumn(t.table, var)
+  table = getfield(t, :table)
+  gcol  = geomcolumn(table)
+  sche  = Tables.schema(table)
+  vars  = setdiff(sche.names, [gcol])
+  cols  = map(vars) do var
+    var => Tables.getcolumn(table, var)
   end
   (; cols...)
 end
