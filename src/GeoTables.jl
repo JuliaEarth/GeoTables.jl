@@ -26,18 +26,16 @@ specify the layer of geometries to read in the file.
 
 Currently supported file types are:
 
-- `*.shp`  via Shapefile.jl
-- `*.gpkg` via ArchGDAL.jl
+- `*.shp` via Shapefile.jl
+- Other formats via ArchGDAL.jl
 """
 function load(fname, layer=0)
   if endswith(fname, ".shp")
     table = SHP.Table(fname)
-  elseif endswith(fname, ".gpkg")
-    gpkg  = AG.read(fname)
-    data  = AG.getlayer(gpkg, layer)
+  else # fallback to GDAL
+    file  = AG.read(fname)
+    data  = AG.getlayer(file, layer)
     table = AG.Table(data)
-  else
-    throw(ErrorException("Unknown file format"))
   end
   GeoTable(table)
 end
