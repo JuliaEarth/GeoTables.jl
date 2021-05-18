@@ -11,24 +11,31 @@ import Meshes
 
 import GADM
 import Shapefile as SHP
+import ArchGDAL as AG
 import GeoInterface as GI
 
 include("conversion.jl")
 include("geotable.jl")
 
 """
-    load(fname)
+    load(fname, layer=0)
 
 Load geospatial table from file `fname` and convert the
-`geometry` column to Meshes.jl geometries.
+`geometry` column to Meshes.jl geometries. Optionally,
+specify the layer of geometries to read in the file.
 
 Currently supported file types are:
 
-- `*.shp` via Shapefile.jl
+- `*.shp`  via Shapefile.jl
+- `*.gpkg` via ArchGDAL.jl
 """
-function load(fname)
+function load(fname, layer=0)
   if endswith(fname, ".shp")
     table = SHP.Table(fname)
+  elseif endswith(fname, ".gpkg")
+    gpkg  = AG.read(fname)
+    data  = AG.getlayer(gpkg, layer)
+    table = AG.Table(data)
   else
     throw(ErrorException("Unknown file format"))
   end

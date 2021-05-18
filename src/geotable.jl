@@ -27,7 +27,8 @@ end
 function Meshes.values(t::GeoTable)
   table = getfield(t, :table)
   gcol  = geomcolumn(table)
-  sche  = Tables.schema(table)
+  rows  = Tables.rows(table)
+  sche  = Tables.schema(rows)
   vars  = setdiff(sche.names, [gcol])
   cols  = map(vars) do var
     var => Tables.getcolumn(table, var)
@@ -37,10 +38,11 @@ end
 
 # helper function to find the geometry column of a table
 function geomcolumn(table)
-  s = Tables.schema(table)
-  if :geometry ∈ s.names
+  rows = Tables.rows(table)
+  sche = Tables.schema(rows)
+  if :geometry ∈ sche.names
     :geometry
-  elseif :geom ∈ s.names
+  elseif :geom ∈ sche.names
     :geom
   else
     throw(ErrorException("geometry column not found"))

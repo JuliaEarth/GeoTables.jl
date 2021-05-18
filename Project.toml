@@ -4,6 +4,7 @@ authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "0.1.4"
 
 [deps]
+ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
 GADM = "a8dd9ffe-31dc-4cf5-a379-ea69100a8233"
 GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
