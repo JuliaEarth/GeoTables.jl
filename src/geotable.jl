@@ -24,7 +24,7 @@ function Meshes.domain(t::GeoTable)
   Meshes.Collection(items)
 end
 
-function Meshes.values(t::GeoTable)
+function Meshes.values(t::GeoTable, rank=nothing)
   table = getfield(t, :table)
   gcol  = geomcolumn(table)
   rows  = Tables.rows(table)
@@ -33,7 +33,9 @@ function Meshes.values(t::GeoTable)
   cols  = map(vars) do var
     var => Tables.getcolumn(table, var)
   end
-  (; cols...)
+  R = paramdim(domain(t))
+  r = isnothing(rank) ? R : rank
+  r == R ? (; cols...) : nothing
 end
 
 # helper function to find the geometry column of a table
