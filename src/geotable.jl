@@ -31,7 +31,8 @@ function Meshes.values(t::GeoTable, rank=nothing)
   sche  = Tables.schema(rows)
   vars  = setdiff(sche.names, [gcol])
   cols  = [var => Tables.getcolumn(table, var) for var in vars]
-  R     = paramdim(domain(t))
+  geoms = Tables.getcolumn(table, gcol)
+  R     = paramdim(geom2meshes(first(geoms)))
   r     = isnothing(rank) ? R : rank
   r == R ? (; cols...) : nothing
 end
