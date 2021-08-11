@@ -35,7 +35,7 @@ function load(fname, layer=0)
   else # fallback to GDAL
     file  = AG.read(fname)
     data  = AG.getlayer(file, layer)
-    table = AG.Table(data)
+    table = Tables.columns(data)
   end
   GeoTable(table)
 end
