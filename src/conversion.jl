@@ -18,17 +18,17 @@ end
 coords2multipoly(coords) = Multi(coords2poly.(coords))
 
 function geom2meshes(geom)
-  gtype  = GI.geotype(geom)
+  gtrait = GI.geomtrait(geom)
   coords = GI.coordinates(geom)
-  if gtype == :Point
+  if gtrait isa GI.PointTrait
     coords2point(coords)
-  elseif gtype == :LineString
+  elseif gtrait isa GI.LineStringTrait
     coords2chain(coords)
-  elseif gtype == :MultiLineString
+  elseif gtrait isa GI.MultiLineStringTrait
     coords2multichain(coords)
-  elseif gtype == :Polygon
+  elseif gtrait isa GI.PolygonTrait
     coords2poly(coords)
-  elseif gtype == :MultiPolygon
+  elseif gtrait isa GI.MultiPolygonTrait
     coords2multipoly(coords)
   end
 end
