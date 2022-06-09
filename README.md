@@ -22,7 +22,7 @@ The `load` function loads data from disk:
 ```julia
 julia> using GeoTables
 
-julia> table = GeoTables.load("/path/to/file.shp")
+julia> GeoTables.load("/path/to/file.shp")
 ```
 
 ### Loading data from GADM
@@ -30,8 +30,10 @@ julia> table = GeoTables.load("/path/to/file.shp")
 The `gadm` function (down)loads data from the GADM project:
 
 ```julia
-julia> t = GeoTables.gadm("BRA", depth = 1)
+julia> GeoTables.gadm("BRA", depth = 1)
 ```
+
+Please read the docstring for more details.
 
 ### Performance tips
 
