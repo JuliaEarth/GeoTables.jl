@@ -41,23 +41,20 @@ function load(fname, layer=0)
 end
 
 """
-    gadm(country, subregions...; children=true, decimation=0.04)
+    gadm(country, subregions...; depth=0, decimation=0.04)
 
 (Down)load GADM table using `GADM.get` and convert
 the `geometry` column to Meshes.jl geometries.
 
-If `children` is `true`, return the table with the
-geometries of the subregions, otherwise return a single
-geometry for the final subregion in the specification.
+The `depth` option can be used to return tables for subregions
+at a given depth starting from the given region specification.
 
-If `decimation` is greater than zero, decimate the
-geometries to reduce the number of vertices. The
-greater is the `decimation` value, the more
-aggressive is the reduction.
+If `decimation` is greater than zero, decimate the geometries
+to reduce the number of vertices. The greater is the `decimation`
+value, the more aggressive is the reduction.
 """
-function gadm(country, subregions...; children=false, decimation=0.04)
-  data   = GADM.get(country, subregions...; children=children)
-  table  = children ? data[2] : data
+function gadm(country, subregions...; depth=0, decimation=0.04)
+  table  = GADM.get(country, subregions...; depth=depth)
   gtable = GeoTable(table)
   if decimation > 0
     𝒯 = values(gtable)

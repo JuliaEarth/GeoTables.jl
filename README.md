@@ -23,14 +23,6 @@ The `load` function loads data from disk:
 julia> using GeoTables
 
 julia> table = GeoTables.load("/path/to/file.shp")
-4 GeoTable{2,Float64}
-  variables
-    └─ACRES (Float64)
-    └─Hectares (Float64)
-    └─MACROZONA (String)
-    └─PERIMETER (Float64)
-    └─area_m2 (Float64)
-  domain: 4 GeometrySet{2,Float64}
 ```
 
 ### Loading data from GADM
@@ -38,25 +30,12 @@ julia> table = GeoTables.load("/path/to/file.shp")
 The `gadm` function (down)loads data from the GADM project:
 
 ```julia
-julia> t = GeoTables.gadm("BRA", children=true)
-27 GeoTable{2,Float64}
-  variables
-    └─CC_1 (String)
-    └─ENGTYPE_1 (String)
-    └─GID_0 (String)
-    └─GID_1 (String)
-    └─HASC_1 (String)
-    └─NAME_0 (String)
-    └─NAME_1 (String)
-    └─NL_NAME_1 (String)
-    └─TYPE_1 (String)
-    └─VARNAME_1 (String)
-  domain: 27 GeometrySet{2,Float64}
+julia> t = GeoTables.gadm("BRA", depth = 1)
 ```
 
 ### Performance tips
 
-The result can be easily converted into any other table type
+The result can be easily converted into any other geotable type
 to avoid converting the geometries every time the underlying
 domain is queried.
 
