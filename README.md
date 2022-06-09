@@ -39,7 +39,9 @@ Please read the docstring for more details.
 
 The result can be easily converted into any other geotable type
 to avoid converting the geometries every time the underlying
-domain is queried.
+domain is queried. For example, assuming that `table` has been
+loaded with the functions above, the following code can be used
+to convert the table to pure Julia geometries:
 
 ```julia
 using GeoStats
