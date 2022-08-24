@@ -2,6 +2,7 @@ using GeoTables
 using Tables
 using Meshes
 using Test, Random, Plots
+using MeshPlots # TODO: replace by MeshViz
 using ReferenceTests, ImageIO
 
 # workaround GR warnings
