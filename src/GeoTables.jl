@@ -33,9 +33,8 @@ function load(fname, layer=0)
   if endswith(fname, ".shp")
     table = SHP.Table(fname)
   else # fallback to GDAL
-    file  = AG.read(fname)
-    data  = AG.getlayer(file, layer)
-    table = Tables.columns(data)
+    data  = AG.read(fname)
+    table = AG.getlayer(data, layer)
   end
   GeoTable(table)
 end
