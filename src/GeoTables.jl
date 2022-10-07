@@ -10,6 +10,7 @@ import Tables
 import Meshes
 
 import GADM
+import GeoJSON as GJS
 import Shapefile as SHP
 import ArchGDAL as AG
 import GeoInterface as GI
@@ -32,6 +33,9 @@ Currently supported file types are:
 function load(fname, layer=0)
   if endswith(fname, ".shp")
     table = SHP.Table(fname)
+  elseif endswith(fname, ".geojson")
+    data  = Base.read(fname)
+    table = GJS.read(data)
   else # fallback to GDAL
     data  = AG.read(fname)
     table = AG.getlayer(data, layer)
