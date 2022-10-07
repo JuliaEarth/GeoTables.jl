@@ -18,8 +18,9 @@ end
 
 function Meshes.domain(t::GeoTable)
   table = getfield(t, :table)
-  gcol  = geomcolumn(table)
-  geoms = Tables.getcolumn(table, gcol)
+  cols  = Tables.columns(table)
+  gcol  = geomcolumn(cols)
+  geoms = Tables.getcolumn(cols, gcol)
   items = geom2meshes.(geoms)
   Meshes.Collection(items)
 end
@@ -27,8 +28,9 @@ end
 function Meshes.values(t::GeoTable, rank=nothing)
   # find ranks of all geometries
   table = getfield(t, :table)
-  gcol  = geomcolumn(table)
-  geoms = Tables.getcolumn(table, gcol)
+  cols  = Tables.columns(table)
+  gcol  = geomcolumn(cols)
+  geoms = Tables.getcolumn(cols, gcol)
   items = geom2meshes.(geoms)
   ranks = paramdim.(items)
 
@@ -42,24 +44,23 @@ function Meshes.values(t::GeoTable, rank=nothing)
     nothing
   else
     # if rank exists, load other columns
-    rows = Tables.rows(table)
-    sche = Tables.schema(rows)
-    vars = setdiff(sche.names, [gcol])
+    names = Tables.columnnames(cols)
+    vars  = setdiff(names, [gcol])
     cols = map(vars) do var
-      col = Tables.getcolumn(table, var)
+      col = Tables.getcolumn(cols, var)
       var => col[rind]
     end
     (; cols...)
   end
 end
 
-# helper function to find the geometry column of a table
-function geomcolumn(table)
-  rows = Tables.rows(table)
-  sche = Tables.schema(rows)
-  if :geometry ∈ sche.names
+# helper function to find the
+# geometry column of a table
+function geomcolumn(cols)
+  names = Tables.columnnames(cols)
+  if :geometry ∈ names
     :geometry
-  elseif :geom ∈ sche.names
+  elseif :geom ∈ names
     :geom
   else
     throw(ErrorException("geometry column not found"))
