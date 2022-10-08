@@ -27,6 +27,10 @@ datadir = joinpath(@__DIR__,"data")
     @test row.geometry isa Multi
   end
 
+  @testset "save" begin
+    # TODO
+  end
+
   @testset "gadm" begin
     table = GeoTables.gadm("BRA", depth = 1)
     gset  = domain(table)

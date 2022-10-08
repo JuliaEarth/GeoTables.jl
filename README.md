@@ -15,19 +15,21 @@ and [GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl), or
 
 ## Usage
 
-### Loading data from disk
+### Loading/saving data from/to disk
 
-The `load` function loads data from disk:
+The `load` and `save` functions are self-explanatory:
 
 ```julia
-julia> using GeoTables
+using GeoTables
 
-julia> GeoTables.load("/path/to/file.shp")
+table = GeoTables.load("/path/to/file.shp")
+
+GeoTables.save("/path/to/file.geojson", table)
 ```
 
 ### Loading data from GADM
 
-The `gadm` function (down)loads data from the GADM project:
+The `gadm` function (down)loads data from the GADM dataset:
 
 ```julia
 julia> GeoTables.gadm("BRA", depth = 1)

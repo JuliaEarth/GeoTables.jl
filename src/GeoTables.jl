@@ -23,11 +23,12 @@ include("geotable.jl")
 
 Load geospatial table from file `fname` and convert the
 `geometry` column to Meshes.jl geometries. Optionally,
-specify the layer of geometries to read in the file.
+specify the layer of geometries to read within the file.
 
-Currently supported file types are:
+## Supported formats
 
 - `*.shp` via Shapefile.jl
+- `*.geojson` via GeoJSON.jl
 - Other formats via ArchGDAL.jl
 """
 function load(fname, layer=0)
@@ -41,6 +42,24 @@ function load(fname, layer=0)
     table = AG.getlayer(data, layer)
   end
   GeoTable(table)
+end
+
+"""
+    save(fname, geotable)
+
+Save geospatial table to file `fname` using the
+appropriate format based on the file extension.
+
+## Supported formats
+
+- `*.geojson` via GeoJSON.jl
+"""
+function save(fname, geotable)
+  if endswith(fname, ".geojson")
+    GJS.write(fname, geotable)
+  else
+    throw(ErrorException("file format not supported"))
+  end
 end
 
 """
