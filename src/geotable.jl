@@ -62,6 +62,8 @@ function geomcolumn(cols)
     :geometry
   elseif :geom ∈ names
     :geom
+  elseif Symbol("") ∈ names
+    Symbol("")
   else
     throw(ErrorException("geometry column not found"))
   end
