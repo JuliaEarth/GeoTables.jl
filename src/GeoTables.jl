@@ -63,7 +63,8 @@ function save(fname, geotable)
 end
 
 """
-    gadm(country, subregions...; depth=0, tol=0.04)
+    gadm(country, subregions...; depth=0, ϵ=nothing,
+         min=3, max=typemax(Int), maxiter=10)
 
 (Down)load GADM table using `GADM.get` and convert
 the `geometry` column to Meshes.jl geometries.
@@ -71,20 +72,17 @@ the `geometry` column to Meshes.jl geometries.
 The `depth` option can be used to return tables for subregions
 at a given depth starting from the given region specification.
 
-If `tol` is greater than zero, decimate the geometries to reduce
-the number of vertices. The greater is the `tol` value, the more
-aggressive is the reduction.
+The options `ϵ`, `min`, `max` and `maxiter` are forwarded to the
+`decimate` function from Meshes.jl to reduce the number of vertices.
 """
-function gadm(country, subregions...; depth=0, tol=0.04)
+function gadm(country, subregions...; depth=0, ϵ=nothing,
+              min=3, max=typemax(Int), maxiter=10)
   table  = GADM.get(country, subregions...; depth=depth)
   gtable = GeoTable(table)
-  if tol > 0
-    𝒯 = values(gtable)
-    𝒟 = domain(gtable)
-    meshdata(decimate(𝒟, tol), etable=𝒯)
-  else
-    gtable
-  end
+  𝒯 = values(gtable)
+  𝒟 = domain(gtable)
+  𝒩 = decimate(𝒟, ϵ, min=min, max=max, maxiter=maxiter)
+  meshdata(𝒩, etable=𝒯)
 end
 
 end

@@ -37,13 +37,13 @@ datadir = joinpath(@__DIR__,"data")
     @test nelements(gset) == 27
     @test all(g -> nvertices(g) < 700, gset)
 
-    table = GeoTables.gadm("USA", depth = 1, tol = 0)
+    table = GeoTables.gadm("USA", depth = 1)
     gset  = domain(table)
     @test nelements(gset) == 51
     nvert = [nvertices(g) for g in gset]
     @test extrema(nvert) == (162, 811920)
 
-    table = GeoTables.gadm("IND", depth = 1, tol = 0)
+    table = GeoTables.gadm("IND", depth = 1)
     gset  = domain(table)
     @test nelements(gset) == 36
     nvert = [nvertices(g) for g in gset]
