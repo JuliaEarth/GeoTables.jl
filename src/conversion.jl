@@ -28,8 +28,8 @@ GI.getgeom(::Any, c::Chain, i) = vertices(c)[i]
 GI.ngeom(::Any, p::Polygon) = length(chains(p))
 GI.getgeom(::Any, p::Polygon, i) = chains(p)[i]
 
-GI.ngeom(::Any, m::Multi) = length(m)
-GI.getgeom(::Any, m::Multi, i) = m[i]
+GI.ngeom(::Any, m::Multi) = length(collect(m))
+GI.getgeom(::Any, m::Multi, i) = collect(m)[i]
 
 GI.isfeaturecollection(::Data) = true
 GI.trait(::Data) = GI.FeatureCollectionTrait()
