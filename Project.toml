@@ -1,7 +1,7 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
-version = "1.1.0"
+version = "1.2.0"
 
 [deps]
 ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
@@ -17,7 +17,7 @@ ArchGDAL = "0.9"
 GADM = "1.0"
 GeoInterface = "1.0"
 GeoJSON = "0.6"
-Meshes = "0.25.7"
+Meshes = "0.26"
 Shapefile = "0.8"
 Tables = "1.7"
 julia = "1.6"

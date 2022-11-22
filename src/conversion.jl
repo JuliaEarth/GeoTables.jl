@@ -33,8 +33,8 @@ GI.getgeom(::Any, m::Multi, i) = collect(m)[i]
 
 GI.isfeaturecollection(::Data) = true
 GI.trait(::Data) = GI.FeatureCollectionTrait()
-GI.nfeature(::Any, d::Data) = nelements(domain(d))
-GI.getfeature(::Any, d::Data, i) = Tables.rows(d)[i]
+GI.nfeature(::Any, d::Data) = nitems(d)
+GI.getfeature(::Any, d::Data, i) = d[i,:]
 
 # --------------------------------------
 # Convert geometries to Meshes.jl types
