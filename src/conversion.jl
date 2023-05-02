@@ -83,15 +83,15 @@ function GI.convert(::Type{Polygon}, ::GI.PolygonTrait, geom)
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiPointTrait, geom)
-    Multi([GI.convert(Point, GI.PointTrait(), g) for g in GI.getgeom(geom)])
+  Multi([GI.convert(Point, GI.PointTrait(), g) for g in GI.getgeom(geom)])
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiLineStringTrait, geom)
-    Multi([GI.convert(Chain, GI.LineStringTrait(), g) for g in GI.getgeom(geom)])
+  Multi([GI.convert(Chain, GI.LineStringTrait(), g) for g in GI.getgeom(geom)])
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiPolygonTrait, geom)
-    Multi([GI.convert(Polygon, GI.PolygonTrait(), g) for g in GI.getgeom(geom)])
+  Multi([GI.convert(Polygon, GI.PolygonTrait(), g) for g in GI.getgeom(geom)])
 end
 
 # --------------------------------------
