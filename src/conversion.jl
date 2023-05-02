@@ -41,56 +41,57 @@ GI.getfeature(::Any, d::Data, i) = d[i,:]
 # Convert geometries to Meshes.jl types
 # --------------------------------------
 
+function getpoints(geom, is3d::Bool)
+  if is3d
+    [Point(GI.x(p), GI.y(p), GI.z(p)) for p in GI.getpoint(geom)]
+  else
+    [Point(GI.x(p), GI.y(p)) for p in GI.getpoint(geom)]
+  end
+end
+
 function GI.convert(::Type{Point}, ::GI.PointTrait, geom)
-    if GI.is3d(geom)
-        return Point(GI.x(geom), GI.y(geom), GI.z(geom))
-    else
-        return Point(GI.x(geom), GI.y(geom))
-    end
+  if GI.is3d(geom)
+    return Point(GI.x(geom), GI.y(geom), GI.z(geom))
+  else
+    return Point(GI.x(geom), GI.y(geom))
+  end
 end
 
 function GI.convert(::Type{Segment}, ::GI.LineTrait, geom)
-    p1 = GI.getgeom(geom, 1)
-    p2 = GI.getgeom(geom, 2)
-    if GI.is3d(geom)
-        Segment(Point(GI.x(p1), GI.y(p1), GI.z(p1)), Point(GI.x(p2), GI.y(p2), GI.z(p1)))
-    else
-        Segment(Point(GI.x(p1), GI.y(p1)), Point(GI.x(p2), GI.y(p2)))
-    end
+  p1, p2 = GI.startpoint(geom), GI.endpoint(geom)
+  if GI.is3d(geom)
+    Segment(Point(GI.x(p1), GI.y(p1), GI.z(p1)), Point(GI.x(p2), GI.y(p2), GI.z(p1)))
+  else
+    Segment(Point(GI.x(p1), GI.y(p1)), Point(GI.x(p2), GI.y(p2)))
+  end
 end
 
 function GI.convert(::Type{Chain}, ::GI.LineStringTrait, geom)
-    if GI.is3d(geom)
-        Chain([Point(GI.x(p), GI.y(p), GI.z(p)) for p in GI.getgeom(geom)])
-    else
-        Chain([Point(GI.x(p), GI.y(p)) for p in GI.getgeom(geom)])
-    end
+  is3d = GI.is3d(geom)
+  Chain(getpoints(geom, is3d))
 end
 
 function GI.convert(::Type{Polygon}, ::GI.PolygonTrait, geom)
-    if GI.is3d(geom)
-        exterior = [Point(GI.x(p), GI.y(p), GI.z(p)) for p in GI.getgeom(GI.getexterior(geom))]
-    else
-        exterior = [Point(GI.x(p), GI.y(p)) for p in GI.getgeom(GI.getexterior(geom))]
-    end
-    if GI.nhole(geom) == 0
-        return PolyArea(exterior)
-    else
-        interiors = map(x -> [Point(GI.x(p), GI.y(p)) for p in GI.getgeom(x)], GI.gethole(geom))
-        return PolyArea(exterior, interiors)
-    end
+  is3d = GI.is3d(geom)
+  exterior = getpoints(GI.getexterior(geom), is3d)
+  if GI.nhole(geom) == 0
+      return PolyArea(exterior)
+  else
+    holes = map(g -> getpoints(g, is3d), GI.gethole(geom))
+    return PolyArea(exterior, holes)
+  end
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiPointTrait, geom)
-    Multi([GI.convert(Point, GI.PointTrait(), x) for x in geom])
+    Multi([GI.convert(Point, GI.PointTrait(), g) for g in GI.getgeom(geom)])
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiLineStringTrait, geom)
-    Multi([GI.convert(Chain, GI.LineStringTrait(), x) for x in geom])
+    Multi([GI.convert(Chain, GI.LineStringTrait(), g) for g in GI.getgeom(geom)])
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiPolygonTrait, geom)
-    Multi([GI.convert(Polygon, GI.PolygonTrait(), x) for x in geom])
+    Multi([GI.convert(Polygon, GI.PolygonTrait(), g) for g in GI.getgeom(geom)])
 end
 
 # --------------------------------------
@@ -105,4 +106,5 @@ geointerface_geomtype(::GI.MultiPointTrait) = Multi
 geointerface_geomtype(::GI.MultiLineStringTrait) = Multi
 geointerface_geomtype(::GI.MultiPolygonTrait) = Multi
 
-geom2meshes(geom) = GI.convert(GeoTables, geom)
+geom2meshes(geom) = geom2meshes(GI.geomtrait(geom), geom)
+geom2meshes(trait, geom) = GI.convert(geointerface_geomtype(trait), trait, geom)
