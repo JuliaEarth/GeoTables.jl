@@ -41,11 +41,23 @@ GI.getfeature(::Any, d::Data, i) = d[i,:]
 # Convert geometries to Meshes.jl types
 # --------------------------------------
 
-function getpoints(geom, is3d::Bool)
+function topoints(geom, is3d::Bool)
   if is3d
     [Point(GI.x(p), GI.y(p), GI.z(p)) for p in GI.getpoint(geom)]
   else
     [Point(GI.x(p), GI.y(p)) for p in GI.getpoint(geom)]
+  end
+end
+
+tochain(geom, is3d::Bool) = Chain(topoints(geom, is3d))
+
+function topolygon(geom, is3d::Bool)
+  exterior = topoints(GI.getexterior(geom), is3d)
+  if GI.nhole(geom) == 0
+      return PolyArea(exterior)
+  else
+    holes = map(g -> topoints(g, is3d), GI.gethole(geom))
+    return PolyArea(exterior, holes)
   end
 end
 
@@ -66,32 +78,22 @@ function GI.convert(::Type{Segment}, ::GI.LineTrait, geom)
   end
 end
 
-function GI.convert(::Type{Chain}, ::GI.LineStringTrait, geom)
-  is3d = GI.is3d(geom)
-  Chain(getpoints(geom, is3d))
-end
+GI.convert(::Type{Chain}, ::GI.LineStringTrait, geom) = tochain(geom, GI.is3d(geom))
 
-function GI.convert(::Type{Polygon}, ::GI.PolygonTrait, geom)
-  is3d = GI.is3d(geom)
-  exterior = getpoints(GI.getexterior(geom), is3d)
-  if GI.nhole(geom) == 0
-      return PolyArea(exterior)
-  else
-    holes = map(g -> getpoints(g, is3d), GI.gethole(geom))
-    return PolyArea(exterior, holes)
-  end
-end
+GI.convert(::Type{Polygon}, ::GI.PolygonTrait, geom) = topolygon(geom, GI.is3d(geom))
 
 function GI.convert(::Type{Multi}, ::GI.MultiPointTrait, geom)
-  Multi([GI.convert(Point, GI.PointTrait(), g) for g in GI.getgeom(geom)])
+  Multi(topoints(geom, GI.is3d(geom)))
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiLineStringTrait, geom)
-  Multi([GI.convert(Chain, GI.LineStringTrait(), g) for g in GI.getgeom(geom)])
+  is3d = GI.is3d(geom)
+  Multi([tochain(g, is3d) for g in GI.getgeom(geom)])
 end
 
 function GI.convert(::Type{Multi}, ::GI.MultiPolygonTrait, geom)
-  Multi([GI.convert(Polygon, GI.PolygonTrait(), g) for g in GI.getgeom(geom)])
+  is3d = GI.is3d(geom)
+  Multi([topolygon(g, is3d) for g in GI.getgeom(geom)])
 end
 
 # --------------------------------------
