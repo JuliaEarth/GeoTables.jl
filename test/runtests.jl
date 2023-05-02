@@ -2,6 +2,9 @@ using GeoTables
 using Tables
 using Meshes
 using Test, Random
+import Shapefile as SHP
+import ArchGDAL as AG
+import GeoJSON as GJ
 
 # environment settings
 isCI = "CI" ∈ keys(ENV)
@@ -9,6 +12,60 @@ islinux = Sys.islinux()
 datadir = joinpath(@__DIR__,"data")
 
 @testset "GeoTables.jl" begin
+  @testset "convert" begin
+    points = Point2[(0,0),(0.5,2),(2.2,2.2)]
+    outer = Point2[(0,0),(0.5,2),(2.2,2.2),(0,0)]
+
+    # Shapefile.jl
+    ps = [SHP.Point(0,0), SHP.Point(0.5,2), SHP.Point(2.2,2.2)]
+    exterior = [SHP.Point(0,0), SHP.Point(0.5,2), SHP.Point(2.2,2.2), SHP.Point(0,0)]
+    box = SHP.Rect(0.0, 0.0, 2.2, 2.2)
+    point = SHP.Point(1.0,1.0)
+    chain = SHP.LineString{SHP.Point}(view(ps, 1:3))
+    poly = SHP.SubPolygon([SHP.LinearRing{SHP.Point}(view(ps, 1:3))])
+    multipoint = SHP.MultiPoint(box, ps)
+    multichain = SHP.Polyline(box, [0,3], repeat(ps, 2))
+    multipoly = SHP.Polygon(box, [0,4], repeat(exterior, 2))
+    @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
+    # @test GeoTables.geom2meshes(chain) == Chain(points)
+    # @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(multipoint) == Multi(points)
+    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
+    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+
+    # ArchGDAL.jl
+    ps = [(0,0), (0.5,2), (2.2,2.2)]
+    exterior = [(0,0), (0.5,2), (2.2,2.2), (0,0)]
+    point = AG.createpoint(1.0,1.0)
+    chain = AG.createlinestring(ps)
+    poly = AG.createpolygon(exterior)
+    multipoint = AG.createmultipoint(ps)
+    multichain = AG.createmultilinestring([ps, ps])
+    multipoly = AG.createmultipolygon([[exterior], [exterior]])
+    @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
+    @test GeoTables.geom2meshes(chain) == Chain(points)
+    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(multipoint) == Multi(points)
+    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
+    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+
+    # GeoJSON.jl
+    points = Point2f[(0,0),(0.5,2),(2.2,2.2)]
+    outer = Point2f[(0,0),(0.5,2),(2.2,2.2),(0,0)]
+    point = GJ.read("""{"type":"Point","coordinates":[1,1]}""")
+    chain = GJ.read("""{"type":"LineString","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
+    poly = GJ.read("""{"type":"Polygon","coordinates":[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]}""")
+    multipoint = GJ.read("""{"type":"MultiPoint","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
+    multichain = GJ.read("""{"type":"MultiLineString","coordinates":[[[0,0],[0.5,2],[2.2,2.2]],[[0,0],[0.5,2],[2.2,2.2]]]}""")
+    multipoly = GJ.read("""{"type":"MultiPolygon","coordinates":[[[[0,0],[0.5,2],[2.2,2.2],[0,0]]],[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]]}""")
+    @test GeoTables.geom2meshes(point) == Point2f(1.0, 1.0)
+    @test GeoTables.geom2meshes(chain) == Chain(points)
+    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(multipoint) == Multi(points)
+    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
+    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+  end
+
   @testset "load" begin
     table = GeoTables.load(joinpath(datadir,"path.shp"))
     @test Tables.schema(table).names == (:ZONA, :geometry)
