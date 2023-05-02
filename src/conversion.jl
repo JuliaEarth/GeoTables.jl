@@ -54,18 +54,18 @@ tochain(geom, is3d::Bool) = Chain(topoints(geom, is3d))
 function topolygon(geom, is3d::Bool)
   exterior = topoints(GI.getexterior(geom), is3d)
   if GI.nhole(geom) == 0
-      return PolyArea(exterior)
+    PolyArea(exterior)
   else
     holes = map(g -> topoints(g, is3d), GI.gethole(geom))
-    return PolyArea(exterior, holes)
+    PolyArea(exterior, holes)
   end
 end
 
 function GI.convert(::Type{Point}, ::GI.PointTrait, geom)
   if GI.is3d(geom)
-    return Point(GI.x(geom), GI.y(geom), GI.z(geom))
+    Point(GI.x(geom), GI.y(geom), GI.z(geom))
   else
-    return Point(GI.x(geom), GI.y(geom))
+    Point(GI.x(geom), GI.y(geom))
   end
 end
 
