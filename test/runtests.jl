@@ -109,7 +109,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
-      @test table[1,:geometry] isa Point
+      @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.shp"))
       @test Tables.schema(table).names == varnames
