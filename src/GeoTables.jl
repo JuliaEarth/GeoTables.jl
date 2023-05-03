@@ -56,11 +56,10 @@ appropriate format based on the file extension.
 """
 function save(fname, geotable; kwargs...)
   if endswith(fname, ".shp")
-    geotable = MeshData(geotable)
     geoms = domain(geotable)
     if !isa(geoms[1], Multi) & !isa(geoms[1], Point)
-      geoms = GeometrySet(map(x -> Multi([x]), geoms))
-      geotable = meshdata(geoms, etable = values(geotable))
+      newgeoms = GeometrySet([Multi([geom]) for geom in geoms])
+      geotable = meshdata(newgeoms, etable = values(geotable))
     end
     SHP.write(fname, geotable; kwargs...)
   elseif endswith(fname, ".geojson")
