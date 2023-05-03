@@ -32,10 +32,10 @@ arguments are those accepted by `GeoJSON.read`, `GeoJSON.write`, `Shapefile.Tabl
 `Shapefile.write` and `ArchGDAL.read`. See below some examples:
 
 ```julia
-# Read `.geojson` geometries with Float64 precision.
+# read `.geojson` geometries with Float64 precision
 table = GeoTables.load("file.geojson", numbertype = Float64)
 
-# Force writing on existing `.shp` file.
+# force writing on existing `.shp` file
 GeoTables.save("file.shp", table, force = true)
 ```
 
