@@ -69,7 +69,7 @@ datadir = joinpath(@__DIR__,"data")
 
   @testset "load" begin
 
-    @testset "custom datasets" begin
+    @testset "load" begin
       table = GeoTables.load(joinpath(datadir,"path.shp"))
       @test Tables.schema(table).names == (:ZONA, :geometry)
       @test nitems(table) == 6
