@@ -89,9 +89,9 @@ function GI.convert(::Type{Multi}, ::GI.MultiPolygonTrait, geom)
   Multi([topolygon(g, is3d) for g in GI.getgeom(geom)])
 end
 
-# --------------------------------------
-# GeoInterface approach to call convert
-# --------------------------------------
+# -----------------------------------------
+# GeoInterface.jl approach to call convert
+# -----------------------------------------
 
 geointerface_geomtype(::GI.PointTrait) = Point
 geointerface_geomtype(::GI.LineTrait) = Segment
