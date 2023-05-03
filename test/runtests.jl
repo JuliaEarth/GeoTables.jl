@@ -86,7 +86,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.Hectares == [1.30772011078e7, 1.01411677447e8, 1.11502398263e8, 6.52729785685e7]
       @test table.area_m2 == [1.30772011078e11, 1.01411677447e12, 1.11502398263e12, 6.52729785685e11]
       @test table.geometry isa GeometrySet
-      @test table[1,:geometry] isa Multi
+      @test table.geometry[1] isa Multi
 
       table = GeoTables.load(joinpath(datadir,"ne_110m_land.shp"))
       @test Tables.schema(table).names == (:featurecla, :scalerank, :min_zoom, :geometry)
@@ -95,7 +95,7 @@ datadir = joinpath(@__DIR__,"data")
       @test all(∈([0,1]), table.scalerank)
       @test all(∈([0.0,0.5,1.0,1.5]), table.min_zoom)
       @test table.geometry isa GeometrySet
-      @test table[1,:geometry] isa Multi
+      @test table.geometry[1] isa Multi
     end
 
     @testset "Shapefile" begin
@@ -119,8 +119,8 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa Multi
-      @test collect(table[1, :geometry])[1] isa Chain
+      @test table.geometry[1] isa Multi
+      @test collect(table.geometry[1])[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.shp"))
       @test Tables.schema(table).names == varnames
@@ -130,8 +130,8 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa Multi
-      @test collect(table[1, :geometry])[1] isa PolyArea
+      @test table.geometry[1] isa Multi
+      @test collect(table.geometry[1])[1] isa PolyArea
     end
 
     @testset "GeoJSON" begin
@@ -145,7 +145,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
-      @test table[1,:geometry] isa Point
+      @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.geojson"))
       @test isempty(setdiff(Tables.schema(table).names, varnames))
@@ -155,7 +155,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa Chain
+      @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
       @test isempty(setdiff(Tables.schema(table).names, varnames))
@@ -165,7 +165,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa PolyArea
+      @test table.geometry[1] isa PolyArea
     end
 
     @testset "ArchGDAL" begin
@@ -179,7 +179,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
-      @test table[1,:geometry] isa Point
+      @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
       @test Tables.schema(table).names == varnames
@@ -189,7 +189,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa Chain
+      @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
       @test Tables.schema(table).names == varnames
@@ -199,7 +199,7 @@ datadir = joinpath(@__DIR__,"data")
       @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
-      @test table[1, :geometry] isa PolyArea
+      @test table.geometry[1] isa PolyArea
     end
   end
 
