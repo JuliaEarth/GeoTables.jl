@@ -19,11 +19,14 @@ include("conversion.jl")
 include("geotable.jl")
 
 """
-    load(fname, layer=0)
+    load(fname, layer=0, kwargs...)
 
 Load geospatial table from file `fname` and convert the
 `geometry` column to Meshes.jl geometries. Optionally,
-specify the layer of geometries to read within the file.
+specify the layer of geometries to read within the file and
+keyword arguments accepted by `Shapefile.Table`, `GeoJSON.read`
+and `ArchGDAL.read`. For example, use `numbertype = Float64` to
+read `.geojson` geometries with Float64 precision.
 
 ## Supported formats
 
@@ -45,13 +48,17 @@ function load(fname; layer=0, kwargs...)
 end
 
 """
-    save(fname, geotable)
+    save(fname, geotable; kwargs...)
 
 Save geospatial table to file `fname` using the
 appropriate format based on the file extension.
+Optionally, specify keyword arguments accepted by
+`Shapefile.write` and `GeoJSON.write`. For example, use
+`force = true` to force writing on existing `.shp` file.
 
 ## Supported formats
 
+- `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
 """
 function save(fname, geotable; kwargs...)
