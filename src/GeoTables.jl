@@ -57,7 +57,7 @@ appropriate format based on the file extension.
 function save(fname, geotable; kwargs...)
   if endswith(fname, ".shp")
     geoms = domain(geotable)
-    if !isa(geoms[1], Multi) & !isa(geoms[1], Point)
+    if !(geoms[1] isa Multi) && !(geoms[1] isa Point)
       newgeoms = GeometrySet([Multi([geom]) for geom in geoms])
       geotable = meshdata(newgeoms, etable = values(geotable))
     end
