@@ -22,9 +22,9 @@ The `load` and `save` functions are self-explanatory:
 ```julia
 using GeoTables
 
-table = GeoTables.load("/path/to/file.shp")
+table = GeoTables.load("file.shp")
 
-GeoTables.save("/path/to/file.geojson", table)
+GeoTables.save("file.geojson", table)
 ```
 
 ### Loading data from GADM
