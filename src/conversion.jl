@@ -8,6 +8,7 @@
 
 GI.isgeometry(::Point) = true
 GI.isgeometry(::Geometry) = true
+
 GI.geomtrait(::Point) = GI.PointTrait()
 GI.geomtrait(::Segment) = GI.LineTrait()
 GI.geomtrait(::Chain) = GI.LineStringTrait()
@@ -40,33 +41,65 @@ GI.getfeature(::Any, d::Data, i) = d[i,:]
 # Convert geometries to Meshes.jl types
 # --------------------------------------
 
-coords2point(coords) = Point(coords)
-
-coords2multipoint(coords) = Multi(coords2point.(coords))
-
-coords2chain(coords) = Chain(Point.(coords))
-
-coords2multichain(coords) = Multi(coords2chain.(coords))
-
-function coords2poly(coords)
-  chains = [Point.(coord) for coord in coords]
-  PolyArea(chains[begin], chains[begin+1:end])
-end
-
-coords2multipoly(coords) = Multi(coords2poly.(coords))
-
-function geom2meshes(geom)
-  gtrait = GI.geomtrait(geom)
-  coords = GI.coordinates(geom)
-  if gtrait isa GI.PointTrait
-    coords2point(coords)
-  elseif gtrait isa GI.LineStringTrait
-    coords2chain(coords)
-  elseif gtrait isa GI.MultiLineStringTrait
-    coords2multichain(coords)
-  elseif gtrait isa GI.PolygonTrait
-    coords2poly(coords)
-  elseif gtrait isa GI.MultiPolygonTrait
-    coords2multipoly(coords)
+function topoints(geom, is3d::Bool)
+  if is3d
+    [Point(GI.x(p), GI.y(p), GI.z(p)) for p in GI.getpoint(geom)]
+  else
+    [Point(GI.x(p), GI.y(p)) for p in GI.getpoint(geom)]
   end
 end
+
+tochain(geom, is3d::Bool) = Chain(topoints(geom, is3d))
+
+function topolygon(geom, is3d::Bool)
+  exterior = topoints(GI.getexterior(geom), is3d)
+  if GI.nhole(geom) == 0
+    PolyArea(exterior)
+  else
+    holes = map(g -> topoints(g, is3d), GI.gethole(geom))
+    PolyArea(exterior, holes)
+  end
+end
+
+function GI.convert(::Type{Point}, ::GI.PointTrait, geom)
+  if GI.is3d(geom)
+    Point(GI.x(geom), GI.y(geom), GI.z(geom))
+  else
+    Point(GI.x(geom), GI.y(geom))
+  end
+end
+
+GI.convert(::Type{Segment}, ::GI.LineTrait, geom) = Segment(topoints(geom, GI.is3d(geom)))
+
+GI.convert(::Type{Chain}, ::GI.LineStringTrait, geom) = tochain(geom, GI.is3d(geom))
+
+GI.convert(::Type{Polygon}, ::GI.PolygonTrait, geom) = topolygon(geom, GI.is3d(geom))
+
+function GI.convert(::Type{Multi}, ::GI.MultiPointTrait, geom)
+  Multi(topoints(geom, GI.is3d(geom)))
+end
+
+function GI.convert(::Type{Multi}, ::GI.MultiLineStringTrait, geom)
+  is3d = GI.is3d(geom)
+  Multi([tochain(g, is3d) for g in GI.getgeom(geom)])
+end
+
+function GI.convert(::Type{Multi}, ::GI.MultiPolygonTrait, geom)
+  is3d = GI.is3d(geom)
+  Multi([topolygon(g, is3d) for g in GI.getgeom(geom)])
+end
+
+# --------------------------------------
+# GeoInterface approach to call convert
+# --------------------------------------
+
+geointerface_geomtype(::GI.PointTrait) = Point
+geointerface_geomtype(::GI.LineTrait) = Segment
+geointerface_geomtype(::GI.LineStringTrait) = Chain
+geointerface_geomtype(::GI.PolygonTrait) = Polygon
+geointerface_geomtype(::GI.MultiPointTrait) = Multi
+geointerface_geomtype(::GI.MultiLineStringTrait) = Multi
+geointerface_geomtype(::GI.MultiPolygonTrait) = Multi
+
+geom2meshes(geom) = geom2meshes(GI.geomtrait(geom), geom)
+geom2meshes(trait, geom) = GI.convert(geointerface_geomtype(trait), trait, geom)
