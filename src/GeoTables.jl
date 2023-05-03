@@ -31,14 +31,14 @@ specify the layer of geometries to read within the file.
 - `*.geojson` via GeoJSON.jl
 - Other formats via ArchGDAL.jl
 """
-function load(fname, layer=0)
+function load(fname; layer=0, kwargs...)
   if endswith(fname, ".shp")
-    table = SHP.Table(fname)
+    table = SHP.Table(fname; kwargs...)
   elseif endswith(fname, ".geojson")
     data  = Base.read(fname)
-    table = GJS.read(data)
+    table = GJS.read(data; kwargs...)
   else # fallback to GDAL
-    data  = AG.read(fname)
+    data  = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)
   end
   GeoTable(table)
@@ -54,9 +54,17 @@ appropriate format based on the file extension.
 
 - `*.geojson` via GeoJSON.jl
 """
-function save(fname, geotable)
-  if endswith(fname, ".geojson")
-    GJS.write(fname, geotable)
+function save(fname, geotable; kwargs...)
+  if endswith(fname, ".shp")
+    geotable = MeshData(geotable)
+    geoms = domain(geotable)
+    if !isa(geoms[1], Multi) & !isa(geoms[1], Point)
+      geoms = GeometrySet(map(x -> Multi([x]), geoms))
+      geotable = meshdata(geoms, etable = values(geotable))
+    end
+    SHP.write(fname, geotable; kwargs...)
+  elseif endswith(fname, ".geojson")
+    GJS.write(fname, geotable; kwargs...)
   else
     throw(ErrorException("file format not supported"))
   end
