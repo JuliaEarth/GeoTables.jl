@@ -63,11 +63,6 @@ Optionally, specify keyword arguments accepted by
 """
 function save(fname, geotable; kwargs...)
   if endswith(fname, ".shp")
-    geoms = domain(geotable)
-    if !(geoms[1] isa Multi) && !(geoms[1] isa Point)
-      newgeoms = GeometrySet([Multi([geom]) for geom in geoms])
-      geotable = meshdata(newgeoms, etable = values(geotable))
-    end
     SHP.write(fname, geotable; kwargs...)
   elseif endswith(fname, ".geojson")
     GJS.write(fname, geotable; kwargs...)
