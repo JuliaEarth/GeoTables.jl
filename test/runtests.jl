@@ -5,7 +5,7 @@ using Test, Random
 using Dates
 import Shapefile as SHP
 import ArchGDAL as AG
-import GeoJSON as GJ
+import GeoJSON as GJS
 
 # environment settings
 isCI = "CI" ∈ keys(ENV)
@@ -53,12 +53,12 @@ datadir = joinpath(@__DIR__,"data")
     # GeoJSON.jl
     points = Point2f[(0,0),(0.5,2),(2.2,2.2)]
     outer = Point2f[(0,0),(0.5,2),(2.2,2.2),(0,0)]
-    point = GJ.read("""{"type":"Point","coordinates":[1,1]}""")
-    chain = GJ.read("""{"type":"LineString","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
-    poly = GJ.read("""{"type":"Polygon","coordinates":[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]}""")
-    multipoint = GJ.read("""{"type":"MultiPoint","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
-    multichain = GJ.read("""{"type":"MultiLineString","coordinates":[[[0,0],[0.5,2],[2.2,2.2]],[[0,0],[0.5,2],[2.2,2.2]]]}""")
-    multipoly = GJ.read("""{"type":"MultiPolygon","coordinates":[[[[0,0],[0.5,2],[2.2,2.2],[0,0]]],[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]]}""")
+    point = GJS.read("""{"type":"Point","coordinates":[1,1]}""")
+    chain = GJS.read("""{"type":"LineString","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
+    poly = GJS.read("""{"type":"Polygon","coordinates":[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]}""")
+    multipoint = GJS.read("""{"type":"MultiPoint","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
+    multichain = GJS.read("""{"type":"MultiLineString","coordinates":[[[0,0],[0.5,2],[2.2,2.2]],[[0,0],[0.5,2],[2.2,2.2]]]}""")
+    multipoly = GJS.read("""{"type":"MultiPolygon","coordinates":[[[[0,0],[0.5,2],[2.2,2.2],[0,0]]],[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]]}""")
     @test GeoTables.geom2meshes(point) == Point2f(1.0, 1.0)
     @test GeoTables.geom2meshes(chain) == Chain(points)
     @test GeoTables.geom2meshes(poly) == PolyArea(outer)
