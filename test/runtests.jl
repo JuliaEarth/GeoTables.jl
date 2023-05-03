@@ -75,7 +75,7 @@ datadir = joinpath(@__DIR__,"data")
       @test nitems(table) == 6
       @test table.ZONA == ["PA 150","BR 364","BR 163","BR 230","BR 010","Estuarina PA"]
       @test table.geometry isa GeometrySet
-      @test table[1,:geometry] isa Multi
+      @test table.geometry[1] isa Multi
 
       table = GeoTables.load(joinpath(datadir,"zone.shp"))
       @test Tables.schema(table).names == (:PERIMETER, :ACRES, :MACROZONA, :Hectares, :area_m2, :geometry)
