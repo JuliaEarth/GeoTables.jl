@@ -201,63 +201,61 @@ datadir = joinpath(@__DIR__,"data")
   end
 
   @testset "save" begin
-    writedir = joinpath(tempdir(), "geotables")
-    mkdir(writedir)
 
     @testset "points" begin
       table = GeoTables.load(joinpath(datadir, "points.geojson"), )
-      GeoTables.save(joinpath(writedir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tpoints.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "points.gpkg"))
-      GeoTables.save(joinpath(writedir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tpoints.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "points.shp"))
-      GeoTables.save(joinpath(writedir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tpoints.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
     end
 
     @testset "lines" begin
       table = GeoTables.load(joinpath(datadir, "lines.geojson"))
-      GeoTables.save(joinpath(writedir, "tlines.geojson"), table)
-      # GeoTables.save(joinpath(writedir, "tlines.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
+      # GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
-      GeoTables.save(joinpath(writedir, "tlines.geojson"), table)
-      # GeoTables.save(joinpath(writedir, "tlines.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
+      # GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "lines.shp"))
-      GeoTables.save(joinpath(writedir, "tlines.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tlines.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
     end
 
     @testset "polygons" begin
       table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
-      GeoTables.save(joinpath(writedir, "tpolygons.geojson"), table)
-      # GeoTables.save(joinpath(writedir, "tpolygons.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
+      # GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
-      GeoTables.save(joinpath(writedir, "tpolygons.geojson"), table)
-      # GeoTables.save(joinpath(writedir, "tpolygons.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
+      # GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir, "polygons.shp"))
-      GeoTables.save(joinpath(writedir, "tpolygons.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tpolygons.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
     end
 
     @testset "multipolygons" begin
       table = GeoTables.load(joinpath(datadir,"path.shp"))
-      GeoTables.save(joinpath(writedir, "tpath.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tpath.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tpath.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tpath.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir,"zone.shp"))
-      GeoTables.save(joinpath(writedir, "tzone.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tzone.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tzone.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tzone.shp"), table, force = true)
 
       table = GeoTables.load(joinpath(datadir,"ne_110m_land.shp"))
-      GeoTables.save(joinpath(writedir, "tne_110m_land.geojson"), table)
-      GeoTables.save(joinpath(writedir, "tne_110m_land.shp"), table, force = true)
+      GeoTables.save(joinpath(datadir, "tne_110m_land.geojson"), table)
+      GeoTables.save(joinpath(datadir, "tne_110m_land.shp"), table, force = true)
     end
   end
 
