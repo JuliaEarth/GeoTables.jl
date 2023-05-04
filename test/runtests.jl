@@ -201,7 +201,6 @@ datadir = joinpath(@__DIR__,"data")
   end
 
   @testset "save" begin
-
     @testset "points" begin
       table = GeoTables.load(joinpath(datadir, "points.geojson"), )
       GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
@@ -214,6 +213,11 @@ datadir = joinpath(@__DIR__,"data")
       table = GeoTables.load(joinpath(datadir, "points.shp"))
       GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
       GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
+
+      rm(joinpath(datadir, "tpoints.geojson"))
+      rm(joinpath(datadir, "tpoints.shp"))
+      rm(joinpath(datadir, "tpoints.shx"))
+      rm(joinpath(datadir, "tpoints.dbf"))
     end
 
     @testset "lines" begin
@@ -228,6 +232,11 @@ datadir = joinpath(@__DIR__,"data")
       table = GeoTables.load(joinpath(datadir, "lines.shp"))
       GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
       GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
+
+      rm(joinpath(datadir, "tlines.geojson"))
+      rm(joinpath(datadir, "tlines.shp"))
+      rm(joinpath(datadir, "tlines.shx"))
+      rm(joinpath(datadir, "tlines.dbf"))
     end
 
     @testset "polygons" begin
@@ -242,6 +251,11 @@ datadir = joinpath(@__DIR__,"data")
       table = GeoTables.load(joinpath(datadir, "polygons.shp"))
       GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
       GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
+
+      rm(joinpath(datadir, "tpolygons.geojson"))
+      rm(joinpath(datadir, "tpolygons.shp"))
+      rm(joinpath(datadir, "tpolygons.shx"))
+      rm(joinpath(datadir, "tpolygons.dbf"))
     end
 
     @testset "multipolygons" begin
@@ -249,25 +263,39 @@ datadir = joinpath(@__DIR__,"data")
       GeoTables.save(joinpath(datadir, "tpath.geojson"), table)
       GeoTables.save(joinpath(datadir, "tpath.shp"), table, force = true)
 
+      rm(joinpath(datadir, "tpath.geojson"))
+      rm(joinpath(datadir, "tpath.shp"))
+      rm(joinpath(datadir, "tpath.shx"))
+      rm(joinpath(datadir, "tpath.dbf"))
+
       table = GeoTables.load(joinpath(datadir,"zone.shp"))
       GeoTables.save(joinpath(datadir, "tzone.geojson"), table)
       GeoTables.save(joinpath(datadir, "tzone.shp"), table, force = true)
 
+      rm(joinpath(datadir, "tzone.geojson"))
+      rm(joinpath(datadir, "tzone.shp"))
+      rm(joinpath(datadir, "tzone.shx"))
+      rm(joinpath(datadir, "tzone.dbf"))
+
       table = GeoTables.load(joinpath(datadir,"ne_110m_land.shp"))
       GeoTables.save(joinpath(datadir, "tne_110m_land.geojson"), table)
       GeoTables.save(joinpath(datadir, "tne_110m_land.shp"), table, force = true)
+
+      rm(joinpath(datadir, "tne_110m_land.geojson"))
+      rm(joinpath(datadir, "tne_110m_land.shp"))
+      rm(joinpath(datadir, "tne_110m_land.shx"))
+      rm(joinpath(datadir, "tne_110m_land.dbf"))
     end
   end
 
   @testset "gadm" begin
     table = GeoTables.gadm("BRA", depth = 1, ϵ=0.04)
-    gset  = domain(table)
-    @test nelements(domain(table)) == 27
+    @test nitems(table) == 27
 
     table = GeoTables.gadm("USA", depth = 1, ϵ=0.04)
-    @test nelements(domain(table)) == 51
+    @test nitems(table) == 51
 
     table = GeoTables.gadm("IND", depth = 1)
-    @test nelements(domain(table)) == 36
+    @test nitems(table) == 36
   end
 end
