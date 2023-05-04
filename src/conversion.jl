@@ -20,15 +20,19 @@ GI.ncoord(::GI.PointTrait, p::Point) = embeddim(p)
 GI.getcoord(::GI.PointTrait, p::Point) = coordinates(p)
 GI.getcoord(::GI.PointTrait, p::Point, i) = coordinates(p)[i]
 
-GI.ngeom(::Any, s::Segment) = nvertices(s)
-GI.getgeom(::Any, s::Segment, i) = vertices(s)[i]
+GI.ncoord(::GI.LineTrait, s::Segment) = embeddim(s)
+GI.ngeom(::GI.LineTrait, s::Segment) = nvertices(s)
+GI.getgeom(::GI.LineTrait, s::Segment, i) = vertices(s)[i]
 
-GI.ngeom(::Any, c::Chain) = nvertices(c)
-GI.getgeom(::Any, c::Chain, i) = vertices(c)[i]
+GI.ncoord(::GI.LineStringTrait, c::Chain) = embeddim(c)
+GI.ngeom(::GI.LineStringTrait, c::Chain) = nvertices(c)
+GI.getgeom(::GI.LineStringTrait, c::Chain, i) = vertices(c)[i]
 
-GI.ngeom(::Any, p::Polygon) = length(chains(p))
-GI.getgeom(::Any, p::Polygon, i) = chains(p)[i]
+GI.ncoord(::GI.PolygonTrait, p::Polygon) = embeddim(p)
+GI.ngeom(::GI.PolygonTrait, p::Polygon) = length(chains(p))
+GI.getgeom(::GI.PolygonTrait, p::Polygon, i) = chains(p)[i]
 
+GI.ncoord(::Any, m::Multi) = embeddim(m)
 GI.ngeom(::Any, m::Multi) = length(collect(m))
 GI.getgeom(::Any, m::Multi, i) = collect(m)[i]
 

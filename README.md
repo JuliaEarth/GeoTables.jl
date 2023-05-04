@@ -27,6 +27,18 @@ table = GeoTables.load("file.shp")
 GeoTables.save("file.geojson", table)
 ```
 
+Additional keyword arguments can be passed to `load` and `save` functions. Valid
+arguments are those accepted by `GeoJSON.read`, `GeoJSON.write`, `Shapefile.Table`,
+`Shapefile.write` and `ArchGDAL.read`. See below some examples:
+
+```julia
+# read `.geojson` geometries with Float64 precision
+table = GeoTables.load("file.geojson", numbertype = Float64)
+
+# force writing on existing `.shp` file
+GeoTables.save("file.shp", table, force = true)
+```
+
 ### Loading data from GADM
 
 The `gadm` function (down)loads data from the GADM dataset:

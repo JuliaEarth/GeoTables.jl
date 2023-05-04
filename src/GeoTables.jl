@@ -19,11 +19,14 @@ include("conversion.jl")
 include("geotable.jl")
 
 """
-    load(fname, layer=0)
+    load(fname, layer=0, kwargs...)
 
 Load geospatial table from file `fname` and convert the
 `geometry` column to Meshes.jl geometries. Optionally,
-specify the layer of geometries to read within the file.
+specify the layer of geometries to read within the file and
+keyword arguments accepted by `Shapefile.Table`, `GeoJSON.read`
+and `ArchGDAL.read`. For example, use `numbertype = Float64` to
+read `.geojson` geometries with Float64 precision.
 
 ## Supported formats
 
@@ -31,32 +34,38 @@ specify the layer of geometries to read within the file.
 - `*.geojson` via GeoJSON.jl
 - Other formats via ArchGDAL.jl
 """
-function load(fname, layer=0)
+function load(fname; layer=0, kwargs...)
   if endswith(fname, ".shp")
-    table = SHP.Table(fname)
+    table = SHP.Table(fname; kwargs...)
   elseif endswith(fname, ".geojson")
     data  = Base.read(fname)
-    table = GJS.read(data)
+    table = GJS.read(data; kwargs...)
   else # fallback to GDAL
-    data  = AG.read(fname)
+    data  = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)
   end
   GeoTable(table)
 end
 
 """
-    save(fname, geotable)
+    save(fname, geotable; kwargs...)
 
 Save geospatial table to file `fname` using the
 appropriate format based on the file extension.
+Optionally, specify keyword arguments accepted by
+`Shapefile.write` and `GeoJSON.write`. For example, use
+`force = true` to force writing on existing `.shp` file.
 
 ## Supported formats
 
+- `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
 """
-function save(fname, geotable)
-  if endswith(fname, ".geojson")
-    GJS.write(fname, geotable)
+function save(fname, geotable; kwargs...)
+  if endswith(fname, ".shp")
+    SHP.write(fname, geotable; kwargs...)
+  elseif endswith(fname, ".geojson")
+    GJS.write(fname, geotable; kwargs...)
   else
     throw(ErrorException("file format not supported"))
   end
