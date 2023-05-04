@@ -25,7 +25,7 @@ GI.ngeom(::GI.LineTrait, s::Segment) = nvertices(s)
 GI.getgeom(::GI.LineTrait, s::Segment, i) = vertices(s)[i]
 
 GI.ncoord(::GI.LineStringTrait, c::Chain) = embeddim(c)
-GI.ngeom(::GI.LineStringTrait, c::Chain) = nvertices(c)
+GI.ngeom(::GI.LineStringTrait, c::Chain) = Meshes.npoints(c)
 GI.getgeom(::GI.LineStringTrait, c::Chain, i) = vertices(c)[i]
 
 GI.ncoord(::GI.PolygonTrait, p::Polygon) = embeddim(p)

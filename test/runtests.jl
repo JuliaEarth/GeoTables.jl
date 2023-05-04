@@ -3,6 +3,7 @@ using Tables
 using Meshes
 using Test, Random
 using Dates
+import GeoInterface as GI
 import Shapefile as SHP
 import ArchGDAL as AG
 import GeoJSON as GJS
@@ -16,6 +17,15 @@ datadir = joinpath(@__DIR__,"data")
   @testset "convert" begin
     points = Point2[(0,0),(0.5,2),(2.2,2.2)]
     outer = Point2[(0,0),(0.5,2),(2.2,2.2),(0,0)]
+
+    # GI functions
+    @test GI.ngeom(Segment(points[1:2])) == 2
+    @test GI.ngeom(Chain(points)) == 3
+    @test GI.ngeom(Chain(outer)) == 4
+    @test GI.ngeom(PolyArea(outer)) == 1
+    @test GI.ngeom(Multi(points)) == 3
+    @test GI.ngeom(Multi([Chain(outer), Chain(outer)])) == 2
+    @test GI.ngeom(Multi([PolyArea(outer), PolyArea(outer)])) == 2
 
     # Shapefile.jl
     ps = [SHP.Point(0,0), SHP.Point(0.5,2), SHP.Point(2.2,2.2)]
