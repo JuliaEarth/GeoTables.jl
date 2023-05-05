@@ -12,8 +12,7 @@ import GeoJSON as GJS
 isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 datadir = joinpath(@__DIR__,"data")
-writedir = joinpath(tempdir(), "geotables")
-mkpath(writedir)
+writedir = mktempdir()
 
 @testset "GeoTables.jl" begin
   @testset "convert" begin
