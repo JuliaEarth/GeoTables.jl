@@ -278,5 +278,3 @@ savedir = mktempdir()
     @test nitems(table) == 36
   end
 end
-
-rm(savedir, recursive = true)
