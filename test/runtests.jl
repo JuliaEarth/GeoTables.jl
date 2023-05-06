@@ -12,6 +12,7 @@ import GeoJSON as GJS
 isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
 datadir = joinpath(@__DIR__,"data")
+savedir = mktempdir()
 
 @testset "GeoTables.jl" begin
   @testset "convert" begin
@@ -33,13 +34,13 @@ datadir = joinpath(@__DIR__,"data")
     box = SHP.Rect(0.0, 0.0, 2.2, 2.2)
     point = SHP.Point(1.0,1.0)
     chain = SHP.LineString{SHP.Point}(view(ps, 1:3))
-    poly = SHP.SubPolygon([SHP.LinearRing{SHP.Point}(view(ps, 1:3))])
+    poly = SHP.SubPolygon([SHP.LinearRing{SHP.Point}(view(exterior, 1:4))])
     multipoint = SHP.MultiPoint(box, ps)
     multichain = SHP.Polyline(box, [0,3], repeat(ps, 2))
     multipoly = SHP.Polygon(box, [0,4], repeat(exterior, 2))
     @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
-    # @test GeoTables.geom2meshes(chain) == Chain(points)
-    # @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(chain) == Chain(points)
+    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
     @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
@@ -211,90 +212,58 @@ datadir = joinpath(@__DIR__,"data")
   end
 
   @testset "save" begin
+    filetypes = ["geojson", "gpkg", "shp"]
+
     @testset "points" begin
-      table = GeoTables.load(joinpath(datadir, "points.geojson"), )
-      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
-
-      table = GeoTables.load(joinpath(datadir, "points.gpkg"))
-      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
-
-      table = GeoTables.load(joinpath(datadir, "points.shp"))
-      GeoTables.save(joinpath(datadir, "tpoints.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tpoints.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tpoints.geojson"))
-      rm(joinpath(datadir, "tpoints.shp"))
-      rm(joinpath(datadir, "tpoints.shx"))
-      rm(joinpath(datadir, "tpoints.dbf"))
+      for ft in filetypes
+        table = GeoTables.load(joinpath(datadir, "points.$ft"))
+        GeoTables.save(joinpath(savedir, "tpoints.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "tpoints.geojson"))
+        GeoTables.save(joinpath(savedir, "tpoints.shp"), table, force = true)
+        newtable = GeoTables.load(joinpath(savedir, "tpoints.shp"))
+      end
     end
 
     @testset "lines" begin
-      table = GeoTables.load(joinpath(datadir, "lines.geojson"))
-      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
-      # GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
+      table = GeoTables.load(joinpath(datadir, "lines.geojson"), numbertype = Float64)
+      GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
+      newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
+      GeoTables.save(joinpath(savedir, "tlines.shp"), table, force = true)
+      newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
 
-      table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
-      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
-      # GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
-
-      table = GeoTables.load(joinpath(datadir, "lines.shp"))
-      GeoTables.save(joinpath(datadir, "tlines.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tlines.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tlines.geojson"))
-      rm(joinpath(datadir, "tlines.shp"))
-      rm(joinpath(datadir, "tlines.shx"))
-      rm(joinpath(datadir, "tlines.dbf"))
+      for ft in ["gpkg", "shp"]
+        table = GeoTables.load(joinpath(datadir, "lines.$ft"))
+        GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
+        GeoTables.save(joinpath(savedir, "tlines.shp"), table, force = true)
+        newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
+      end
     end
 
     @testset "polygons" begin
-      table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
-      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
-      # GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
+      table = GeoTables.load(joinpath(datadir, "polygons.geojson"), numbertype = Float64)
+      GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
+      newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
+      GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force = true)
+      newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
 
-      table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
-      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
-      # GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
-
-      table = GeoTables.load(joinpath(datadir, "polygons.shp"))
-      GeoTables.save(joinpath(datadir, "tpolygons.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tpolygons.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tpolygons.geojson"))
-      rm(joinpath(datadir, "tpolygons.shp"))
-      rm(joinpath(datadir, "tpolygons.shx"))
-      rm(joinpath(datadir, "tpolygons.dbf"))
+      for ft in ["gpkg", "shp"]
+        table = GeoTables.load(joinpath(datadir, "polygons.$ft"))
+        GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
+        GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force = true)
+        newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
+      end
     end
 
     @testset "multipolygons" begin
-      table = GeoTables.load(joinpath(datadir,"path.shp"))
-      GeoTables.save(joinpath(datadir, "tpath.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tpath.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tpath.geojson"))
-      rm(joinpath(datadir, "tpath.shp"))
-      rm(joinpath(datadir, "tpath.shx"))
-      rm(joinpath(datadir, "tpath.dbf"))
-
-      table = GeoTables.load(joinpath(datadir,"zone.shp"))
-      GeoTables.save(joinpath(datadir, "tzone.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tzone.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tzone.geojson"))
-      rm(joinpath(datadir, "tzone.shp"))
-      rm(joinpath(datadir, "tzone.shx"))
-      rm(joinpath(datadir, "tzone.dbf"))
-
-      table = GeoTables.load(joinpath(datadir,"ne_110m_land.shp"))
-      GeoTables.save(joinpath(datadir, "tne_110m_land.geojson"), table)
-      GeoTables.save(joinpath(datadir, "tne_110m_land.shp"), table, force = true)
-
-      rm(joinpath(datadir, "tne_110m_land.geojson"))
-      rm(joinpath(datadir, "tne_110m_land.shp"))
-      rm(joinpath(datadir, "tne_110m_land.shx"))
-      rm(joinpath(datadir, "tne_110m_land.dbf"))
+      for file in ["path", "zone", "ne_110m_land"]
+        table = GeoTables.load(joinpath(datadir,"$file.shp"))
+        GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"))
+        GeoTables.save(joinpath(savedir, "t$file.shp"), table, force = true)
+        newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
+      end
     end
   end
 
