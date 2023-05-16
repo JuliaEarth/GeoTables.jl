@@ -271,10 +271,10 @@ savedir = mktempdir()
     table = GeoTables.gadm("BRA", depth = 1, ϵ=0.04)
     @test nitems(table) == 27
 
-    table = GeoTables.gadm("USA", depth = 1, ϵ=0.04)
-    @test nitems(table) == 51
-
     table = GeoTables.gadm("IND", depth = 1)
     @test nitems(table) == 36
+
+    table = GeoTables.gadm("USA", depth = 1, ϵ=0.04)
+    @test nitems(table) == 51
   end
 end
