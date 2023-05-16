@@ -14,6 +14,11 @@ islinux = Sys.islinux()
 datadir = joinpath(@__DIR__,"data")
 savedir = mktempdir()
 
+# download files
+GeoTables.gadm("USA")
+GeoTables.gadm("BRA")
+GeoTables.gadm("IND")
+
 @testset "GeoTables.jl" begin
   @testset "convert" begin
     points = Point2[(0,0),(0.5,2),(2.2,2.2)]
@@ -271,10 +276,10 @@ savedir = mktempdir()
     table = GeoTables.gadm("BRA", depth = 1, ϵ=0.04)
     @test nitems(table) == 27
 
-    table = GeoTables.gadm("IND", depth = 1)
-    @test nitems(table) == 36
-
     table = GeoTables.gadm("USA", depth = 1, ϵ=0.04)
     @test nitems(table) == 51
+
+    table = GeoTables.gadm("IND", depth = 1)
+    @test nitems(table) == 36
   end
 end
