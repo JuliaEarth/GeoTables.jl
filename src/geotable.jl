@@ -18,8 +18,8 @@ end
 
 function Meshes.domain(t::GeoTable)
   table = getfield(t, :table)
-  cols  = Tables.columns(table)
-  gcol  = geomcolumn(cols)
+  cols = Tables.columns(table)
+  gcol = geomcolumn(cols)
   geoms = Tables.getcolumn(cols, gcol)
   items = geom2meshes.(geoms)
   Meshes.Collection(items)
@@ -28,16 +28,16 @@ end
 function Meshes.values(t::GeoTable, rank=nothing)
   # find ranks of all geometries
   table = getfield(t, :table)
-  cols  = Tables.columns(table)
-  gcol  = geomcolumn(cols)
+  cols = Tables.columns(table)
+  gcol = geomcolumn(cols)
   geoms = Tables.getcolumn(cols, gcol)
   items = geom2meshes.(geoms)
   ranks = paramdim.(items)
 
   # select geometries with given rank
-  rmax  = maximum(ranks)
-  rsel  = isnothing(rank) ? rmax : rank
-  rind  = findall(==(rsel), ranks)
+  rmax = maximum(ranks)
+  rsel = isnothing(rank) ? rmax : rank
+  rind = findall(==(rsel), ranks)
 
   # check if rank exists in data
   if isempty(rind)
@@ -45,7 +45,7 @@ function Meshes.values(t::GeoTable, rank=nothing)
   else
     # if rank exists, load other columns
     names = Tables.columnnames(cols)
-    vars  = setdiff(names, [gcol])
+    vars = setdiff(names, [gcol])
     cols = map(vars) do var
       col = Tables.getcolumn(cols, var)
       var => col[rind]

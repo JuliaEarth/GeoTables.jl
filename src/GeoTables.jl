@@ -38,10 +38,10 @@ function load(fname; layer=0, kwargs...)
   if endswith(fname, ".shp")
     table = SHP.Table(fname; kwargs...)
   elseif endswith(fname, ".geojson")
-    data  = Base.read(fname)
+    data = Base.read(fname)
     table = GJS.read(data; kwargs...)
   else # fallback to GDAL
-    data  = AG.read(fname; kwargs...)
+    data = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)
   end
   GeoTable(table)
@@ -84,9 +84,8 @@ at a given depth starting from the given region specification.
 The options `ϵ`, `min`, `max` and `maxiter` are forwarded to the
 `decimate` function from Meshes.jl to reduce the number of vertices.
 """
-function gadm(country, subregions...; depth=0, ϵ=nothing,
-              min=3, max=typemax(Int), maxiter=10)
-  table  = GADM.get(country, subregions...; depth=depth)
+function gadm(country, subregions...; depth=0, ϵ=nothing, min=3, max=typemax(Int), maxiter=10)
+  table = GADM.get(country, subregions...; depth=depth)
   gtable = GeoTable(table)
   𝒯 = values(gtable)
   𝒟 = domain(gtable)
