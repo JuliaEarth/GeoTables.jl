@@ -51,8 +51,8 @@ Please read the docstring for more details.
 
 ### Performance tips
 
-The result can be easily converted into any other geotable type
-to avoid converting the geometries every time the underlying
+The result can be easily converted into any other geospatial table
+type to avoid converting the geometries every time the underlying
 domain is queried. For example, assuming that `table` has been
 loaded with the functions above, the following code can be used
 to convert the table to pure Julia geometries:
