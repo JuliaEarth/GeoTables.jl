@@ -85,8 +85,8 @@ The options `ϵ`, `min`, `max` and `maxiter` are forwarded to the
 `decimate` function from Meshes.jl to reduce the number of vertices.
 """
 function gadm(country, subregions...; depth=0, ϵ=nothing,
-              min=3, max=typemax(Int), maxiter=10)
-  table  = GADM.get(country, subregions...; depth=depth)
+              min=3, max=typemax(Int), maxiter=10, kwargs...)
+  table  = GADM.get(country, subregions...; depth=depth, kwargs...)
   gtable = GeoTable(table)
   𝒯 = values(gtable)
   𝒟 = domain(gtable)
