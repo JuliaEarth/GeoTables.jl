@@ -22,15 +22,15 @@ GI.getcoord(::GI.PointTrait, p::Point, i) = coordinates(p)[i]
 
 GI.ncoord(::GI.LineTrait, s::Segment) = embeddim(s)
 GI.ngeom(::GI.LineTrait, s::Segment) = nvertices(s)
-GI.getgeom(::GI.LineTrait, s::Segment, i) = vertices(s)[i]
+GI.getgeom(::GI.LineTrait, s::Segment, i) = vertex(s, i)
 
 GI.ncoord(::GI.LineStringTrait, c::Chain) = embeddim(c)
-GI.ngeom(::GI.LineStringTrait, c::Chain) = Meshes.npoints(c)
-GI.getgeom(::GI.LineStringTrait, c::Chain, i) = vertices(c)[i]
+GI.ngeom(::GI.LineStringTrait, c::Chain) = nvertices(c) + isclosed(c)
+GI.getgeom(::GI.LineStringTrait, c::Chain, i) = vertex(c, i)
 
 GI.ncoord(::GI.PolygonTrait, p::Polygon) = embeddim(p)
-GI.ngeom(::GI.PolygonTrait, p::Polygon) = length(chains(p))
-GI.getgeom(::GI.PolygonTrait, p::Polygon, i) = chains(p)[i]
+GI.ngeom(::GI.PolygonTrait, p::Polygon) = length(rings(p))
+GI.getgeom(::GI.PolygonTrait, p::Polygon, i) = rings(p)[i]
 
 GI.ncoord(::Any, m::Multi) = embeddim(m)
 GI.ngeom(::Any, m::Multi) = length(collect(m))
@@ -53,15 +53,22 @@ function topoints(geom, is3d::Bool)
   end
 end
 
-tochain(geom, is3d::Bool) = Chain(topoints(geom, is3d))
+function tochain(geom, is3d::Bool)
+  points = topoints(geom, is3d)
+  if first(points) == last(points)
+    Ring(points[begin:(end-1)])
+  else
+    Rope(points)
+  end
+end
 
 function topolygon(geom, is3d::Bool)
-  exterior = topoints(GI.getexterior(geom), is3d)
+  outer = tochain(GI.getexterior(geom), is3d)
   if GI.nhole(geom) == 0
-    PolyArea(exterior)
+    PolyArea(outer)
   else
-    holes = map(g -> topoints(g, is3d), GI.gethole(geom))
-    PolyArea(exterior, holes)
+    inners = map(g -> tochain(g, is3d), GI.gethole(geom))
+    PolyArea(outer, inners)
   end
 end
 

@@ -21,12 +21,12 @@ savedir = mktempdir()
 
     # GI functions
     @test GI.ngeom(Segment(points[1:2])) == 2
-    @test GI.ngeom(Chain(points)) == 3
-    @test GI.ngeom(Chain(outer)) == 4
-    @test GI.ngeom(PolyArea(outer)) == 1
+    @test GI.ngeom(Rope(points)) == 3
+    @test GI.ngeom(Ring(points)) == 4
+    @test GI.ngeom(PolyArea(points)) == 1
     @test GI.ngeom(Multi(points)) == 3
-    @test GI.ngeom(Multi([Chain(outer), Chain(outer)])) == 2
-    @test GI.ngeom(Multi([PolyArea(outer), PolyArea(outer)])) == 2
+    @test GI.ngeom(Multi([Rope(points), Rope(points)])) == 2
+    @test GI.ngeom(Multi([PolyArea(points), PolyArea(points)])) == 2
 
     # Shapefile.jl
     ps = [SHP.Point(0, 0), SHP.Point(0.5, 2), SHP.Point(2.2, 2.2)]
@@ -39,31 +39,32 @@ savedir = mktempdir()
     multichain = SHP.Polyline(box, [0, 3], repeat(ps, 2))
     multipoly = SHP.Polygon(box, [0, 4], repeat(exterior, 2))
     @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Chain(points)
-    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(chain) == Rope(points)
+    @test GeoTables.geom2meshes(poly) == PolyArea(points)
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
-    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
+    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(points), PolyArea(points)])
 
     # ArchGDAL.jl
     ps = [(0, 0), (0.5, 2), (2.2, 2.2)]
-    exterior = [(0, 0), (0.5, 2), (2.2, 2.2), (0, 0)]
+    outer = [(0, 0), (0.5, 2), (2.2, 2.2), (0, 0)]
     point = AG.createpoint(1.0, 1.0)
     chain = AG.createlinestring(ps)
-    poly = AG.createpolygon(exterior)
+    poly = AG.createpolygon(outer)
     multipoint = AG.createmultipoint(ps)
     multichain = AG.createmultilinestring([ps, ps])
-    multipoly = AG.createmultipolygon([[exterior], [exterior]])
+    multipoly = AG.createmultipolygon([[outer], [outer]])
+    polyarea = PolyArea(outer[begin:(end-1)])
     @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Chain(points)
-    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
+    @test GeoTables.geom2meshes(chain) == Rope(points)
+    @test GeoTables.geom2meshes(poly) == polyarea 
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
-    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
+    @test GeoTables.geom2meshes(multipoly) == Multi([polyarea, polyarea])
 
     # GeoJSON.jl
     points = Point2f[(0, 0), (0.5, 2), (2.2, 2.2)]
-    outer = Point2f[(0, 0), (0.5, 2), (2.2, 2.2), (0, 0)]
+    outer = Point2f[(0, 0), (0.5, 2), (2.2, 2.2)]
     point = GJS.read("""{"type":"Point","coordinates":[1,1]}""")
     chain = GJS.read("""{"type":"LineString","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
     poly = GJS.read("""{"type":"Polygon","coordinates":[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]}""")
@@ -74,10 +75,10 @@ savedir = mktempdir()
       """{"type":"MultiPolygon","coordinates":[[[[0,0],[0.5,2],[2.2,2.2],[0,0]]],[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]]}"""
     )
     @test GeoTables.geom2meshes(point) == Point2f(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Chain(points)
+    @test GeoTables.geom2meshes(chain) == Rope(points)
     @test GeoTables.geom2meshes(poly) == PolyArea(outer)
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Chain(points), Chain(points)])
+    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
   end
 
