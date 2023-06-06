@@ -44,6 +44,10 @@ savedir = mktempdir()
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
     @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(points), PolyArea(points)])
+    # chain with 2 equal points
+    ps = [SHP.Point(2.2, 2.2), SHP.Point(2.2, 2.2)]
+    chain = SHP.LineString{SHP.Point}(view(ps, 1:2))
+    @test GeoTables.geom2meshes(chain) == Rope(Point2[(2.2, 2.2), (2.2, 2.2)])
 
     # ArchGDAL.jl
     ps = [(0, 0), (0.5, 2), (2.2, 2.2)]
@@ -61,6 +65,9 @@ savedir = mktempdir()
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
     @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([polyarea, polyarea])
+    # chain with 2 equal points
+    chain = AG.createlinestring([(2.2, 2.2), (2.2, 2.2)])
+    @test GeoTables.geom2meshes(chain) == Rope(Point2[(2.2, 2.2), (2.2, 2.2)])
 
     # GeoJSON.jl
     points = Point2f[(0, 0), (0.5, 2), (2.2, 2.2)]
@@ -80,6 +87,9 @@ savedir = mktempdir()
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
     @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
+    # chain with 2 equal points
+    chain = GJS.read("""{"type":"LineString","coordinates":[[2.2,2.2],[2.2,2.2]]}""")
+    @test GeoTables.geom2meshes(chain) == Rope(Point2f[(2.2, 2.2), (2.2, 2.2)])
   end
 
   @testset "load" begin
