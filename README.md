@@ -39,6 +39,8 @@ table = GeoTables.load("file.geojson", numbertype = Float64)
 GeoTables.save("file.shp", table, force = true)
 ```
 
+Please read the docstrings for more details.
+
 ### Loading data from GADM
 
 The `gadm` function (down)loads data from the GADM dataset:
@@ -48,20 +50,6 @@ julia> GeoTables.gadm("BRA", depth = 1)
 ```
 
 Please read the docstring for more details.
-
-### Performance tips
-
-The result can be easily converted into any other geospatial table
-type to avoid converting the geometries every time the underlying
-domain is queried. For example, assuming that `table` has been
-loaded with the functions above, the following code can be used
-to convert the table to pure Julia geometries:
-
-```julia
-using GeoStats
-
-table |> GeoData
-```
 
 ## Asking for help
 

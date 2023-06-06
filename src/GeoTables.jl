@@ -19,14 +19,19 @@ include("conversion.jl")
 include("geotable.jl")
 
 """
-    load(fname, layer=0, kwargs...)
+    load(fname, layer=0, lazy=false, kwargs...)
 
 Load geospatial table from file `fname` and convert the
-`geometry` column to Meshes.jl geometries. Optionally,
-specify the layer of geometries to read within the file and
-keyword arguments accepted by `Shapefile.Table`, `GeoJSON.read`
-and `ArchGDAL.read`. For example, use `numbertype = Float64` to
-read `.geojson` geometries with Float64 precision.
+`geometry` column to Meshes.jl geometries.
+
+Optionally, specify the `layer` of geometries to read
+within the file and keyword arguments `kwargs` accepted
+by `Shapefile.Table`, `GeoJSON.read` and `ArchGDAL.read`.
+For example, use `numbertype = Float64` to read `.geojson`
+geometries with `Float64` precision.
+
+The option `lazy` can be used to convert geometries on
+the fly instead of converting them immediately.
 
 ## Supported formats
 
@@ -34,7 +39,7 @@ read `.geojson` geometries with Float64 precision.
 - `*.geojson` via GeoJSON.jl
 - Other formats via ArchGDAL.jl
 """
-function load(fname; layer=0, kwargs...)
+function load(fname; layer=0, lazy=false, kwargs...)
   if endswith(fname, ".shp")
     table = SHP.Table(fname; kwargs...)
   elseif endswith(fname, ".geojson")
@@ -44,7 +49,8 @@ function load(fname; layer=0, kwargs...)
     data = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)
   end
-  GeoTable(table)
+  gtable = GeoTable(table)
+  lazy ? gtable : Meshes.MeshData(gtable)
 end
 
 """
