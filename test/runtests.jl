@@ -58,10 +58,10 @@ savedir = mktempdir()
     multipoint = AG.createmultipoint(ps)
     multichain = AG.createmultilinestring([ps, ps])
     multipoly = AG.createmultipolygon([[outer], [outer]])
-    polyarea = PolyArea(outer[begin:(end-1)])
+    polyarea = PolyArea(outer[begin:(end - 1)])
     @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
     @test GeoTables.geom2meshes(chain) == Rope(points)
-    @test GeoTables.geom2meshes(poly) == polyarea 
+    @test GeoTables.geom2meshes(poly) == polyarea
     @test GeoTables.geom2meshes(multipoint) == Multi(points)
     @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
     @test GeoTables.geom2meshes(multipoly) == Multi([polyarea, polyarea])
