@@ -55,7 +55,7 @@ end
 
 function tochain(geom, is3d::Bool)
   points = topoints(geom, is3d)
-  if first(points) == last(points)
+  if GI.isclosed(geom)
     Ring(points[begin:(end - 1)])
   else
     Rope(points)
