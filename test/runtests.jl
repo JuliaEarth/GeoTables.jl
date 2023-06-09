@@ -264,7 +264,6 @@ savedir = mktempdir()
         GeoTables.save(joinpath(savedir, "tlines.shp"), table, force=true)
         newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
       end
-
     end
 
     @testset "polygons" begin
