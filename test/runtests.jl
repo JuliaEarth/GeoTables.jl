@@ -284,10 +284,17 @@ savedir = mktempdir()
 
     @testset "multipolygons" begin
       # the file `ne_110m_land` needs Float64 precision
-      for file in ["path", "zone", "ne_110m_land"]
+      file = "ne_110m_land"
+      table = GeoTables.load(joinpath(datadir, "$file.shp"))
+      GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
+      newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype = Float64)
+      GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
+      newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
+
+      for file in ["path", "zone"]
         table = GeoTables.load(joinpath(datadir, "$file.shp"))
         GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
-        newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype = Float64)
+        newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"))
         GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
         newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
       end
