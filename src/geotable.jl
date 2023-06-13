@@ -22,7 +22,7 @@ function Meshes.domain(t::GeoTable)
   gcol = geomcolumn(cols)
   geoms = Tables.getcolumn(cols, gcol)
   items = geom2meshes.(geoms)
-  Meshes.Collection(items)
+  Meshes.GeometrySet(items)
 end
 
 function Meshes.values(t::GeoTable, rank=nothing)
