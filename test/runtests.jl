@@ -259,8 +259,8 @@ savedir = mktempdir()
 
       for ft in ["gpkg", "shp"]
         table = GeoTables.load(joinpath(datadir, "lines.$ft"))
-        # GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
-        # newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
+        GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
         GeoTables.save(joinpath(savedir, "tlines.shp"), table, force=true)
         newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
       end
@@ -275,18 +275,26 @@ savedir = mktempdir()
 
       for ft in ["gpkg", "shp"]
         table = GeoTables.load(joinpath(datadir, "polygons.$ft"))
-        # GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
-        # newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
+        GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
         GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force=true)
         newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
       end
     end
 
     @testset "multipolygons" begin
-      for file in ["path", "zone", "ne_110m_land"]
+      # the file `ne_110m_land` needs Float64 precision
+      file = "ne_110m_land"
+      table = GeoTables.load(joinpath(datadir, "$file.shp"))
+      GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
+      newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype = Float64)
+      GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
+      newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
+
+      for file in ["path", "zone"]
         table = GeoTables.load(joinpath(datadir, "$file.shp"))
-        # GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
-        # newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"))
+        GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
+        newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"))
         GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
         newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
       end
