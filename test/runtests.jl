@@ -287,7 +287,7 @@ savedir = mktempdir()
       file = "ne_110m_land"
       table = GeoTables.load(joinpath(datadir, "$file.shp"))
       GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
-      newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype = Float64)
+      newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype=Float64)
       GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
       newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
 
