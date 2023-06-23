@@ -198,7 +198,19 @@ savedir = mktempdir()
       @test GeoTables.load(joinpath(datadir, "lines.geojson"), lazy=true) isa GeoTables.GeoTable
     end
 
-    @testset "ArchGDAL" begin
+    @testset "KML" begin
+      varnames = (:Name, :Description, :geometry)
+
+      table = GeoTables.load(joinpath(datadir, "field.kml"))
+      @test Tables.schema(table).names == varnames
+      @test nitems(table) == 4
+      @test table.Name[1] isa String
+      @test table.Description[1] isa String
+      @test table.geometry isa GeometrySet
+      @test table.geometry[1] isa PolyArea
+    end
+
+    @testset "GeoPackage" begin
       varnames = (:code, :name, :date, :variable, :geometry)
 
       table = GeoTables.load(joinpath(datadir, "points.gpkg"))
@@ -238,10 +250,8 @@ savedir = mktempdir()
   end
 
   @testset "save" begin
-    filetypes = ["geojson", "gpkg", "shp"]
-
     @testset "points" begin
-      for ft in filetypes
+      for ft in ["shp", "geojson", "gpkg"]
         table = GeoTables.load(joinpath(datadir, "points.$ft"))
         GeoTables.save(joinpath(savedir, "tpoints.geojson"), table)
         newtable = GeoTables.load(joinpath(savedir, "tpoints.geojson"))
@@ -257,7 +267,7 @@ savedir = mktempdir()
       GeoTables.save(joinpath(savedir, "tlines.shp"), table, force=true)
       newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
 
-      for ft in ["gpkg", "shp"]
+      for ft in ["shp", "gpkg"]
         table = GeoTables.load(joinpath(datadir, "lines.$ft"))
         GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
         newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
@@ -273,7 +283,7 @@ savedir = mktempdir()
       GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force=true)
       newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
 
-      for ft in ["gpkg", "shp"]
+      for ft in ["shp", "gpkg"]
         table = GeoTables.load(joinpath(datadir, "polygons.$ft"))
         GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
         newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
