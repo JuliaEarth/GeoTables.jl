@@ -309,6 +309,16 @@ savedir = mktempdir()
         newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
       end
     end
+
+    # @testset "agwrite" begin
+    #   table = GeoTables.load(joinpath(datadir, "lines.geojson"), numbertype=Float64)
+    #   for ext in GeoTables.SUPORTED
+    #     GeoTables.agwrite(joinpath(savedir, "ag-lines$ext"), table)
+    #     kwargs = ext == ".geojson" ? (; numbertype=Float64) : ()
+    #     agtable = GeoTables.load(joinpath(savedir, "ag-lines$ext"); kwargs...)
+    #     @test agtable == table
+    #   end
+    # end
   end
 
   @testset "gadm" begin
