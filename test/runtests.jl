@@ -95,7 +95,7 @@ savedir = mktempdir()
   @testset "load" begin
     @testset "Shapefile" begin
       table = GeoTables.load(joinpath(datadir, "points.shp"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa Date
@@ -104,7 +104,7 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.shp"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa Date
@@ -114,7 +114,7 @@ savedir = mktempdir()
       @test collect(table.geometry[1])[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.shp"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa Date
@@ -125,14 +125,14 @@ savedir = mktempdir()
 
       table = GeoTables.load(joinpath(datadir, "path.shp"))
       @test Tables.schema(table).names == (:ZONA, :geometry)
-      @test nitems(table) == 6
+      @test length(table.geometry) == 6
       @test table.ZONA == ["PA 150", "BR 364", "BR 163", "BR 230", "BR 010", "Estuarina PA"]
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
 
       table = GeoTables.load(joinpath(datadir, "zone.shp"))
       @test Tables.schema(table).names == (:PERIMETER, :ACRES, :MACROZONA, :Hectares, :area_m2, :geometry)
-      @test nitems(table) == 4
+      @test length(table.geometry) == 4
       @test table.PERIMETER == [5.850803650776888e6, 9.539471535859613e6, 1.01743436941e7, 7.096124186552936e6]
       @test table.ACRES == [3.23144676827e7, 2.50593712407e8, 2.75528426573e8, 1.61293042687e8]
       @test table.MACROZONA == ["Estuario", "Fronteiras Antigas", "Fronteiras Intermediarias", "Fronteiras Novas"]
@@ -143,7 +143,7 @@ savedir = mktempdir()
 
       table = GeoTables.load(joinpath(datadir, "land.shp"))
       @test Tables.schema(table).names == (:featurecla, :scalerank, :min_zoom, :geometry)
-      @test nitems(table) == 127
+      @test length(table.geometry) == 127
       @test all(==("Land"), table.featurecla)
       @test all(∈([0, 1]), table.scalerank)
       @test all(∈([0.0, 0.5, 1.0, 1.5]), table.min_zoom)
@@ -160,7 +160,7 @@ savedir = mktempdir()
 
     @testset "GeoJSON" begin
       table = GeoTables.load(joinpath(datadir, "points.geojson"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa String
@@ -169,7 +169,7 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.geojson"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa String
@@ -178,7 +178,7 @@ savedir = mktempdir()
       @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa String
@@ -193,7 +193,7 @@ savedir = mktempdir()
 
     @testset "KML" begin
       table = GeoTables.load(joinpath(datadir, "field.kml"))
-      @test nitems(table) == 4
+      @test length(table.geometry) == 4
       @test table.Name[1] isa String
       @test table.Description[1] isa String
       @test table.geometry isa GeometrySet
@@ -202,7 +202,7 @@ savedir = mktempdir()
 
     @testset "GeoPackage" begin
       table = GeoTables.load(joinpath(datadir, "points.gpkg"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa DateTime
@@ -211,7 +211,7 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa DateTime
@@ -220,7 +220,7 @@ savedir = mktempdir()
       @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
-      @test nitems(table) == 5
+      @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
       @test table.date[1] isa DateTime
@@ -260,12 +260,12 @@ savedir = mktempdir()
 
   @testset "gadm" begin
     table = GeoTables.gadm("SVN", depth=1, ϵ=0.04)
-    @test nitems(table) == 12
+    @test length(table.geometry) == 12
 
     table = GeoTables.gadm("QAT", depth=1, ϵ=0.04)
-    @test nitems(table) == 7
+    @test length(table.geometry) == 7
 
     table = GeoTables.gadm("ISR", depth=1)
-    @test nitems(table) == 7
+    @test length(table.geometry) == 7
   end
 end
