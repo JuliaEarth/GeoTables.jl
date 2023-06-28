@@ -3,34 +3,6 @@
 
 const DRIVER = AG.extensions()
 
-const SUPPORTED = [
-  ".arrow",
-  ".arrows",
-  ".db",
-  ".dbf",
-  ".feather",
-  ".fgb",
-  ".geojson",
-  ".geojsonl",
-  ".geojsons",
-  ".gml",
-  ".gpkg",
-  ".ipc",
-  ".jml",
-  ".kml",
-  ".mbtiles",
-  ".mvt",
-  ".nc",
-  ".parquet",
-  ".pbf",
-  ".pdf",
-  ".shp",
-  ".shz",
-  ".sql",
-  ".sqlite",
-  ".xml"
-]
-
 const AGGEOM = Dict(
   GI.PointTrait() => AG.wkbPoint,
   GI.LineStringTrait() => AG.wkbLineString,
@@ -45,11 +17,6 @@ asstrings(options::Dict{<:AbstractString,<:AbstractString}) =
   [uppercase(String(k)) * "=" * String(v) for (k, v) in options]
 
 function agwrite(fname, geotable; layername="data", options=Dict("geometry_name" => "geometry"))
-  ext = last(splitext(fname))
-  if ext ∉ SUPPORTED
-    error("file format not supported")
-  end
-
   geoms = domain(geotable)
   table = values(geotable)
   rows = Tables.rows(table)
@@ -60,6 +27,7 @@ function agwrite(fname, geotable; layername="data", options=Dict("geometry_name"
     options["geometry_name"] = "geometry"
   end
 
+  ext = last(splitext(fname))
   driver = AG.getdriver(DRIVER[ext])
   trait = GI.geomtrait(first(geoms))
   aggeom = get(AGGEOM, trait, AG.wkbUnknown)

@@ -67,15 +67,17 @@ Optionally, specify keyword arguments accepted by
 
 - `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
-- Other formats via ArchGDAL.jl
+- `*.gpkg` via ArchGDAL.jl
 """
 function save(fname, geotable; kwargs...)
   if endswith(fname, ".shp")
     SHP.write(fname, geotable; kwargs...)
   elseif endswith(fname, ".geojson")
     GJS.write(fname, geotable; kwargs...)
-  else
+  elseif endswith(fname, ".gpkg")
     agwrite(fname, geotable; kwargs...)
+  else
+    error("file format not supported")
   end
 end
 
