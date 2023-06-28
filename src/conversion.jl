@@ -56,6 +56,8 @@ end
 function tochain(geom, is3d::Bool)
   points = topoints(geom, is3d)
   if GI.isclosed(geom)
+    # fix backend issues: https://github.com/JuliaEarth/GeoTables.jl/issues/32
+    first(points) == last(points) || push!(points, first(points))
     Ring(points[begin:(end - 1)])
   else
     Rope(points)
@@ -63,11 +65,13 @@ function tochain(geom, is3d::Bool)
 end
 
 function topolygon(geom, is3d::Bool)
-  outer = tochain(GI.getexterior(geom), is3d)
+  # fix backend issues: https://github.com/JuliaEarth/GeoTables.jl/issues/32
+  toring(g) = close(tochain(g, is3d))
+  outer = toring(GI.getexterior(geom))
   if GI.nhole(geom) == 0
     PolyArea(outer)
   else
-    inners = map(g -> tochain(g, is3d), GI.gethole(geom))
+    inners = map(toring, GI.gethole(geom))
     PolyArea(outer, inners)
   end
 end

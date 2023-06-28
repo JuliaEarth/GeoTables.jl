@@ -158,6 +158,9 @@ savedir = mktempdir()
       # lazy loading
       @test GeoTables.load(joinpath(datadir, "lines.shp")) isa Meshes.MeshData
       @test GeoTables.load(joinpath(datadir, "lines.shp"), lazy=true) isa GeoTables.GeoTable
+
+      # https://github.com/JuliaEarth/GeoTables.jl/issues/32
+      @test GeoTables.load(joinpath(datadir, "issue32.shp")) isa Meshes.MeshData
     end
 
     @testset "GeoJSON" begin
