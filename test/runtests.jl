@@ -312,7 +312,7 @@ savedir = mktempdir()
 
     # @testset "agwrite" begin
     #   table = GeoTables.load(joinpath(datadir, "lines.geojson"), numbertype=Float64)
-    #   for ext in GeoTables.SUPORTED
+    #   for ext in GeoTables.SUPPORTED
     #     GeoTables.agwrite(joinpath(savedir, "ag-lines$ext"), table)
     #     kwargs = ext == ".geojson" ? (; numbertype=Float64) : ()
     #     agtable = GeoTables.load(joinpath(savedir, "ag-lines$ext"); kwargs...)

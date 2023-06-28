@@ -3,7 +3,7 @@
 
 const DRIVER = AG.extensions()
 
-const SUPORTED = [
+const SUPPORTED = [
   ".arrow",
   ".arrows",
   ".db",
@@ -46,7 +46,7 @@ asstrings(options::Dict{<:AbstractString,<:AbstractString}) =
 
 function agwrite(fname, geotable; layername="data", options=Dict("geometry_name" => "geometry"))
   ext = last(splitext(fname))
-  if ext ∉ SUPORTED
+  if ext ∉ SUPPORTED
     error("file format not supported")
   end
 
