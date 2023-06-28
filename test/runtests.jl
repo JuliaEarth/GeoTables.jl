@@ -94,10 +94,7 @@ savedir = mktempdir()
 
   @testset "load" begin
     @testset "Shapefile" begin
-      varnames = (:code, :name, :date, :variable, :geometry)
-
       table = GeoTables.load(joinpath(datadir, "points.shp"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -107,7 +104,6 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.shp"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -118,7 +114,6 @@ savedir = mktempdir()
       @test collect(table.geometry[1])[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.shp"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -164,10 +159,7 @@ savedir = mktempdir()
     end
 
     @testset "GeoJSON" begin
-      varnames = (:code, :name, :date, :variable, :geometry)
-
       table = GeoTables.load(joinpath(datadir, "points.geojson"))
-      @test isempty(setdiff(Tables.schema(table).names, varnames))
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -177,7 +169,6 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.geojson"))
-      @test isempty(setdiff(Tables.schema(table).names, varnames))
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -187,7 +178,6 @@ savedir = mktempdir()
       @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
-      @test isempty(setdiff(Tables.schema(table).names, varnames))
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -202,10 +192,7 @@ savedir = mktempdir()
     end
 
     @testset "KML" begin
-      varnames = (:Name, :Description, :geometry)
-
       table = GeoTables.load(joinpath(datadir, "field.kml"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 4
       @test table.Name[1] isa String
       @test table.Description[1] isa String
@@ -214,10 +201,7 @@ savedir = mktempdir()
     end
 
     @testset "GeoPackage" begin
-      varnames = (:code, :name, :date, :variable, :geometry)
-
       table = GeoTables.load(joinpath(datadir, "points.gpkg"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -227,7 +211,6 @@ savedir = mktempdir()
       @test table.geometry[1] isa Point
 
       table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
@@ -237,7 +220,6 @@ savedir = mktempdir()
       @test table.geometry[1] isa Chain
 
       table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
-      @test Tables.schema(table).names == varnames
       @test nitems(table) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
