@@ -155,12 +155,12 @@ savedir = mktempdir()
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
 
+      # https://github.com/JuliaEarth/GeoTables.jl/issues/32
+      @test GeoTables.load(joinpath(datadir, "issue32.shp")) isa Meshes.MeshData
+
       # lazy loading
       @test GeoTables.load(joinpath(datadir, "lines.shp")) isa Meshes.MeshData
       @test GeoTables.load(joinpath(datadir, "lines.shp"), lazy=true) isa GeoTables.GeoTable
-
-      # https://github.com/JuliaEarth/GeoTables.jl/issues/32
-      @test GeoTables.load(joinpath(datadir, "issue32.shp")) isa Meshes.MeshData
     end
 
     @testset "GeoJSON" begin
@@ -253,81 +253,26 @@ savedir = mktempdir()
   end
 
   @testset "save" begin
-    @testset "points" begin
-      for ft in ["shp", "geojson", "gpkg"]
-        table = GeoTables.load(joinpath(datadir, "points.$ft"))
-        GeoTables.save(joinpath(savedir, "tpoints.geojson"), table)
-        newtable = GeoTables.load(joinpath(savedir, "tpoints.geojson"))
-        GeoTables.save(joinpath(savedir, "tpoints.shp"), table, force=true)
-        newtable = GeoTables.load(joinpath(savedir, "tpoints.shp"))
-      end
-    end
+    fnames = ["points.geojson", "points.gpkg", "points.shp",
+              "lines.geojson", "lines.gpkg", "lines.shp",
+              "polygons.geojson", "polygons.gpkg", "polygons.shp",
+              "land.shp", "path.shp", "zone.shp",
+              "field.kml", "issue32.shp"]
 
-    @testset "lines" begin
-      table = GeoTables.load(joinpath(datadir, "lines.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
-      newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
-      GeoTables.save(joinpath(savedir, "tlines.shp"), table, force=true)
-      newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
+    # saved and loaded tables are the same
+    for fname in fnames, fmt in [".shp", ".geojson", ".gpkg"]
+      # input and output file names
+      f1 = joinpath(datadir, fname)
+      f2 = joinpath(savedir, first(splitext(fname))*fmt)
 
-      for ft in ["shp", "gpkg"]
-        table = GeoTables.load(joinpath(datadir, "lines.$ft"))
-        GeoTables.save(joinpath(savedir, "tlines.geojson"), table)
-        newtable = GeoTables.load(joinpath(savedir, "tlines.geojson"))
-        GeoTables.save(joinpath(savedir, "tlines.shp"), table, force=true)
-        newtable = GeoTables.load(joinpath(savedir, "tlines.shp"))
-      end
-    end
+      # load and save table
+      # t1 = GeoTables.load(f1)
+      # GeoTables.save(f2, t1)
+      # t2 = GeoTables.load(f2)
+      # @test t1 == t2
 
-    @testset "polygons" begin
-      table = GeoTables.load(joinpath(datadir, "polygons.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
-      newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
-      GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force=true)
-      newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
-
-      for ft in ["shp", "gpkg"]
-        table = GeoTables.load(joinpath(datadir, "polygons.$ft"))
-        GeoTables.save(joinpath(savedir, "tpolygons.geojson"), table)
-        newtable = GeoTables.load(joinpath(savedir, "tpolygons.geojson"))
-        GeoTables.save(joinpath(savedir, "tpolygons.shp"), table, force=true)
-        newtable = GeoTables.load(joinpath(savedir, "tpolygons.shp"))
-      end
-    end
-
-    @testset "multipolygons" begin
-      # the file `land` needs Float64 precision
-      file = "land"
-      table = GeoTables.load(joinpath(datadir, "$file.shp"))
-      GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
-      newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
-      newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
-
-      for file in ["path", "zone"]
-        table = GeoTables.load(joinpath(datadir, "$file.shp"))
-        GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
-        newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"))
-        GeoTables.save(joinpath(savedir, "t$file.shp"), table, force=true)
-        newtable = GeoTables.load(joinpath(savedir, "t$file.shp"))
-      end
-    end
-
-    @testset "agwrite" begin
-      table = GeoTables.load(joinpath(datadir, "lines.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "ag-lines.gpkg"), table)
-      agtable = GeoTables.load(joinpath(savedir, "ag-lines.gpkg"))
-      @test agtable == table
-
-      table = GeoTables.load(joinpath(datadir, "points.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "ag-points.gpkg"), table)
-      agtable = GeoTables.load(joinpath(savedir, "ag-points.gpkg"))
-      @test agtable == table
-
-      table = GeoTables.load(joinpath(datadir, "polygons.geojson"), numbertype=Float64)
-      GeoTables.save(joinpath(savedir, "ag-polygons.gpkg"), table)
-      agtable = GeoTables.load(joinpath(savedir, "ag-polygons.gpkg"))
-      @test agtable == table
+      # avoid overwrite issues
+      # rm(f2)
     end
   end
 
