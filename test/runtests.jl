@@ -146,7 +146,7 @@ savedir = mktempdir()
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
 
-      table = GeoTables.load(joinpath(datadir, "ne_110m_land.shp"))
+      table = GeoTables.load(joinpath(datadir, "land.shp"))
       @test Tables.schema(table).names == (:featurecla, :scalerank, :min_zoom, :geometry)
       @test nitems(table) == 127
       @test all(==("Land"), table.featurecla)
@@ -296,8 +296,8 @@ savedir = mktempdir()
     end
 
     @testset "multipolygons" begin
-      # the file `ne_110m_land` needs Float64 precision
-      file = "ne_110m_land"
+      # the file `land` needs Float64 precision
+      file = "land"
       table = GeoTables.load(joinpath(datadir, "$file.shp"))
       GeoTables.save(joinpath(savedir, "t$file.geojson"), table)
       newtable = GeoTables.load(joinpath(savedir, "t$file.geojson"), numbertype=Float64)
