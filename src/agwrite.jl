@@ -3,16 +3,6 @@
 
 const DRIVER = AG.extensions()
 
-const AGGEOM = Dict(
-  GI.PointTrait() => AG.wkbPoint,
-  GI.LineStringTrait() => AG.wkbLineString,
-  GI.LinearRingTrait() => AG.wkbMultiLineString,
-  GI.PolygonTrait() => AG.wkbPolygon,
-  GI.MultiPointTrait() => AG.wkbMultiPoint,
-  GI.MultiLineStringTrait() => AG.wkbMultiLineString,
-  GI.MultiPolygonTrait() => AG.wkbMultiPolygon
-)
-
 asstrings(options::Dict{<:AbstractString,<:AbstractString}) =
   [uppercase(String(k)) * "=" * String(v) for (k, v) in options]
 
@@ -29,8 +19,6 @@ function agwrite(fname, geotable; layername="data", options=Dict("geometry_name"
 
   ext = last(splitext(fname))
   driver = AG.getdriver(DRIVER[ext])
-  trait = GI.geomtrait(first(geoms))
-  aggeom = get(AGGEOM, trait, AG.wkbUnknown)
   optionlist = asstrings(options)
   agtypes = map(schema.types) do type
     try
@@ -42,7 +30,7 @@ function agwrite(fname, geotable; layername="data", options=Dict("geometry_name"
   end
 
   AG.create(fname; driver) do dataset
-    AG.createlayer(; dataset, name=layername, geom=aggeom, options=optionlist) do layer
+    AG.createlayer(; dataset, name=layername, options=optionlist) do layer
       for (name, type) in zip(schema.names, agtypes)
         AG.addfielddefn!(layer, String(name), type)
       end
