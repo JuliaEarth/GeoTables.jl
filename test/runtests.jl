@@ -235,17 +235,28 @@ savedir = mktempdir()
   end
 
   @testset "save" begin
-    fnames = ["points.geojson", "points.gpkg", "points.shp",
-              "lines.geojson", "lines.gpkg", "lines.shp",
-              "polygons.geojson", "polygons.gpkg", "polygons.shp",
-              "land.shp", "path.shp", "zone.shp",
-              "field.kml", "issue32.shp"]
+    fnames = [
+      "points.geojson",
+      "points.gpkg",
+      "points.shp",
+      "lines.geojson",
+      "lines.gpkg",
+      "lines.shp",
+      "polygons.geojson",
+      "polygons.gpkg",
+      "polygons.shp",
+      "land.shp",
+      "path.shp",
+      "zone.shp",
+      "field.kml",
+      "issue32.shp"
+    ]
 
     # saved and loaded tables are the same
     for fname in fnames, fmt in [".shp", ".geojson", ".gpkg"]
       # input and output file names
       f1 = joinpath(datadir, fname)
-      f2 = joinpath(savedir, first(splitext(fname))*fmt)
+      f2 = joinpath(savedir, first(splitext(fname)) * fmt)
 
       # load and save table
       # t1 = GeoTables.load(f1)
