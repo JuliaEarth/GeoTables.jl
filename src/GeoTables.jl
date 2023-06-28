@@ -76,8 +76,6 @@ function save(fname, geotable; kwargs...)
     GJS.write(fname, geotable; kwargs...)
   else # fallback to GDAL
     agwrite(fname, geotable; kwargs...)
-  else
-    error("file format not supported")
   end
 end
 
