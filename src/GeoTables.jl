@@ -17,6 +17,7 @@ import GeoInterface as GI
 
 include("conversion.jl")
 include("geotable.jl")
+include("agwrite.jl")
 
 """
     load(fname, layer=0, lazy=false, kwargs...)
@@ -66,6 +67,7 @@ Optionally, specify keyword arguments accepted by
 
 - `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
+- Other formats via ArchGDAL.jl
 """
 function save(fname, geotable; kwargs...)
   if endswith(fname, ".shp")
@@ -73,7 +75,7 @@ function save(fname, geotable; kwargs...)
   elseif endswith(fname, ".geojson")
     GJS.write(fname, geotable; kwargs...)
   else
-    throw(ErrorException("file format not supported"))
+    agwrite(fname, geotable; kwargs...)
   end
 end
 
