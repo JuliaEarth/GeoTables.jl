@@ -10,8 +10,9 @@ import Tables
 import Meshes
 
 import GADM
-import GeoJSON as GJS
 import Shapefile as SHP
+import GeoJSON as GJS
+import GeoParquet as GPQ
 import ArchGDAL as AG
 import GeoInterface as GI
 
@@ -27,9 +28,8 @@ Load geospatial table from file `fname` and convert the
 
 Optionally, specify the `layer` of geometries to read
 within the file and keyword arguments `kwargs` accepted
-by `Shapefile.Table`, `GeoJSON.read` and `ArchGDAL.read`.
-For example, use `numbertype = Float64` to read `.geojson`
-geometries with `Float64` precision.
+by `Shapefile.Table`, `GeoJSON.read` `GeoParquet.read` and
+`ArchGDAL.read`.
 
 The option `lazy` can be used to convert geometries on
 the fly instead of converting them immediately.
@@ -38,6 +38,7 @@ the fly instead of converting them immediately.
 
 - `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
+- `*.parquet` via GeoParquet.jl
 - Other formats via ArchGDAL.jl
 """
 function load(fname; layer=0, lazy=false, kwargs...)
@@ -46,6 +47,8 @@ function load(fname; layer=0, lazy=false, kwargs...)
   elseif endswith(fname, ".geojson")
     data = Base.read(fname)
     table = GJS.read(data; kwargs...)
+  elseif endswith(fname, ".parquet")
+    table = GPQ.read(fname)
   else # fallback to GDAL
     data = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)
