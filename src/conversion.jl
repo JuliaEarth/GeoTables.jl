@@ -13,6 +13,7 @@ GI.geomtrait(::Point) = GI.PointTrait()
 GI.geomtrait(::Segment) = GI.LineTrait()
 GI.geomtrait(::Chain) = GI.LineStringTrait()
 GI.geomtrait(::Polygon) = GI.PolygonTrait()
+GI.geomtrait(::Multi{<:Any,<:Any,<:Point}) = GI.MultiPointTrait()
 GI.geomtrait(::Multi{<:Any,<:Any,<:Chain}) = GI.MultiLineStringTrait()
 GI.geomtrait(::Multi{<:Any,<:Any,<:Polygon}) = GI.MultiPolygonTrait()
 
@@ -32,9 +33,9 @@ GI.ncoord(::GI.PolygonTrait, p::Polygon) = embeddim(p)
 GI.ngeom(::GI.PolygonTrait, p::Polygon) = length(rings(p))
 GI.getgeom(::GI.PolygonTrait, p::Polygon, i) = rings(p)[i]
 
-GI.ncoord(::Any, m::Multi) = embeddim(m)
-GI.ngeom(::Any, m::Multi) = length(collect(m))
-GI.getgeom(::Any, m::Multi, i) = collect(m)[i]
+GI.ncoord(::GI.AbstractGeometryTrait, m::Multi) = embeddim(m)
+GI.ngeom(::GI.AbstractGeometryTrait, m::Multi) = length(collect(m))
+GI.getgeom(::GI.AbstractGeometryTrait, m::Multi, i) = collect(m)[i]
 
 GI.isfeaturecollection(::Data) = true
 GI.trait(::Data) = GI.FeatureCollectionTrait()
