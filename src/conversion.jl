@@ -85,7 +85,7 @@ function GI.convert(::Type{Point}, ::GI.PointTrait, geom)
   end
 end
 
-GI.convert(::Type{Segment}, ::GI.LineTrait, geom) = Segment(topoints(geom, GI.is3d(geom)))
+GI.convert(::Type{Segment}, ::GI.LineTrait, geom) = Segment(topoints(geom, GI.is3d(geom))...)
 
 GI.convert(::Type{Chain}, ::GI.LineStringTrait, geom) = tochain(geom, GI.is3d(geom))
 

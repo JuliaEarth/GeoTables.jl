@@ -16,11 +16,11 @@ savedir = mktempdir()
 
 @testset "GeoTables.jl" begin
   @testset "convert" begin
-    points = Point2[(0, 0), (0.5, 2), (2.2, 2.2)]
-    outer = Point2[(0, 0), (0.5, 2), (2.2, 2.2), (0, 0)]
+    points = Point2[(0, 0), (2.2, 2.2), (0.5, 2)]
+    outer = Point2[(0, 0), (2.2, 2.2), (0.5, 2), (0, 0)]
 
     # GI functions
-    @test GI.ngeom(Segment(points[1:2])) == 2
+    @test GI.ngeom(Segment(points[1], points[2])) == 2
     @test GI.ngeom(Rope(points)) == 3
     @test GI.ngeom(Ring(points)) == 4
     @test GI.ngeom(PolyArea(points)) == 1
@@ -29,8 +29,8 @@ savedir = mktempdir()
     @test GI.ngeom(Multi([PolyArea(points), PolyArea(points)])) == 2
 
     # Shapefile.jl
-    ps = [SHP.Point(0, 0), SHP.Point(0.5, 2), SHP.Point(2.2, 2.2)]
-    exterior = [SHP.Point(0, 0), SHP.Point(0.5, 2), SHP.Point(2.2, 2.2), SHP.Point(0, 0)]
+    ps = [SHP.Point(0, 0), SHP.Point(2.2, 2.2), SHP.Point(0.5, 2)]
+    exterior = [SHP.Point(0, 0), SHP.Point(2.2, 2.2), SHP.Point(0.5, 2), SHP.Point(0, 0)]
     box = SHP.Rect(0.0, 0.0, 2.2, 2.2)
     point = SHP.Point(1.0, 1.0)
     chain = SHP.LineString{SHP.Point}(view(ps, 1:3))
@@ -50,8 +50,8 @@ savedir = mktempdir()
     @test GeoTables.geom2meshes(chain) == Ring((2.2, 2.2))
 
     # ArchGDAL.jl
-    ps = [(0, 0), (0.5, 2), (2.2, 2.2)]
-    outer = [(0, 0), (0.5, 2), (2.2, 2.2), (0, 0)]
+    ps = [(0, 0), (2.2, 2.2), (0.5, 2)]
+    outer = [(0, 0), (2.2, 2.2), (0.5, 2), (0, 0)]
     point = AG.createpoint(1.0, 1.0)
     chain = AG.createlinestring(ps)
     poly = AG.createpolygon(outer)
@@ -70,16 +70,16 @@ savedir = mktempdir()
     @test GeoTables.geom2meshes(chain) == Ring((2.2, 2.2))
 
     # GeoJSON.jl
-    points = Point2f[(0, 0), (0.5, 2), (2.2, 2.2)]
-    outer = Point2f[(0, 0), (0.5, 2), (2.2, 2.2)]
+    points = Point2f[(0, 0), (2.2, 2.2), (0.5, 2)]
+    outer = Point2f[(0, 0), (2.2, 2.2), (0.5, 2)]
     point = GJS.read("""{"type":"Point","coordinates":[1,1]}""")
-    chain = GJS.read("""{"type":"LineString","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
-    poly = GJS.read("""{"type":"Polygon","coordinates":[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]}""")
-    multipoint = GJS.read("""{"type":"MultiPoint","coordinates":[[0,0],[0.5,2],[2.2,2.2]]}""")
+    chain = GJS.read("""{"type":"LineString","coordinates":[[0,0],[2.2,2.2],[0.5,2]]}""")
+    poly = GJS.read("""{"type":"Polygon","coordinates":[[[0,0],[2.2,2.2],[0.5,2],[0,0]]]}""")
+    multipoint = GJS.read("""{"type":"MultiPoint","coordinates":[[0,0],[2.2,2.2],[0.5,2]]}""")
     multichain =
-      GJS.read("""{"type":"MultiLineString","coordinates":[[[0,0],[0.5,2],[2.2,2.2]],[[0,0],[0.5,2],[2.2,2.2]]]}""")
+      GJS.read("""{"type":"MultiLineString","coordinates":[[[0,0],[2.2,2.2],[0.5,2]],[[0,0],[2.2,2.2],[0.5,2]]]}""")
     multipoly = GJS.read(
-      """{"type":"MultiPolygon","coordinates":[[[[0,0],[0.5,2],[2.2,2.2],[0,0]]],[[[0,0],[0.5,2],[2.2,2.2],[0,0]]]]}"""
+      """{"type":"MultiPolygon","coordinates":[[[[0,0],[2.2,2.2],[0.5,2],[0,0]]],[[[0,0],[2.2,2.2],[0.5,2],[0,0]]]]}"""
     )
     @test GeoTables.geom2meshes(point) == Point2f(1.0, 1.0)
     @test GeoTables.geom2meshes(chain) == Rope(points)
@@ -249,7 +249,8 @@ savedir = mktempdir()
       "path.shp",
       "zone.shp",
       "field.kml",
-      "issue32.shp"
+      "issue32.shp",
+      "example.parquet"
     ]
 
     # saved and loaded tables are the same
