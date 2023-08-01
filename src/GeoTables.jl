@@ -12,7 +12,6 @@ import Meshes
 import GADM
 import Shapefile as SHP
 import GeoJSON as GJS
-import GeoParquet as GPQ
 import ArchGDAL as AG
 import GeoInterface as GI
 
@@ -38,7 +37,6 @@ the fly instead of converting them immediately.
 
 - `*.shp` via Shapefile.jl
 - `*.geojson` via GeoJSON.jl
-- `*.parquet` via GeoParquet.jl
 - Other formats via ArchGDAL.jl
 """
 function load(fname; layer=0, lazy=false, kwargs...)
@@ -47,8 +45,6 @@ function load(fname; layer=0, lazy=false, kwargs...)
   elseif endswith(fname, ".geojson")
     data = Base.read(fname)
     table = GJS.read(data; kwargs...)
-  elseif endswith(fname, ".parquet")
-    table = GPQ.read(fname)
   else # fallback to GDAL
     data = AG.read(fname; kwargs...)
     table = AG.getlayer(data, layer)

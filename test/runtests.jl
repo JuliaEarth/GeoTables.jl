@@ -249,8 +249,7 @@ savedir = mktempdir()
       "path.shp",
       "zone.shp",
       "field.kml",
-      "issue32.shp",
-      "example.parquet"
+      "issue32.shp"
     ]
 
     # saved and loaded tables are the same
