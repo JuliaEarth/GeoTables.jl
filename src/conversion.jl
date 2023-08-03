@@ -58,8 +58,10 @@ function tochain(geom, is3d::Bool)
   points = topoints(geom, is3d)
   if GI.isclosed(geom)
     # fix backend issues: https://github.com/JuliaEarth/GeoTables.jl/issues/32
-    first(points) == last(points) || push!(points, first(points))
-    Ring(points[begin:(end - 1)])
+    while first(points) == last(points) && length(points) ≥ 2
+      pop!(points)
+    end
+    Ring(points)
   else
     Rope(points)
   end
