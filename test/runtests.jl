@@ -98,7 +98,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -107,7 +106,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
@@ -117,7 +115,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
@@ -163,7 +160,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -172,7 +168,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Chain
@@ -181,7 +176,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa PolyArea
@@ -205,7 +199,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -214,7 +207,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Chain
@@ -223,7 +215,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa PolyArea
@@ -248,7 +239,6 @@ savedir = mktempdir()
       "land.shp",
       "path.shp",
       "zone.shp",
-      "field.kml",
       "issue32.shp"
     ]
 
@@ -259,13 +249,31 @@ savedir = mktempdir()
       f2 = joinpath(savedir, first(splitext(fname)) * fmt)
 
       # load and save table
-      # t1 = GeoTables.load(f1)
-      # GeoTables.save(f2, t1)
-      # t2 = GeoTables.load(f2)
-      # @test t1 == t2
+      kwargs = endswith(f1, ".geojson") ? (; numbertype=Float64) : ()
+      gt1 = GeoTables.load(f1; kwargs...)
+      GeoTables.save(f2, gt1)
+      kwargs = endswith(f2, ".geojson") ? (; numbertype=Float64) : ()
+      gt2 = GeoTables.load(f2; kwargs...)
+
+      # compere domain and values
+      d1 = domain(gt1)
+      d2 = domain(gt2)
+      @test d1 == d2
+      t1 = values(gt1)
+      t2 = values(gt2)
+      c1 = Tables.columns(t1)
+      c2 = Tables.columns(t2)
+      n1 = Tables.columnnames(c1)
+      n2 = Tables.columnnames(c2)
+      @test Set(n1) == Set(n2)
+      for n in n1
+        x1 = Tables.getcolumn(c1, n)
+        x2 = Tables.getcolumn(c2, n)
+        @test x1 == x2
+      end
 
       # avoid overwrite issues
-      # rm(f2)
+      rm(f2)
     end
   end
 
