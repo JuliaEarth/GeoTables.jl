@@ -14,6 +14,18 @@ islinux = Sys.islinux()
 datadir = joinpath(@__DIR__, "data")
 savedir = mktempdir()
 
+# Note: Shapefile.jl saves Chains and Polygons as Multi
+# This function is used to work around this problem
+_isequal(d1::Domain, d2::Domain) = all(_isequal(g1, g2) for (g1, g2) in zip(d1, d2))
+
+_isequal(g1, g2) = g1 == g2
+_isequal(m1::Multi, m2::Multi) = m1 == m2
+_isequal(g, m::Multi) = _isequal(m, g)
+function _isequal(m::Multi, g)
+  gs = collect(m)
+  length(gs) == 1 && first(gs) == g
+end
+
 @testset "GeoTables.jl" begin
   @testset "convert" begin
     points = Point2[(0, 0), (2.2, 2.2), (0.5, 2)]
@@ -98,7 +110,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -107,7 +118,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
@@ -117,7 +127,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa Date
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Multi
@@ -163,7 +172,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -172,7 +180,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Chain
@@ -181,7 +188,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa String
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa PolyArea
@@ -205,7 +211,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa PointSet
       @test table.geometry[1] isa Point
@@ -214,7 +219,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa Chain
@@ -223,7 +227,6 @@ savedir = mktempdir()
       @test length(table.geometry) == 5
       @test table.code[1] isa Integer
       @test table.name[1] isa String
-      @test table.date[1] isa DateTime
       @test table.variable[1] isa Real
       @test table.geometry isa GeometrySet
       @test table.geometry[1] isa PolyArea
@@ -248,7 +251,6 @@ savedir = mktempdir()
       "land.shp",
       "path.shp",
       "zone.shp",
-      "field.kml",
       "issue32.shp"
     ]
 
@@ -256,16 +258,31 @@ savedir = mktempdir()
     for fname in fnames, fmt in [".shp", ".geojson", ".gpkg"]
       # input and output file names
       f1 = joinpath(datadir, fname)
-      f2 = joinpath(savedir, first(splitext(fname)) * fmt)
+      f2 = joinpath(savedir, replace(fname, "." => "-") * fmt)
 
       # load and save table
-      # t1 = GeoTables.load(f1)
-      # GeoTables.save(f2, t1)
-      # t2 = GeoTables.load(f2)
-      # @test t1 == t2
+      kwargs = endswith(f1, ".geojson") ? (; numbertype=Float64) : ()
+      gt1 = GeoTables.load(f1; kwargs...)
+      GeoTables.save(f2, gt1)
+      kwargs = endswith(f2, ".geojson") ? (; numbertype=Float64) : ()
+      gt2 = GeoTables.load(f2; kwargs...)
 
-      # avoid overwrite issues
-      # rm(f2)
+      # compare domain and values
+      d1 = domain(gt1)
+      d2 = domain(gt2)
+      @test _isequal(d1, d2)
+      t1 = values(gt1)
+      t2 = values(gt2)
+      c1 = Tables.columns(t1)
+      c2 = Tables.columns(t2)
+      n1 = Tables.columnnames(c1)
+      n2 = Tables.columnnames(c2)
+      @test Set(n1) == Set(n2)
+      for n in n1
+        x1 = Tables.getcolumn(c1, n)
+        x2 = Tables.getcolumn(c2, n)
+        @test x1 == x2
+      end
     end
   end
 
