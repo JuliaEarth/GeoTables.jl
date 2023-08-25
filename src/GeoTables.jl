@@ -100,4 +100,6 @@ function gadm(country, subregions...; depth=0, ϵ=nothing, min=3, max=typemax(In
   meshdata(𝒩, etable=𝒯)
 end
 
+include("precompile.jl")
+
 end
