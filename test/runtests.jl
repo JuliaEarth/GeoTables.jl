@@ -260,6 +260,9 @@ end
       f1 = joinpath(datadir, fname)
       f2 = joinpath(savedir, first(splitext(fname)) * fmt)
 
+      # avoid overwrite issues
+      isfile(f2) && rm(f2)
+
       # load and save table
       kwargs = endswith(f1, ".geojson") ? (; numbertype=Float64) : ()
       gt1 = GeoTables.load(f1; kwargs...)
@@ -283,9 +286,6 @@ end
         x2 = Tables.getcolumn(c2, n)
         @test x1 == x2
       end
-
-      # avoid overwrite issues
-      rm(f2)
     end
   end
 
