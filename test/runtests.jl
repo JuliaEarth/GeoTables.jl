@@ -20,8 +20,8 @@ _isequal(d1::Domain, d2::Domain) = all(_isequal(g1, g2) for (g1, g2) in zip(d1, 
 
 _isequal(g1, g2) = g1 == g2
 _isequal(m1::Multi, m2::Multi) = m1 == m2
-_isequal(m::Multi, g) = _isequal(g, m)
-function _isequal(g, m::Multi)
+_isequal(g, m::Multi) = _isequal(m, g)
+function _isequal(m::Multi, g)
   gs = collect(m)
   length(gs) == 1 && first(gs) == g
 end
