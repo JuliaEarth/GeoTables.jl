@@ -14,6 +14,18 @@ islinux = Sys.islinux()
 datadir = joinpath(@__DIR__, "data")
 savedir = mktempdir()
 
+# Note: Shapefile.jl saves Chains and Polygons as Multi
+# This function is used to work around this problem
+_isequal(d1::Domain, d2::Domain) = all(_isequal(g1, g2) for (g1, g2) in zip(d1, d2))
+
+_isequal(g1, g2) = g1 == g2
+_isequal(m1::Multi, m2::Multi) = m1 == m2
+_isequal(m::Multi, g) = _isequal(g, m)
+function _isequal(g, m::Multi)
+  gs = collect(m)
+  length(gs) == 1 && first(gs) == g
+end
+
 @testset "GeoTables.jl" begin
   @testset "convert" begin
     points = Point2[(0, 0), (2.2, 2.2), (0.5, 2)]
@@ -258,7 +270,7 @@ savedir = mktempdir()
       # compere domain and values
       d1 = domain(gt1)
       d2 = domain(gt2)
-      @test d1 == d2
+      @test _isequal(d1, d2)
       t1 = values(gt1)
       t2 = values(gt2)
       c1 = Tables.columns(t1)
