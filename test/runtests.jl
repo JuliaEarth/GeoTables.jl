@@ -258,13 +258,12 @@ end
     for fname in fnames, fmt in [".shp", ".geojson", ".gpkg"]
       # input and output file names
       f1 = joinpath(datadir, fname)
-      f2 = joinpath(savedir, first(splitext(fname)) * fmt)
+      f2 = joinpath(savedir, replace(fname, "." => "-") * fmt)
 
       # load and save table
       kwargs = endswith(f1, ".geojson") ? (; numbertype=Float64) : ()
       gt1 = GeoTables.load(f1; kwargs...)
-      kwargs = endswith(f2, ".shp") ? (; force=true) : ()
-      GeoTables.save(f2, gt1; kwargs...)
+      GeoTables.save(f2, gt1)
       kwargs = endswith(f2, ".geojson") ? (; numbertype=Float64) : ()
       gt2 = GeoTables.load(f2; kwargs...)
 
