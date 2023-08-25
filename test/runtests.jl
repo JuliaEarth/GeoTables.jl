@@ -267,7 +267,7 @@ end
       kwargs = endswith(f2, ".geojson") ? (; numbertype=Float64) : ()
       gt2 = GeoTables.load(f2; kwargs...)
 
-      # compere domain and values
+      # compare domain and values
       d1 = domain(gt1)
       d2 = domain(gt2)
       @test _isequal(d1, d2)
