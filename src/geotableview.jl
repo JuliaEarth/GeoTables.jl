@@ -17,9 +17,9 @@ GeoTableView(v::GeoTableView, inds) = GeoTableView(getgeotable(v), getinds(v)[in
 
 unview(v::GeoTableView) = getgeotable(v), getinds(v)
 
-# ---------------
-# DATA INTERFACE
-# ---------------
+# ---------------------------
+# ABSTRACTGEOTABLE INTERFACE
+# ---------------------------
 
 function domain(v::GeoTableView)
   geotable = getgeotable(v)
