@@ -1,4 +1,5 @@
 using GeoTables
+using LinearAlgebra
 using Tables
 using Meshes
 using Test
@@ -12,11 +13,11 @@ islinux = Sys.islinux()
 
 include("dummy.jl")
 
+dummydata(domain, table) = DummyGeoTable(domain, Dict(paramdim(domain) => table))
+dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
+
 @testset "GeoTables.jl" begin
   @testset "AbstractGeoTable" begin
-    dummydata(domain, table) = DummyGeoTable(domain, Dict(paramdim(domain) => table))
-    dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
-
     for (dummy, DummyType) in [(dummydata, DummyGeoTable), (dummymeta, GeoTable)]
       # fallback constructor with spatial table
       dom = CartesianGrid(2, 2)
@@ -148,6 +149,71 @@ include("dummy.jl")
       @test sprint(show, data) == "4 $DummyType"
       @test sprint(show, MIME"text/plain"(), data) ==
             "2×2 CartesianGrid{2,Float64}\n  variables (rank 2)\n    └─a (Int64)\n    └─b (Int64)"
+    end
+  end
+
+  @testset "partitioning" begin
+    data = geotable(CartesianGrid(10, 10), etable=(a=rand(100), b=rand(100)))
+    for method in [
+      UniformPartition(2),
+      FractionPartition(0.5),
+      BlockPartition(2),
+      BallPartition(2),
+      BisectPointPartition(Vec(1, 1), Point(5, 5)),
+      BisectFractionPartition(Vec(1, 1), 0.5),
+      PlanePartition(Vec(1, 1)),
+      DirectionPartition(Vec(1, 1)),
+      PredicatePartition((i, j) -> iseven(i + j)),
+      SpatialPredicatePartition((x, y) -> norm(x + y) < 5),
+      ProductPartition(UniformPartition(2), UniformPartition(2)),
+      HierarchicalPartition(UniformPartition(2), UniformPartition(2))
+    ]
+      Π = partition(data, method)
+      inds = reduce(vcat, indices(Π))
+      @test sort(inds) == 1:100
+    end
+  end
+
+  @testset "view" begin
+    for dummy in [dummydata, dummymeta]
+      g = CartesianGrid(10, 10)
+      t = (a=1:100, b=1:100)
+      d = dummy(g, t)
+      v = view(d, 1:3)
+      @test unview(v) == (d, 1:3)
+      @test unview(d) == (d, 1:100)
+
+      g = CartesianGrid(10, 10)
+      t = (a=1:100, b=1:100)
+      d = dummy(g, t)
+      b = Box(Point(1, 1), Point(5, 5))
+      v = view(d, b)
+      @test domain(v) == CartesianGrid(Point(0, 0), Point(6, 6), dims=(6, 6))
+      x = [collect(1:6); collect(11:16); collect(21:26); collect(31:36); collect(41:46); collect(51:56)]
+      @test Tables.columntable(values(v)) == (a=x, b=x)
+
+      p = PointSet(collect(vertices(g)))
+      d = dummy(p, t)
+      v = view(d, b)
+      dd = domain(v)
+      @test centroid(dd, 1) == Point(1, 1)
+      @test centroid(dd, nelements(dd)) == Point(5, 5)
+      tt = Tables.columntable(values(v))
+      @test tt == (
+        a=[13, 14, 15, 16, 17, 24, 25, 26, 27, 28, 35, 36, 37, 38, 39, 46, 47, 48, 49, 50, 57, 58, 59, 60, 61],
+        b=[13, 14, 15, 16, 17, 24, 25, 26, 27, 28, 35, 36, 37, 38, 39, 46, 47, 48, 49, 50, 57, 58, 59, 60, 61]
+      )
+
+      dom = CartesianGrid(2, 2)
+      dat = dummy(dom, (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      v = view(dat, 2:4)
+      @test domain(v) == view(dom, 2:4)
+      @test Tables.columntable(values(v)) == (a=[2, 3, 4], b=[6, 7, 8])
+      @test centroid(domain(v), 1) == Point(1.5, 0.5)
+      @test centroid(domain(v), 2) == Point(0.5, 1.5)
+      @test centroid(domain(v), 3) == Point(1.5, 1.5)
+      @test v.a == v."a" == [2, 3, 4]
+      @test v.b == v."b" == [6, 7, 8]
     end
   end
 end

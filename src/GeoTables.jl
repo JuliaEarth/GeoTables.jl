@@ -9,7 +9,7 @@ using Tables
 using Random
 
 import Base: values
-import Meshes: unview
+import Meshes: unview, partsubsets, nitems
 import DataAPI: nrow, ncol
 import StatsBase: sample
 

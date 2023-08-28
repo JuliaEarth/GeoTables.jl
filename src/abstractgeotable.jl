@@ -82,6 +82,8 @@ function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable
   return true
 end
 
+nitems(geotable::AbstractGeoTable) = nrow(geotable)
+
 nrow(geotable::AbstractGeoTable) = nelements(domain(geotable))
 
 ncol(geotable::AbstractGeoTable) = length(Tables.columnnames(Tables.columns(values(geotable)))) + 1
@@ -338,6 +340,13 @@ asarray(geotable::AbstractGeoTable, var::AbstractString) = asarray(geotable, Sym
 
 sample(rng::AbstractRNG, geotable::AbstractGeoTable, method::DiscreteSamplingMethod) =
   view(geotable, sampleinds(rng, domain(geotable), method))
+
+#--------------
+# PARTITIONING
+#--------------
+
+partsubsets(rng::AbstractRNG, geotable::AbstractGeoTable, method::PartitionMethod) =
+  partsubsets(rng, domain(geotable), method)
 
 # -----------
 # IO METHODS
