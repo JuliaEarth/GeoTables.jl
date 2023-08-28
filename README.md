@@ -2,7 +2,7 @@
 
 [![][build-img]][build-url] [![][codecov-img]][codecov-url]
 
-to-do
+Geospatial tables compatible with the GeoStats.jl framework.
 
 ## Asking for help
 
