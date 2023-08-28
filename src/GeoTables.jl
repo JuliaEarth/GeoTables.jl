@@ -9,4 +9,6 @@ using Tables
 
 # to-do
 
+include("deprecations.jl")
+
 end
