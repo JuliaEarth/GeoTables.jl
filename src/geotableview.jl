@@ -12,7 +12,7 @@ end
 getgeotable(v::GeoTableView) = getfield(v, :geotable)
 getinds(v::GeoTableView) = getfield(v, :inds)
 
-# specialize view to avoid infinite loops
+# specialize constructor to avoid infinite loops
 GeoTableView(v::GeoTableView, inds) = GeoTableView(getgeotable(v), getinds(v)[inds])
 
 unview(v::GeoTableView) = getgeotable(v), getinds(v)
