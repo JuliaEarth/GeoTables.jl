@@ -86,6 +86,25 @@ nrow(geotable::AbstractGeoTable) = nelements(domain(geotable))
 
 ncol(geotable::AbstractGeoTable) = length(Tables.columnnames(Tables.columns(values(geotable)))) + 1
 
+Base.view(geotable::AbstractGeoTable, inds) = GeoTableView(geotable, inds)
+
+function Base.view(geotable::AbstractGeoTable, geometry::Geometry)
+  dom = domain(geotable)
+  tab = values(geotable)
+
+  # retrieve subdomain
+  inds = indices(dom, geometry)
+  subdom = view(dom, inds)
+
+  # retrieve subtable
+  subtab = Tables.subset(tab, inds)
+
+  # data table for elements
+  vals = Dict(paramdim(dom) => subtab)
+
+  constructor(geotable)(subdom, vals)
+end
+
 # -----------------
 # TABLES INTERFACE
 # -----------------

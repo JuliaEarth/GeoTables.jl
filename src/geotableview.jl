@@ -15,25 +15,6 @@ getinds(v::GeoTableView) = getfield(v, :inds)
 # specialize view to avoid infinite loops
 GeoTableView(v::GeoTableView, inds) = GeoTableView(getgeotable(v), getinds(v)[inds])
 
-Base.view(geotable::AbstractGeoTable, inds) = GeoTableView(geotable, inds)
-
-function Base.view(geotable::AbstractGeoTable, geometry::Geometry)
-  dom = domain(geotable)
-  tab = values(geotable)
-
-  # retrieve subdomain
-  inds = indices(dom, geometry)
-  subdom = view(dom, inds)
-
-  # retrieve subtable
-  subtab = Tables.subset(tab, inds)
-
-  # data table for elements
-  vals = Dict(paramdim(dom) => subtab)
-
-  constructor(geotable)(subdom, vals)
-end
-
 unview(v::GeoTableView) = getgeotable(v), getinds(v)
 
 # ---------------
