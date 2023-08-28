@@ -350,17 +350,17 @@ function Base.show(io::IO, geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  l = []
+  lines = String[]
   dom = domain(geotable)
   for rank in 0:paramdim(dom)
     tab = values(geotable, rank)
     if !isnothing(tab)
       sche = Tables.schema(tab)
       vars = zip(sche.names, sche.types)
-      push!(l, "  variables (rank $rank)")
-      append!(l, ["    └─$var ($V)" for (var, V) in vars])
+      push!(lines, "  variables (rank $rank)")
+      append!(lines, ["    └─$var ($V)" for (var, V) in vars])
     end
   end
   println(io, dom)
-  print(io, join(l, "\n"))
+  print(io, join(lines, "\n"))
 end
