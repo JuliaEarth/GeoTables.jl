@@ -345,13 +345,8 @@ sample(rng::AbstractRNG, geotable::AbstractGeoTable, method::DiscreteSamplingMet
 # PARTITIONING
 #--------------
 
-partsubsets(rng::AbstractRNG, geotable::AbstractGeoTable, method::PartitionMethod) =
-  partsubsets(rng, domain(geotable), method)
-
-function partition(rng::AbstractRNG, geotable::AbstractGeoTable, method::ProductPartition)
-  p = partition(rng, domain(geotable), method)
-  Partition(geotable, indices(p), metadata(p))
-end
+partitioninds(rng::AbstractRNG, geotable::AbstractGeoTable, method::PartitionMethod) =
+  partitioninds(rng, domain(geotable), method)
 
 # -----------
 # IO METHODS
