@@ -13,6 +13,11 @@ import Meshes: partitioninds, unview
 import DataAPI: nrow, ncol
 import StatsBase: sample
 
+include("abstractgeotable.jl")
+include("geotableview.jl")
+include("geotable.jl")
+include("deprecations.jl")
+
 export
   # AbstractGeoTable interface
   AbstractGeoTable,
@@ -34,10 +39,5 @@ export
 
   # utilities
   asarray
-
-include("abstractgeotable.jl")
-include("geotableview.jl")
-include("geotable.jl")
-include("deprecations.jl")
 
 end
