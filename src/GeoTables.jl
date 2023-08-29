@@ -13,9 +13,27 @@ import Meshes: partition, partsubsets, unview
 import DataAPI: nrow, ncol
 import StatsBase: sample
 
-export AbstractGeoTable, domain, values, constructor
-export nrow, ncol, asarray, unview
-export GeoTable, geotable
+export
+  # AbstractGeoTable interface
+  AbstractGeoTable,
+  domain,
+  # Base.values,
+  constructor,
+
+  # implementation
+  GeoTable,
+  geotable,
+
+  # viewing
+  # Base.view,
+  unview,
+
+  # DataAPI interface
+  nrow,
+  ncol,
+
+  # utilities
+  asarray
 
 include("abstractgeotable.jl")
 include("geotableview.jl")
