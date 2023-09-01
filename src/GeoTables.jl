@@ -8,7 +8,6 @@ using Meshes
 using Tables
 using Random
 
-import Base: values
 import Meshes: unview
 import DataAPI: nrow, ncol
 

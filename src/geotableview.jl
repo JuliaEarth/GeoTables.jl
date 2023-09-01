@@ -27,7 +27,7 @@ function domain(v::GeoTableView)
   view(domain(geotable), inds)
 end
 
-function values(v::GeoTableView, rank=nothing)
+function Base.values(v::GeoTableView, rank=nothing)
   geotable = getgeotable(v)
   inds = getinds(v)
   R = paramdim(domain(geotable))
