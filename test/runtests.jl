@@ -1,299 +1,219 @@
 using GeoTables
+using LinearAlgebra
 using Tables
 using Meshes
-using Test, Random
-using Dates
-import GeoInterface as GI
-import Shapefile as SHP
-import ArchGDAL as AG
-import GeoJSON as GJS
+using Test
+
+# temporary solution
+using GeoTables: domain, asarray
 
 # environment settings
 isCI = "CI" ∈ keys(ENV)
 islinux = Sys.islinux()
-datadir = joinpath(@__DIR__, "data")
-savedir = mktempdir()
 
-# Note: Shapefile.jl saves Chains and Polygons as Multi
-# This function is used to work around this problem
-_isequal(d1::Domain, d2::Domain) = all(_isequal(g1, g2) for (g1, g2) in zip(d1, d2))
+include("dummy.jl")
 
-_isequal(g1, g2) = g1 == g2
-_isequal(m1::Multi, m2::Multi) = m1 == m2
-_isequal(g, m::Multi) = _isequal(m, g)
-function _isequal(m::Multi, g)
-  gs = collect(m)
-  length(gs) == 1 && first(gs) == g
-end
+dummydata(domain, table) = DummyGeoTable(domain, Dict(paramdim(domain) => table))
+dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
 
 @testset "GeoTables.jl" begin
-  @testset "convert" begin
-    points = Point2[(0, 0), (2.2, 2.2), (0.5, 2)]
-    outer = Point2[(0, 0), (2.2, 2.2), (0.5, 2), (0, 0)]
+  @testset "AbstractGeoTable" begin
+    for (dummy, DummyType) in [(dummydata, DummyGeoTable), (dummymeta, GeoTable)]
+      # fallback constructor with spatial table
+      dom = CartesianGrid(2, 2)
+      tab = dummydata(dom, (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      dat = DummyType(tab)
+      @test domain(dat) == domain(tab)
+      @test values(dat) == values(tab)
 
-    # GI functions
-    @test GI.ngeom(Segment(points[1], points[2])) == 2
-    @test GI.ngeom(Rope(points)) == 3
-    @test GI.ngeom(Ring(points)) == 4
-    @test GI.ngeom(PolyArea(points)) == 1
-    @test GI.ngeom(Multi(points)) == 3
-    @test GI.ngeom(Multi([Rope(points), Rope(points)])) == 2
-    @test GI.ngeom(Multi([PolyArea(points), PolyArea(points)])) == 2
+      # equality of data sets
+      data₁ = dummy(CartesianGrid(2, 2), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      data₂ = dummy(CartesianGrid(2, 2), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      data₃ = dummy(PointSet(rand(Point2, 4)), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      @test data₁ == data₂
+      @test data₁ != data₃
+      @test data₂ != data₃
 
-    # Shapefile.jl
-    ps = [SHP.Point(0, 0), SHP.Point(2.2, 2.2), SHP.Point(0.5, 2)]
-    exterior = [SHP.Point(0, 0), SHP.Point(2.2, 2.2), SHP.Point(0.5, 2), SHP.Point(0, 0)]
-    box = SHP.Rect(0.0, 0.0, 2.2, 2.2)
-    point = SHP.Point(1.0, 1.0)
-    chain = SHP.LineString{SHP.Point}(view(ps, 1:3))
-    poly = SHP.SubPolygon([SHP.LinearRing{SHP.Point}(view(exterior, 1:4))])
-    multipoint = SHP.MultiPoint(box, ps)
-    multichain = SHP.Polyline(box, [0, 3], repeat(ps, 2))
-    multipoly = SHP.Polygon(box, [0, 4], repeat(exterior, 2))
-    @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Rope(points)
-    @test GeoTables.geom2meshes(poly) == PolyArea(points)
-    @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
-    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(points), PolyArea(points)])
-    # degenerate chain with 2 equal points
-    ps = [SHP.Point(2.2, 2.2), SHP.Point(2.2, 2.2)]
-    chain = SHP.LineString{SHP.Point}(view(ps, 1:2))
-    @test GeoTables.geom2meshes(chain) == Ring((2.2, 2.2))
+      # equality with missing data
+      data₁ = dummy(PointSet([1 2 3; 4 5 6]), (a=[1, missing, 3], b=[3, 2, 1]))
+      data₂ = dummy(PointSet([1 2 3; 4 5 6]), (a=[1, missing, 3], b=[3, 2, 1]))
+      @test data₁ == data₂
 
-    # ArchGDAL.jl
-    ps = [(0, 0), (2.2, 2.2), (0.5, 2)]
-    outer = [(0, 0), (2.2, 2.2), (0.5, 2), (0, 0)]
-    point = AG.createpoint(1.0, 1.0)
-    chain = AG.createlinestring(ps)
-    poly = AG.createpolygon(outer)
-    multipoint = AG.createmultipoint(ps)
-    multichain = AG.createmultilinestring([ps, ps])
-    multipoly = AG.createmultipolygon([[outer], [outer]])
-    polyarea = PolyArea(outer[begin:(end - 1)])
-    @test GeoTables.geom2meshes(point) == Point(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Rope(points)
-    @test GeoTables.geom2meshes(poly) == polyarea
-    @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
-    @test GeoTables.geom2meshes(multipoly) == Multi([polyarea, polyarea])
-    # degenerate chain with 2 equal points
-    chain = AG.createlinestring([(2.2, 2.2), (2.2, 2.2)])
-    @test GeoTables.geom2meshes(chain) == Ring((2.2, 2.2))
+      # Tables interface
+      dom = CartesianGrid(2, 2)
+      dat = dummy(dom, (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      @test Tables.istable(dat)
+      sch = Tables.schema(dat)
+      @test sch.names == (:a, :b, :geometry)
+      @test sch.types == (Int, Int, Quadrangle{2,Float64})
+      @test Tables.rowaccess(dat)
+      rows = Tables.rows(dat)
+      @test Tables.schema(rows) == sch
+      @test collect(rows) == [
+        (a=1, b=5, geometry=dom[1]),
+        (a=2, b=6, geometry=dom[2]),
+        (a=3, b=7, geometry=dom[3]),
+        (a=4, b=8, geometry=dom[4])
+      ]
+      @test collect(Tables.columns(dat)) == [[1, 2, 3, 4], [5, 6, 7, 8], [dom[1], dom[2], dom[3], dom[4]]]
+      @test Tables.materializer(dat) <: DummyType
 
-    # GeoJSON.jl
-    points = Point2f[(0, 0), (2.2, 2.2), (0.5, 2)]
-    outer = Point2f[(0, 0), (2.2, 2.2), (0.5, 2)]
-    point = GJS.read("""{"type":"Point","coordinates":[1,1]}""")
-    chain = GJS.read("""{"type":"LineString","coordinates":[[0,0],[2.2,2.2],[0.5,2]]}""")
-    poly = GJS.read("""{"type":"Polygon","coordinates":[[[0,0],[2.2,2.2],[0.5,2],[0,0]]]}""")
-    multipoint = GJS.read("""{"type":"MultiPoint","coordinates":[[0,0],[2.2,2.2],[0.5,2]]}""")
-    multichain =
-      GJS.read("""{"type":"MultiLineString","coordinates":[[[0,0],[2.2,2.2],[0.5,2]],[[0,0],[2.2,2.2],[0.5,2]]]}""")
-    multipoly = GJS.read(
-      """{"type":"MultiPolygon","coordinates":[[[[0,0],[2.2,2.2],[0.5,2],[0,0]]],[[[0,0],[2.2,2.2],[0.5,2],[0,0]]]]}"""
-    )
-    @test GeoTables.geom2meshes(point) == Point2f(1.0, 1.0)
-    @test GeoTables.geom2meshes(chain) == Rope(points)
-    @test GeoTables.geom2meshes(poly) == PolyArea(outer)
-    @test GeoTables.geom2meshes(multipoint) == Multi(points)
-    @test GeoTables.geom2meshes(multichain) == Multi([Rope(points), Rope(points)])
-    @test GeoTables.geom2meshes(multipoly) == Multi([PolyArea(outer), PolyArea(outer)])
-    # degenerate chain with 2 equal points
-    chain = GJS.read("""{"type":"LineString","coordinates":[[2.2,2.2],[2.2,2.2]]}""")
-    @test GeoTables.geom2meshes(chain) == Ring(Point2f(2.2, 2.2))
-  end
-
-  @testset "load" begin
-    @testset "Shapefile" begin
-      table = GeoTables.load(joinpath(datadir, "points.shp"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa PointSet
-      @test table.geometry[1] isa Point
-
-      table = GeoTables.load(joinpath(datadir, "lines.shp"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Multi
-      @test collect(table.geometry[1])[1] isa Chain
-
-      table = GeoTables.load(joinpath(datadir, "polygons.shp"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Multi
-      @test collect(table.geometry[1])[1] isa PolyArea
-
-      table = GeoTables.load(joinpath(datadir, "path.shp"))
-      @test Tables.schema(table).names == (:ZONA, :geometry)
-      @test length(table.geometry) == 6
-      @test table.ZONA == ["PA 150", "BR 364", "BR 163", "BR 230", "BR 010", "Estuarina PA"]
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Multi
-
-      table = GeoTables.load(joinpath(datadir, "zone.shp"))
-      @test Tables.schema(table).names == (:PERIMETER, :ACRES, :MACROZONA, :Hectares, :area_m2, :geometry)
-      @test length(table.geometry) == 4
-      @test table.PERIMETER == [5.850803650776888e6, 9.539471535859613e6, 1.01743436941e7, 7.096124186552936e6]
-      @test table.ACRES == [3.23144676827e7, 2.50593712407e8, 2.75528426573e8, 1.61293042687e8]
-      @test table.MACROZONA == ["Estuario", "Fronteiras Antigas", "Fronteiras Intermediarias", "Fronteiras Novas"]
-      @test table.Hectares == [1.30772011078e7, 1.01411677447e8, 1.11502398263e8, 6.52729785685e7]
-      @test table.area_m2 == [1.30772011078e11, 1.01411677447e12, 1.11502398263e12, 6.52729785685e11]
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Multi
-
-      table = GeoTables.load(joinpath(datadir, "land.shp"))
-      @test Tables.schema(table).names == (:featurecla, :scalerank, :min_zoom, :geometry)
-      @test length(table.geometry) == 127
-      @test all(==("Land"), table.featurecla)
-      @test all(∈([0, 1]), table.scalerank)
-      @test all(∈([0.0, 0.5, 1.0, 1.5]), table.min_zoom)
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Multi
-
-      # https://github.com/JuliaEarth/GeoTables.jl/issues/32
-      @test GeoTables.load(joinpath(datadir, "issue32.shp")) isa Meshes.MeshData
-
-      # lazy loading
-      @test GeoTables.load(joinpath(datadir, "lines.shp")) isa Meshes.MeshData
-      @test GeoTables.load(joinpath(datadir, "lines.shp"), lazy=true) isa GeoTables.GeoTable
-    end
-
-    @testset "GeoJSON" begin
-      table = GeoTables.load(joinpath(datadir, "points.geojson"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa PointSet
-      @test table.geometry[1] isa Point
-
-      table = GeoTables.load(joinpath(datadir, "lines.geojson"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Chain
-
-      table = GeoTables.load(joinpath(datadir, "polygons.geojson"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa PolyArea
-
-      # lazy loading
-      @test GeoTables.load(joinpath(datadir, "lines.geojson")) isa Meshes.MeshData
-      @test GeoTables.load(joinpath(datadir, "lines.geojson"), lazy=true) isa GeoTables.GeoTable
-    end
-
-    @testset "KML" begin
-      table = GeoTables.load(joinpath(datadir, "field.kml"))
-      @test length(table.geometry) == 4
-      @test table.Name[1] isa String
-      @test table.Description[1] isa String
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa PolyArea
-    end
-
-    @testset "GeoPackage" begin
-      table = GeoTables.load(joinpath(datadir, "points.gpkg"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa PointSet
-      @test table.geometry[1] isa Point
-
-      table = GeoTables.load(joinpath(datadir, "lines.gpkg"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa Chain
-
-      table = GeoTables.load(joinpath(datadir, "polygons.gpkg"))
-      @test length(table.geometry) == 5
-      @test table.code[1] isa Integer
-      @test table.name[1] isa String
-      @test table.variable[1] isa Real
-      @test table.geometry isa GeometrySet
-      @test table.geometry[1] isa PolyArea
-
-      # lazy loading
-      @test GeoTables.load(joinpath(datadir, "lines.gpkg")) isa Meshes.MeshData
-      @test GeoTables.load(joinpath(datadir, "lines.gpkg"), lazy=true) isa GeoTables.GeoTable
-    end
-  end
-
-  @testset "save" begin
-    fnames = [
-      "points.geojson",
-      "points.gpkg",
-      "points.shp",
-      "lines.geojson",
-      "lines.gpkg",
-      "lines.shp",
-      "polygons.geojson",
-      "polygons.gpkg",
-      "polygons.shp",
-      "land.shp",
-      "path.shp",
-      "zone.shp",
-      "issue32.shp"
-    ]
-
-    # saved and loaded tables are the same
-    for fname in fnames, fmt in [".shp", ".geojson", ".gpkg"]
-      # input and output file names
-      f1 = joinpath(datadir, fname)
-      f2 = joinpath(savedir, replace(fname, "." => "-") * fmt)
-
-      # load and save table
-      kwargs = endswith(f1, ".geojson") ? (; numbertype=Float64) : ()
-      gt1 = GeoTables.load(f1; kwargs...)
-      GeoTables.save(f2, gt1)
-      kwargs = endswith(f2, ".geojson") ? (; numbertype=Float64) : ()
-      gt2 = GeoTables.load(f2; kwargs...)
-
-      # compare domain and values
-      d1 = domain(gt1)
-      d2 = domain(gt2)
-      @test _isequal(d1, d2)
-      t1 = values(gt1)
-      t2 = values(gt2)
-      c1 = Tables.columns(t1)
-      c2 = Tables.columns(t2)
-      n1 = Tables.columnnames(c1)
-      n2 = Tables.columnnames(c2)
-      @test Set(n1) == Set(n2)
-      for n in n1
-        x1 = Tables.getcolumn(c1, n)
-        x2 = Tables.getcolumn(c2, n)
-        @test x1 == x2
+      # dataframe interface
+      grid = CartesianGrid(2, 2)
+      data = dummy(grid, (a=[1, 2, 3, 4], b=[5, missing, 7, 8]))
+      @test propertynames(data) == [:a, :b, :geometry]
+      @test names(data) == ["a", "b", "geometry"]
+      @test isequal(data.a, [1, 2, 3, 4])
+      @test isequal(data.b, [5, missing, 7, 8])
+      @test data.geometry == grid
+      @test_throws ErrorException data.c
+      for (a, b, geometry) in [(:a, :b, :geometry), ("a", "b", "geometry")]
+        @test data[1:2, [a, b]] == dummy(view(grid, 1:2), (a=[1, 2], b=[5, missing]))
+        @test data[1:2, [a, b, geometry]] == dummy(view(grid, 1:2), (a=[1, 2], b=[5, missing]))
+        @test isequal(data[1:2, a], [1, 2])
+        @test isequal(data[1:2, b], [5, missing])
+        @test isequal(data[1:2, geometry], view(grid, 1:2))
+        @test data[1:2, :] == dummy(view(grid, 1:2), (a=[1, 2], b=[5, missing]))
+        @test isequal(data[1, [a, b]], (a=1, b=5, geometry=grid[1]))
+        @test isequal(data[1, [a, b, geometry]], (a=1, b=5, geometry=grid[1]))
+        @test isequal(data[1, a], 1)
+        @test isequal(data[1, b], 5)
+        @test isequal(data[1, geometry], grid[1])
+        @test isequal(data[1, :], (a=1, b=5, geometry=grid[1]))
+        @test data[:, [a, b]] == data
+        @test data[:, [a, b, geometry]] == data
+        @test isequal(data[:, a], [1, 2, 3, 4])
+        @test isequal(data[:, b], [5, missing, 7, 8])
+        @test isequal(data[:, geometry], grid)
       end
+      # regex
+      @test data[3, r"a"] == (a=3, geometry=grid[3])
+      @test data[3:4, r"b"] == dummy(view(grid, 3:4), (b=[7, 8],))
+      @test data[:, r"[ab]"] == data
+
+      # hcat
+      dom = PointSet(rand(Point2, 10))
+      data₁ = dummy(dom, (a=rand(10), b=rand(10)))
+      data₂ = dummy(dom, (c=rand(10), d=rand(10)))
+      data₃ = dummy(dom, (e=rand(10), f=rand(10)))
+      @test hcat(data₁) == data₁
+      hdata = hcat(data₁, data₂)
+      @test hdata.a == data₁.a
+      @test hdata.b == data₁.b
+      @test hdata.c == data₂.c
+      @test hdata.d == data₂.d
+      @test hdata.geometry == dom
+      hdata = hcat(data₁, data₂, data₃)
+      @test hdata.a == data₁.a
+      @test hdata.b == data₁.b
+      @test hdata.c == data₂.c
+      @test hdata.d == data₂.d
+      @test hdata.e == data₃.e
+      @test hdata.f == data₃.f
+      @test hdata.geometry == dom
+      # throws
+      data₁ = dummy(dom, (a=rand(10), b=rand(10)))
+      data₂ = dummy(dom, (a=rand(10), c=rand(10)))
+      @test_throws ArgumentError hcat(data₁, data₂)
+      data₁ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      data₂ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      @test_throws ArgumentError hcat(data₁, data₂)
+
+      # vcat
+      data₁ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      data₂ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      data₃ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      @test vcat(data₁) == data₁
+      vdata = vcat(data₁, data₂)
+      @test vdata.a == [data₁.a; data₂.a]
+      @test vdata.b == [data₁.b; data₂.b]
+      @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+      vdata = vcat(data₁, data₂, data₃)
+      @test vdata.a == [data₁.a; data₂.a; data₃.a]
+      @test vdata.b == [data₁.b; data₂.b; data₃.b]
+      @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry); collect(data₃.geometry)])
+      # throws
+      data₁ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), b=rand(10)))
+      data₂ = dummy(PointSet(rand(Point2, 10)), (a=rand(10), c=rand(10)))
+      @test_throws ArgumentError vcat(data₁, data₂)
+
+      # variables interface
+      data = dummy(PointSet(rand(Point2, 4)), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      @test asarray(data, :a) == asarray(data, "a") == [1, 2, 3, 4]
+      @test asarray(data, :b) == asarray(data, "b") == [5, 6, 7, 8]
+      data = dummy(CartesianGrid(2, 2), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      @test asarray(data, :a) == asarray(data, "a") == [1 3; 2 4]
+      @test asarray(data, :b) == asarray(data, "b") == [5 7; 6 8]
+
+      data = dummy(CartesianGrid(2, 2), (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      @test sprint(show, data) == "4 $DummyType"
+      @test sprint(show, MIME"text/plain"(), data) ==
+            "2×2 CartesianGrid{2,Float64}\n  variables (rank 2)\n    └─a (Int64)\n    └─b (Int64)"
     end
   end
 
-  @testset "gadm" begin
-    table = GeoTables.gadm("SVN", depth=1, ϵ=0.04)
-    @test length(table.geometry) == 12
+  @testset "viewing" begin
+    for dummy in [dummydata, dummymeta]
+      g = CartesianGrid(10, 10)
+      t = (a=1:100, b=1:100)
+      d = dummy(g, t)
+      v = view(d, 1:3)
+      @test unview(v) == (d, 1:3)
+      @test unview(d) == (d, 1:100)
 
-    table = GeoTables.gadm("QAT", depth=1, ϵ=0.04)
-    @test length(table.geometry) == 7
+      g = CartesianGrid(10, 10)
+      t = (a=1:100, b=1:100)
+      d = dummy(g, t)
+      b = Box(Point(1, 1), Point(5, 5))
+      v = view(d, b)
+      @test domain(v) == CartesianGrid(Point(0, 0), Point(6, 6), dims=(6, 6))
+      x = [collect(1:6); collect(11:16); collect(21:26); collect(31:36); collect(41:46); collect(51:56)]
+      @test Tables.columntable(values(v)) == (a=x, b=x)
 
-    table = GeoTables.gadm("ISR", depth=1)
-    @test length(table.geometry) == 7
+      p = PointSet(collect(vertices(g)))
+      d = dummy(p, t)
+      v = view(d, b)
+      dd = domain(v)
+      @test centroid(dd, 1) == Point(1, 1)
+      @test centroid(dd, nelements(dd)) == Point(5, 5)
+      tt = Tables.columntable(values(v))
+      @test tt == (
+        a=[13, 14, 15, 16, 17, 24, 25, 26, 27, 28, 35, 36, 37, 38, 39, 46, 47, 48, 49, 50, 57, 58, 59, 60, 61],
+        b=[13, 14, 15, 16, 17, 24, 25, 26, 27, 28, 35, 36, 37, 38, 39, 46, 47, 48, 49, 50, 57, 58, 59, 60, 61]
+      )
+
+      dom = CartesianGrid(2, 2)
+      dat = dummy(dom, (a=[1, 2, 3, 4], b=[5, 6, 7, 8]))
+      v = view(dat, 2:4)
+      @test domain(v) == view(dom, 2:4)
+      @test Tables.columntable(values(v)) == (a=[2, 3, 4], b=[6, 7, 8])
+      @test centroid(domain(v), 1) == Point(1.5, 0.5)
+      @test centroid(domain(v), 2) == Point(0.5, 1.5)
+      @test centroid(domain(v), 3) == Point(1.5, 1.5)
+      @test v.a == v."a" == [2, 3, 4]
+      @test v.b == v."b" == [6, 7, 8]
+    end
+  end
+
+  @testset "partitioning" begin
+    data = geotable(CartesianGrid(10, 10), etable=(a=rand(100), b=rand(100)))
+    for method in [
+      UniformPartition(2),
+      FractionPartition(0.5),
+      BlockPartition(2),
+      BallPartition(2),
+      BisectPointPartition(Vec(1, 1), Point(5, 5)),
+      BisectFractionPartition(Vec(1, 1), 0.5),
+      PlanePartition(Vec(1, 1)),
+      DirectionPartition(Vec(1, 1)),
+      PredicatePartition((i, j) -> iseven(i + j)),
+      SpatialPredicatePartition((x, y) -> norm(x + y) < 5),
+      ProductPartition(UniformPartition(2), UniformPartition(2)),
+      HierarchicalPartition(UniformPartition(2), UniformPartition(2))
+    ]
+      Π = partition(data, method)
+      inds = reduce(vcat, indices(Π))
+      @test sort(inds) == 1:100
+    end
   end
 end
