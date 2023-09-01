@@ -1,4 +1,4 @@
-# dummy type implementing the Data trait
+# dummy type implementing the AbstractGeoTable trait
 struct DummyGeoTable{D,V} <: AbstractGeoTable
   domain::D
   values::V
