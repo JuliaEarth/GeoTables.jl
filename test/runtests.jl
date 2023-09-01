@@ -151,8 +151,6 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       t = (a=1:100, b=1:100)
       d = dummy(g, t)
       v = view(d, 1:3)
-      @test unview(v) == (d, 1:3)
-      @test unview(d) == (d, 1:100)
 
       g = CartesianGrid(10, 10)
       t = (a=1:100, b=1:100)

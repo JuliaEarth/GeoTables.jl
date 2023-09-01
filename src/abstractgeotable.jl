@@ -82,8 +82,6 @@ function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable
   return true
 end
 
-unview(geotable::AbstractGeoTable) = geotable, 1:nrow(geotable)
-
 nrow(geotable::AbstractGeoTable) = nelements(domain(geotable))
 
 ncol(geotable::AbstractGeoTable) = length(Tables.columnnames(Tables.columns(values(geotable)))) + 1

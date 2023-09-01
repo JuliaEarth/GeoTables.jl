@@ -8,7 +8,6 @@ using Meshes
 using Tables
 using Random
 
-import Meshes: unview
 import DataAPI: nrow, ncol
 
 include("abstractgeotable.jl")
