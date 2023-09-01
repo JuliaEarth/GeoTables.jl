@@ -4,13 +4,6 @@ using Tables
 using Meshes
 using Test
 
-# temporary solution
-using GeoTables: domain, asarray
-
-# environment settings
-isCI = "CI" ∈ keys(ENV)
-islinux = Sys.islinux()
-
 include("dummy.jl")
 
 dummydata(domain, table) = DummyGeoTable(domain, Dict(paramdim(domain) => table))
