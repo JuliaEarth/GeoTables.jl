@@ -334,20 +334,6 @@ end
 
 asarray(geotable::AbstractGeoTable, var::AbstractString) = asarray(geotable, Symbol(var))
 
-#----------
-# SAMPLING
-#----------
-
-sample(rng::AbstractRNG, geotable::AbstractGeoTable, method::DiscreteSamplingMethod) =
-  view(geotable, sampleinds(rng, domain(geotable), method))
-
-#--------------
-# PARTITIONING
-#--------------
-
-partitioninds(rng::AbstractRNG, geotable::AbstractGeoTable, method::PartitionMethod) =
-  partitioninds(rng, domain(geotable), method)
-
 # -----------
 # IO METHODS
 # -----------

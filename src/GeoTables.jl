@@ -9,9 +9,8 @@ using Tables
 using Random
 
 import Base: values
-import Meshes: partitioninds, unview
+import Meshes: unview
 import DataAPI: nrow, ncol
-import StatsBase: sample
 
 include("abstractgeotable.jl")
 include("geotableview.jl")
