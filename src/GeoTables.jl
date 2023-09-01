@@ -26,10 +26,6 @@ export
   GeoTable,
   geotable,
 
-  # viewing
-  # Base.view,
-  unview,
-
   # DataAPI interface
   nrow,
   ncol,
