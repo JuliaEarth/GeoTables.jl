@@ -17,7 +17,7 @@ end
 
 domain(geotable::GeoTable) = getfield(geotable, :domain)
 
-function values(geotable::GeoTable, rank=nothing)
+function Base.values(geotable::GeoTable, rank=nothing)
   domain = getfield(geotable, :domain)
   values = getfield(geotable, :values)
   r = isnothing(rank) ? paramdim(domain) : rank

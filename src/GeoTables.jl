@@ -8,10 +8,7 @@ using Meshes
 using Tables
 using Random
 
-import Base: values
-import Meshes: partitioninds, unview
 import DataAPI: nrow, ncol
-import StatsBase: sample
 
 include("abstractgeotable.jl")
 include("geotableview.jl")
