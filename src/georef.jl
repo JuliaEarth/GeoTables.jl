@@ -79,7 +79,7 @@ georef(table, names::NTuple{N,<:AbstractString}) where {N} = georef(table, colle
 """
     georef(tuple)
 
-Georeference a named `tuple` in `CartesianGrid(dims)`,
+Georeference a named `tuple` on `CartesianGrid(dims)`,
 with `dims` being the dimensions of the `tuple` arrays.
 
 ## Examples
