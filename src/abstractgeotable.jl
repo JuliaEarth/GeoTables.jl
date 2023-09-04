@@ -324,10 +324,10 @@ with size equal to the size of the underlying domain if the size is
 defined, otherwise returns a vector.
 """
 function asarray(geotable::AbstractGeoTable, var::Symbol)
-  D = domain(geotable)
-  hassize = hasmethod(size, (typeof(D),))
+  dom = domain(geotable)
+  hassize = hasmethod(size, (typeof(dom),))
   dataval = getproperty(geotable, var)
-  hassize ? reshape(dataval, size(D)) : dataval
+  hassize ? reshape(dataval, size(dom)) : dataval
 end
 
 asarray(geotable::AbstractGeoTable, var::AbstractString) = asarray(geotable, Symbol(var))
