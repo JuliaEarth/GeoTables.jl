@@ -32,9 +32,9 @@ of the elements of the domain.
 values
 
 """
-    constructor(D::Type)
+    constructor(T::Type)
 
-Return the constructor of the geotable type `D` as a function.
+Return the constructor of the geotable type `T` as a function.
 The function takes a domain and a dictionary of tables as
 inputs and combines them into an instance of the geotable type.
 """
@@ -44,9 +44,9 @@ function constructor end
 # FALLBACKS
 # ----------
 
-constructor(::D) where {D<:AbstractGeoTable} = constructor(D)
+constructor(::T) where {T<:AbstractGeoTable} = constructor(T)
 
-function (::Type{D})(table) where {D<:AbstractGeoTable}
+function (::Type{T})(table) where {T<:AbstractGeoTable}
   # build domain from geometry column
   cols = Tables.columns(table)
   geoms = Tables.getcolumn(cols, :geometry)
@@ -61,7 +61,7 @@ function (::Type{D})(table) where {D<:AbstractGeoTable}
   values = Dict(paramdim(domain) => newtable)
 
   # combine the two with constructor
-  constructor(D)(domain, values)
+  constructor(T)(domain, values)
 end
 
 function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable)
@@ -145,7 +145,7 @@ function Tables.schema(rows::GeoTableRows)
   Tables.Schema((names..., :geometry), (types..., geomtype))
 end
 
-Tables.materializer(::Type{D}) where {D<:AbstractGeoTable} = D
+Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
 
 # --------------------
 # DATAFRAME INTERFACE
