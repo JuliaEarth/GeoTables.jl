@@ -312,9 +312,9 @@ function _rmgeometry!(vars)
   end
 end
 
-# -------------------
-# VARIABLE INTERFACE
-# -------------------
+# ----------
+# UTILITIES
+# ----------
 
 """
     asarray(geotable, var)

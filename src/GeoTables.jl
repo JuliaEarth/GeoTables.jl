@@ -13,6 +13,7 @@ import DataAPI: nrow, ncol
 include("abstractgeotable.jl")
 include("geotableview.jl")
 include("geotable.jl")
+include("georef.jl")
 include("deprecations.jl")
 
 export
@@ -31,6 +32,7 @@ export
   ncol,
 
   # utilities
-  asarray
+  asarray,
+  georef
 
 end
