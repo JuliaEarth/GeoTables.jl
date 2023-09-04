@@ -253,5 +253,15 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     tuple3D = (x=rand(10, 10, 10), y=rand(10, 10, 10))
     gtb = georef(tuple3D)
     @test domain(gtb) == CartesianGrid(10, 10, 10)
+    # different types
+    tuple1D = (x=[rand(9); missing], y=rand(10))
+    gtb = georef(tuple1D)
+    @test domain(gtb) == CartesianGrid(10)
+    tuple2D = (x=rand(10, 10), y=BitArray(rand(Bool, 10, 10)))
+    gtb = georef(tuple2D)
+    @test domain(gtb) == CartesianGrid(10, 10)
+    # throws: different sizes
+    tuple2D = (x=rand(3, 3), y=rand(5, 5))
+    @test_throws AssertionError georef(tuple2D)
   end
 end

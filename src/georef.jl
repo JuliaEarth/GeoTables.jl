@@ -88,8 +88,11 @@ julia> georef((a=rand(10, 10), b=rand(10, 10))) # 2D grid
 julia> georef((a=rand(10, 10, 10), b=rand(10, 10, 10))) # 3D grid
 ```
 """
-function georef(nmtuple::NamedTuple{NM,NTuple{N,A}}) where {NM,N,A<:AbstractArray}
-  dims = size(first(nmtuple))
-  table = (; (nm => reshape(x, prod(dims)) for (nm, x) in pairs(nmtuple))...)
+function georef(tuple::NamedTuple{NM,<:NTuple{N,AbstractArray}}) where {NM,N}
+  dims = size(first(tuple))
+  for i in 2:length(tuple)
+    @assert size(tuple[i]) == dims "all arrays must have the same dimensions"
+  end
+  table = (; (nm => reshape(x, prod(dims)) for (nm, x) in pairs(tuple))...)
   georef(table, CartesianGrid(dims))
 end
