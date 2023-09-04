@@ -7,6 +7,9 @@ module GeoTables
 using Meshes
 using Tables
 using Random
+using PrettyTables
+using ScientificTypes
+using Unitful
 
 import DataAPI: nrow, ncol
 

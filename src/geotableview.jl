@@ -44,13 +44,3 @@ end
 
 # specialize methods for performance
 Base.:(==)(v₁::GeoTableView, v₂::GeoTableView) = getgeotable(v₁) == getgeotable(v₂) && getinds(v₁) == getinds(v₂)
-
-# -----------
-# IO METHODS
-# -----------
-
-function Base.show(io::IO, v::GeoTableView)
-  geotable = getgeotable(v)
-  nelms = length(getinds(v))
-  print(io, "$nelms View{$geotable}")
-end
