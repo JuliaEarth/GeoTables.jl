@@ -75,7 +75,6 @@ georef(table, names::AbstractVector{<:AbstractString}) = georef(table, Symbol.(n
 georef(table, names::NTuple{N,Symbol}) where {N} = georef(table, collect(names))
 georef(table, names::NTuple{N,<:AbstractString}) where {N} = georef(table, collect(Symbol.(names)))
 
-
 """
     georef(tuple)
 
