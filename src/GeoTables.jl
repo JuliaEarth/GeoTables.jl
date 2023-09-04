@@ -22,17 +22,14 @@ export
   domain,
   # Base.values,
   constructor,
+  nrow,
+  ncol,
+  asarray,
 
   # implementation
   GeoTable,
-  geotable,
 
-  # DataAPI interface
-  nrow,
-  ncol,
-
-  # utilities
-  asarray,
+  # georeferencing
   georef
 
 end
