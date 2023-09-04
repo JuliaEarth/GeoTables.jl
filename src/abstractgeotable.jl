@@ -336,24 +336,57 @@ asarray(geotable::AbstractGeoTable, var::AbstractString) = asarray(geotable, Sym
 # IO METHODS
 # -----------
 
-function Base.show(io::IO, geotable::AbstractGeoTable)
+function Base.summary(io::IO, geotable::AbstractGeoTable)
+  dom = domain(geotable)
   name = nameof(typeof(geotable))
-  nelm = nelements(domain(geotable))
-  print(io, "$nelm $name")
+  print(io, "$(nrow(geotable))×$(ncol(geotable)) $name over $dom")
 end
 
+Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
+
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  lines = String[]
+  summary(io, geotable)
+  println(io)
+
   dom = domain(geotable)
-  for rank in 0:paramdim(dom)
-    tab = values(geotable, rank)
-    if !isnothing(tab)
-      sche = Tables.schema(tab)
-      vars = zip(sche.names, sche.types)
-      push!(lines, "  variables (rank $rank)")
-      append!(lines, ["    └─$var ($V)" for (var, V) in vars])
+  tab = values(geotable)
+  cols = Tables.columns(tab)
+  names = propertynames(geotable)
+
+  # header
+  colnames = string.(names)
+
+  # subheaders
+  types = String[]
+  units = String[]
+  for name in names
+    if name === :geometry
+      push!(types, string(eltype(dom)))
+      push!(units, "")
+    else
+      x = Tables.getcolumn(cols, name)
+      push!(types, string(nameof(elscitype(x))))
+      T = eltype(x)
+      push!(units, T <: Quantity ? string(unit(T)) : "")
     end
   end
-  println(io, dom)
-  print(io, join(lines, "\n"))
+
+  # print etable
+  header = all(isempty, units) ? (colnames, types) : (colnames, types, units)
+  pretty_table(io, geotable; header, vcrop_mode=:middle, newline_at_end=false)
+
+  # info about other tables
+  rank = paramdim(dom)
+  if rank > 0
+    others = Int[]
+    for r in (rank - 1):-1:0
+      if !isnothing(values(geotable, r))
+        push!(others, r)
+      end
+    end
+    if !isempty(others)
+      println(io)
+      print(io, "Additional tables encountered for the following ranks: $(join(others, " ,"))")
+    end
+  end
 end
