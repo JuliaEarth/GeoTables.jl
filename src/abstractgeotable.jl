@@ -32,9 +32,9 @@ of the elements of the domain.
 values
 
 """
-    constructor(G::Type)
+    constructor(D::Type)
 
-Return the constructor of the geotable type `G` as a function.
+Return the constructor of the geotable type `D` as a function.
 The function takes a domain and a dictionary of tables as
 inputs and combines them into an instance of the geotable type.
 """
@@ -44,9 +44,9 @@ function constructor end
 # FALLBACKS
 # ----------
 
-constructor(::G) where {G<:AbstractGeoTable} = constructor(G)
+constructor(::D) where {D<:AbstractGeoTable} = constructor(D)
 
-function (::Type{G})(table) where {G<:AbstractGeoTable}
+function (::Type{D})(table) where {D<:AbstractGeoTable}
   # build domain from geometry column
   cols = Tables.columns(table)
   geoms = Tables.getcolumn(cols, :geometry)
@@ -61,7 +61,7 @@ function (::Type{G})(table) where {G<:AbstractGeoTable}
   values = Dict(paramdim(domain) => newtable)
 
   # combine the two with constructor
-  constructor(G)(domain, values)
+  constructor(D)(domain, values)
 end
 
 function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable)
@@ -145,7 +145,7 @@ function Tables.schema(rows::GeoTableRows)
   Tables.Schema((names..., :geometry), (types..., geomtype))
 end
 
-Tables.materializer(::Type{G}) where {G<:AbstractGeoTable} = G
+Tables.materializer(::Type{D}) where {D<:AbstractGeoTable} = D
 
 # --------------------
 # DATAFRAME INTERFACE
@@ -324,10 +324,10 @@ with size equal to the size of the underlying domain if the size is
 defined, otherwise returns a vector.
 """
 function asarray(geotable::AbstractGeoTable, var::Symbol)
-  G = domain(geotable)
-  hassize = hasmethod(size, (typeof(G),))
+  D = domain(geotable)
+  hassize = hasmethod(size, (typeof(D),))
   dataval = getproperty(geotable, var)
-  hassize ? reshape(dataval, size(G)) : dataval
+  hassize ? reshape(dataval, size(D)) : dataval
 end
 
 asarray(geotable::AbstractGeoTable, var::AbstractString) = asarray(geotable, Symbol(var))

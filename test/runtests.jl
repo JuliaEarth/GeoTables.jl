@@ -189,69 +189,69 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
 
   @testset "georef" begin
     table = Table(x=rand(3), y=[1, 2, 3], z=["a", "b", "c"])
-    nmtuple = (x=rand(3), y=[1, 2, 3], z=["a", "b", "c"])
+    tuple = (x=rand(3), y=[1, 2, 3], z=["a", "b", "c"])
 
     # explicit domain types
     gtb = georef(table, PointSet(rand(2, 3)))
     @test domain(gtb) isa PointSet
-    gtb = georef(nmtuple, PointSet(rand(2, 3)))
+    gtb = georef(tuple, PointSet(rand(2, 3)))
     @test domain(gtb) isa PointSet
     gtb = georef(table, CartesianGrid(3))
     @test domain(gtb) isa CartesianGrid
-    gtb = georef(nmtuple, CartesianGrid(3))
+    gtb = georef(tuple, CartesianGrid(3))
     @test domain(gtb) isa CartesianGrid
 
     # vectors of geometries
     gtb = georef(table, rand(Point2, 3))
     @test domain(gtb) isa PointSet
-    gtb = georef(nmtuple, rand(Point2, 3))
+    gtb = georef(tuple, rand(Point2, 3))
     @test domain(gtb) isa PointSet
     gtb = georef(table, collect(CartesianGrid(3)))
     @test domain(gtb) isa GeometrySet
-    gtb = georef(nmtuple, collect(CartesianGrid(3)))
+    gtb = georef(tuple, collect(CartesianGrid(3)))
     @test domain(gtb) isa GeometrySet
 
     # coordinates of point set
     gtb = georef(table, rand(2, 3))
     @test domain(gtb) isa PointSet
-    gtb = georef(nmtuple, rand(2, 3))
+    gtb = georef(tuple, rand(2, 3))
     @test domain(gtb) isa PointSet
 
     # coordinates names in table
     gtb = georef(table, (:x, :y))
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
-    gtb = georef(nmtuple, (:x, :y))
+    gtb = georef(tuple, (:x, :y))
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
     gtb = georef(table, [:x, :y])
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
-    gtb = georef(nmtuple, [:x, :y])
+    gtb = georef(tuple, [:x, :y])
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
     gtb = georef(table, ("x", "y"))
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
-    gtb = georef(nmtuple, ("x", "y"))
+    gtb = georef(tuple, ("x", "y"))
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
     gtb = georef(table, ["x", "y"])
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
-    gtb = georef(nmtuple, ["x", "y"])
+    gtb = georef(tuple, ["x", "y"])
     @test domain(gtb) isa PointSet
     @test propertynames(gtb) == [:z, :geometry]
 
-    # regular grid data
-    nmtuple1D = (x=rand(10), y=rand(10))
-    gtb = georef(nmtuple1D)
+    # grid data
+    tuple1D = (x=rand(10), y=rand(10))
+    gtb = georef(tuple1D)
     @test domain(gtb) == CartesianGrid(10)
-    nmtuple2D = (x=rand(10, 10), y=rand(10, 10))
-    gtb = georef(nmtuple2D)
+    tuple2D = (x=rand(10, 10), y=rand(10, 10))
+    gtb = georef(tuple2D)
     @test domain(gtb) == CartesianGrid(10, 10)
-    nmtuple3D = (x=rand(10, 10, 10), y=rand(10, 10, 10))
-    gtb = georef(nmtuple3D)
+    tuple3D = (x=rand(10, 10, 10), y=rand(10, 10, 10))
+    gtb = georef(tuple3D)
     @test domain(gtb) == CartesianGrid(10, 10, 10)
   end
 end

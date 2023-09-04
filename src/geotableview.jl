@@ -3,8 +3,8 @@
 
 Return a view of `geotable` at indices `inds`.
 """
-struct GeoTableView{G<:AbstractGeoTable,I} <: AbstractGeoTable
-  geotable::G
+struct GeoTableView{D<:AbstractGeoTable,I} <: AbstractGeoTable
+  geotable::D
   inds::I
 end
 
@@ -34,9 +34,9 @@ function Base.values(v::GeoTableView, rank=nothing)
   r == R ? Tables.subset(𝒯, inds) : nothing
 end
 
-function constructor(::Type{GeoTableView{G,I}}) where {G<:AbstractGeoTable,I}
+function constructor(::Type{GeoTableView{D,I}}) where {D<:AbstractGeoTable,I}
   function ctor(domain, values)
-    geotable = constructor(G)(domain, values)
+    geotable = constructor(D)(domain, values)
     inds = 1:nelements(domain)
     GeoTableView(geotable, inds)
   end
