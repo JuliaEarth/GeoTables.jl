@@ -1,10 +1,10 @@
 """
-    DataView(geotable, inds)
+    GeoTableView(geotable, inds)
 
 Return a view of `geotable` at indices `inds`.
 """
-struct GeoTableView{G<:AbstractGeoTable,I} <: AbstractGeoTable
-  geotable::G
+struct GeoTableView{T<:AbstractGeoTable,I} <: AbstractGeoTable
+  geotable::T
   inds::I
 end
 
@@ -15,9 +15,9 @@ getinds(v::GeoTableView) = getfield(v, :inds)
 # specialize constructor to avoid infinite loops
 GeoTableView(v::GeoTableView, inds) = GeoTableView(getgeotable(v), getinds(v)[inds])
 
-# ---------------------------
-# ABSTRACTGEOTABLE INTERFACE
-# ---------------------------
+# ----------------------------
+# ABSTRACT GEOTABLE INTERFACE
+# ----------------------------
 
 function domain(v::GeoTableView)
   geotable = getgeotable(v)
@@ -34,9 +34,9 @@ function Base.values(v::GeoTableView, rank=nothing)
   r == R ? Tables.subset(𝒯, inds) : nothing
 end
 
-function constructor(::Type{GeoTableView{D,I}}) where {D<:AbstractGeoTable,I}
+function constructor(::Type{GeoTableView{T,I}}) where {T<:AbstractGeoTable,I}
   function ctor(domain, values)
-    geotable = constructor(D)(domain, values)
+    geotable = constructor(T)(domain, values)
     inds = 1:nelements(domain)
     GeoTableView(geotable, inds)
   end

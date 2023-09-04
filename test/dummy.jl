@@ -1,6 +1,6 @@
 # dummy type implementing the AbstractGeoTable trait
-struct DummyGeoTable{D,V} <: AbstractGeoTable
-  domain::D
+struct DummyGeoTable{T,V} <: AbstractGeoTable
+  domain::T
   values::V
 end
 
