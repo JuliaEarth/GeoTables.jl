@@ -378,12 +378,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   # info about other tables
   rank = paramdim(dom)
   if rank > 0
-    others = Int[]
-    for r in (rank - 1):-1:0
-      if !isnothing(values(geotable, r))
-        push!(others, r)
-      end
-    end
+    others = filter(r -> !isnothing(values(geotable, r)), 0:(rank - 1))
     if !isempty(others)
       println(io)
       print(io, "Additional tables encountered for the following ranks: $(join(others, " ,"))")
