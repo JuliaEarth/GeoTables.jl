@@ -398,3 +398,61 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
     end
   end
 end
+
+function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
+  println(io, "<div>")
+  print(io, "<p style=\"margin-bottom: 1em; font-weight: bold\">")
+  summary(io, geotable)
+  println(io, "</p>")
+
+  dom = domain(geotable)
+  tab = values(geotable)
+  cols = Tables.columns(tab)
+  names = propertynames(geotable)
+
+  # header
+  colnames = string.(names)
+
+  # subheaders
+  tuples = map(names) do name
+    if name === :geometry
+      t = string(eltype(dom))
+      u = ""
+    else
+      x = Tables.getcolumn(cols, name)
+      T = eltype(x)
+      if T <: Quantity
+        t = string(nameof(Continuous))
+        u = string(unit(T))
+      else
+        t = string(nameof(nonmissingtype(elscitype(x))))
+        u = "NoUnits"
+      end
+    end
+    t, u
+  end
+  types = first.(tuples)
+  units = last.(tuples)
+
+  # print etable
+  pretty_table(
+    io,
+    geotable;
+    backend=Val(:html),
+    header=(colnames, types, units),
+    vcrop_mode=:middle,
+    max_num_of_rows=20
+  )
+
+  # info about other tables
+  rank = paramdim(dom)
+  if rank > 0
+    others = filter(r -> !isnothing(values(geotable, r)), 0:(rank - 1))
+    if !isempty(others)
+      print(io, "<p style=\"margin-top: 1em\">")
+      print(io, "Additional tables encountered for the following ranks: $(join(others, " ,"))")
+      println(io, "</p>")
+    end
+  end
+  print(io, "<div>")
+end
