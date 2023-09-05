@@ -348,12 +348,9 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   pretty_table(
     io,
     geotable;
-    title=summary(geotable),
-    header=_header(geotable),
-    vcrop_mode=:middle,
-    max_num_of_rows=20,
     newline_at_end=false,
-    header_crayon=crayon"bold (0,128,128)"
+    header_crayon=crayon"bold (0,128,128)",
+    _common_kwargs(geotable)...
   )
 end
 
@@ -362,14 +359,11 @@ function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
     io,
     geotable;
     backend=Val(:html),
-    title=summary(geotable),
-    header=_header(geotable),
-    vcrop_mode=:middle,
-    max_num_of_rows=20
+    _common_kwargs(geotable)...
   )
 end
 
-function _header(geotable)
+function _common_kwargs(geotable)
   dom = domain(geotable)
   tab = values(geotable)
   cols = Tables.columns(tab)
@@ -399,5 +393,5 @@ function _header(geotable)
   types = first.(tuples)
   units = last.(tuples)
 
-  (colnames, types, units)
+  (title=summary(geotable), header=(colnames, types, units), vcrop_mode=:middle, max_num_of_rows=20)
 end
