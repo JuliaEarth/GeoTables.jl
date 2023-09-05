@@ -377,7 +377,8 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   pretty_table(io, geotable; header,
                max_num_of_rows=20,
                vcrop_mode=:middle,
-               newline_at_end=false)
+               newline_at_end=false,
+               header_crayon=crayon"blue bold")
 
   # info about other tables
   rank = paramdim(dom)
