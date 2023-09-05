@@ -365,6 +365,87 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
       │       8 │       8.46 │ missing │ Point(9.0, 9.0) │
       └─────────┴────────────┴─────────┴─────────────────┘"""
+
+      gtb = georef((; a, b, c), pset)
+      @test sprint(show, MIME("text/html"), gtb) == """<table>
+      <caption style = "text-align: left;">9×4 GeoTable over 9 PointSet{2,Float64}</caption>
+      <thead>
+        <tr class = "header">
+          <th style = "text-align: right;">a</th>
+          <th style = "text-align: right;">b</th>
+          <th style = "text-align: right;">c</th>
+          <th style = "text-align: right;">geometry</th>
+        </tr>
+        <tr class = "subheader">
+          <th style = "text-align: right;">Count</th>
+          <th style = "text-align: right;">Continuous</th>
+          <th style = "text-align: right;">Textual</th>
+          <th style = "text-align: right;">Point2</th>
+        </tr>
+        <tr class = "subheader headerLastRow">
+          <th style = "text-align: right;">NoUnits</th>
+          <th style = "text-align: right;">NoUnits</th>
+          <th style = "text-align: right;">NoUnits</th>
+          <th style = "text-align: right;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style = "text-align: right;">0</td>
+          <td style = "text-align: right;">2.34</td>
+          <td style = "text-align: right;">txt1</td>
+          <td style = "text-align: right;">Point(1.0, 1.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">6</td>
+          <td style = "text-align: right;">7.5</td>
+          <td style = "text-align: right;">txt2</td>
+          <td style = "text-align: right;">Point(2.0, 2.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">6</td>
+          <td style = "text-align: right;">0.06</td>
+          <td style = "text-align: right;">txt3</td>
+          <td style = "text-align: right;">Point(3.0, 3.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">3</td>
+          <td style = "text-align: right;">1.29</td>
+          <td style = "text-align: right;">txt4</td>
+          <td style = "text-align: right;">Point(4.0, 4.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">9</td>
+          <td style = "text-align: right;">3.64</td>
+          <td style = "text-align: right;">txt5</td>
+          <td style = "text-align: right;">Point(5.0, 5.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">5</td>
+          <td style = "text-align: right;">8.05</td>
+          <td style = "text-align: right;">txt6</td>
+          <td style = "text-align: right;">Point(6.0, 6.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">2</td>
+          <td style = "text-align: right;">0.11</td>
+          <td style = "text-align: right;">txt7</td>
+          <td style = "text-align: right;">Point(7.0, 7.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">2</td>
+          <td style = "text-align: right;">0.64</td>
+          <td style = "text-align: right;">txt8</td>
+          <td style = "text-align: right;">Point(8.0, 8.0)</td>
+        </tr>
+        <tr>
+          <td style = "text-align: right;">8</td>
+          <td style = "text-align: right;">8.46</td>
+          <td style = "text-align: right;">txt9</td>
+          <td style = "text-align: right;">Point(9.0, 9.0)</td>
+        </tr>
+      </tbody>
+    </table>\n"""
     end
   end
 end
