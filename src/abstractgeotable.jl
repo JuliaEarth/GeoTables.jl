@@ -357,23 +357,27 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   colnames = string.(names)
 
   # subheaders
-  types = String[]
-  units = String[]
-  for name in names
+  typesunits = map(names) do name
     if name === :geometry
-      push!(types, string(eltype(dom)))
-      push!(units, "")
+      t = string(eltype(dom))
+      u = ""
     else
       x = Tables.getcolumn(cols, name)
-      push!(types, string(nameof(elscitype(x))))
       T = eltype(x)
-      push!(units, T <: Quantity ? string(unit(T)) : "")
+      t = string(nameof(elscitype(x)))
+      u = T <: Quantity ? string(unit(T)) : "NoUnits"
     end
+    t, u
   end
+  types = first.(typesunits)
+  units = last.(typesunits)
 
   # print etable
-  header = all(isempty, units) ? (colnames, types) : (colnames, types, units)
-  pretty_table(io, geotable; header, vcrop_mode=:middle, newline_at_end=false)
+  header = (colnames, types, units)
+  pretty_table(io, geotable; header,
+               max_num_of_rows=20,
+               vcrop_mode=:middle,
+               newline_at_end=false)
 
   # info about other tables
   rank = paramdim(dom)
