@@ -272,33 +272,35 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
     @test sprint(show, MIME("text/plain"), gtb) == """
     9×4 GeoTable over 9 PointSet{2,Float64}
-    ┌───────┬────────────┬─────────┬─────────────────┐
-    │     a │          b │       c │        geometry │
-    │ Count │ Continuous │ Textual │          Point2 │
-    ├───────┼────────────┼─────────┼─────────────────┤
-    │     0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
-    │     6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
-    │     6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
-    │     3 │       1.29 │    txt4 │ Point(4.0, 4.0) │
-    │     9 │       3.64 │    txt5 │ Point(5.0, 5.0) │
-    │     5 │       8.05 │    txt6 │ Point(6.0, 6.0) │
-    │     2 │       0.11 │    txt7 │ Point(7.0, 7.0) │
-    │     2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
-    │     8 │       8.46 │    txt9 │ Point(9.0, 9.0) │
-    └───────┴────────────┴─────────┴─────────────────┘"""
+    ┌─────────┬────────────┬─────────┬─────────────────┐
+    │       a │          b │       c │        geometry │
+    │   Count │ Continuous │ Textual │          Point2 │
+    │ NoUnits │    NoUnits │ NoUnits │                 │
+    ├─────────┼────────────┼─────────┼─────────────────┤
+    │       0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
+    │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
+    │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
+    │       3 │       1.29 │    txt4 │ Point(4.0, 4.0) │
+    │       9 │       3.64 │    txt5 │ Point(5.0, 5.0) │
+    │       5 │       8.05 │    txt6 │ Point(6.0, 6.0) │
+    │       2 │       0.11 │    txt7 │ Point(7.0, 7.0) │
+    │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
+    │       8 │       8.46 │    txt9 │ Point(9.0, 9.0) │
+    └─────────┴────────────┴─────────┴─────────────────┘"""
 
     vgtb = view(gtb, 1:3)
     @test sprint(show, vgtb) == "3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}"
     @test sprint(show, MIME("text/plain"), vgtb) == """
     3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}
-    ┌───────┬────────────┬─────────┬─────────────────┐
-    │     a │          b │       c │        geometry │
-    │ Count │ Continuous │ Textual │          Point2 │
-    ├───────┼────────────┼─────────┼─────────────────┤
-    │     0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
-    │     6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
-    │     6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
-    └───────┴────────────┴─────────┴─────────────────┘"""
+    ┌─────────┬────────────┬─────────┬─────────────────┐
+    │       a │          b │       c │        geometry │
+    │   Count │ Continuous │ Textual │          Point2 │
+    │ NoUnits │    NoUnits │ NoUnits │                 │
+    ├─────────┼────────────┼─────────┼─────────────────┤
+    │       0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
+    │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
+    │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
+    └─────────┴────────────┴─────────┴─────────────────┘"""
 
     gtb = georef((a=a * u"m/s", b=b * u"km/hr", c=c), pset)
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
@@ -307,7 +309,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     ┌──────────┬───────────────┬─────────┬─────────────────┐
     │        a │             b │       c │        geometry │
     │  Unknown │       Unknown │ Textual │          Point2 │
-    │   m s^-1 │      km hr^-1 │         │                 │
+    │   m s^-1 │      km hr^-1 │ NoUnits │                 │
     ├──────────┼───────────────┼─────────┼─────────────────┤
     │ 0 m s^-1 │ 2.34 km hr^-1 │    txt1 │ Point(1.0, 1.0) │
     │ 6 m s^-1 │  7.5 km hr^-1 │    txt2 │ Point(2.0, 2.0) │
@@ -325,20 +327,21 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     @test sprint(show, gtb) == "9×4 GeoTable over 3×3 CartesianGrid{2,Float64}"
     @test sprint(show, MIME("text/plain"), gtb) == """
     9×4 GeoTable over 3×3 CartesianGrid{2,Float64}
-    ┌───────┬────────────┬─────────┬────────────────────────────────────────────────────────────────────────────────┐
-    │     a │          b │       c │                                                                       geometry │
-    │ Count │ Continuous │ Textual │                                                         Quadrangle{2, Float64} │
-    ├───────┼────────────┼─────────┼────────────────────────────────────────────────────────────────────────────────┤
-    │     0 │       2.34 │    txt1 │ Quadrangle(Point(0.0, 0.0), Point(1.0, 0.0), Point(1.0, 1.0), Point(0.0, 1.0)) │
-    │     6 │        7.5 │    txt2 │ Quadrangle(Point(1.0, 0.0), Point(2.0, 0.0), Point(2.0, 1.0), Point(1.0, 1.0)) │
-    │     6 │       0.06 │    txt3 │ Quadrangle(Point(2.0, 0.0), Point(3.0, 0.0), Point(3.0, 1.0), Point(2.0, 1.0)) │
-    │     3 │       1.29 │    txt4 │ Quadrangle(Point(0.0, 1.0), Point(1.0, 1.0), Point(1.0, 2.0), Point(0.0, 2.0)) │
-    │     9 │       3.64 │    txt5 │ Quadrangle(Point(1.0, 1.0), Point(2.0, 1.0), Point(2.0, 2.0), Point(1.0, 2.0)) │
-    │     5 │       8.05 │    txt6 │ Quadrangle(Point(2.0, 1.0), Point(3.0, 1.0), Point(3.0, 2.0), Point(2.0, 2.0)) │
-    │     2 │       0.11 │    txt7 │ Quadrangle(Point(0.0, 2.0), Point(1.0, 2.0), Point(1.0, 3.0), Point(0.0, 3.0)) │
-    │     2 │       0.64 │    txt8 │ Quadrangle(Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 3.0), Point(1.0, 3.0)) │
-    │     8 │       8.46 │    txt9 │ Quadrangle(Point(2.0, 2.0), Point(3.0, 2.0), Point(3.0, 3.0), Point(2.0, 3.0)) │
-    └───────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘
+    ┌─────────┬────────────┬─────────┬────────────────────────────────────────────────────────────────────────────────┐
+    │       a │          b │       c │                                                                       geometry │
+    │   Count │ Continuous │ Textual │                                                         Quadrangle{2, Float64} │
+    │ NoUnits │    NoUnits │ NoUnits │                                                                                │
+    ├─────────┼────────────┼─────────┼────────────────────────────────────────────────────────────────────────────────┤
+    │       0 │       2.34 │    txt1 │ Quadrangle(Point(0.0, 0.0), Point(1.0, 0.0), Point(1.0, 1.0), Point(0.0, 1.0)) │
+    │       6 │        7.5 │    txt2 │ Quadrangle(Point(1.0, 0.0), Point(2.0, 0.0), Point(2.0, 1.0), Point(1.0, 1.0)) │
+    │       6 │       0.06 │    txt3 │ Quadrangle(Point(2.0, 0.0), Point(3.0, 0.0), Point(3.0, 1.0), Point(2.0, 1.0)) │
+    │       3 │       1.29 │    txt4 │ Quadrangle(Point(0.0, 1.0), Point(1.0, 1.0), Point(1.0, 2.0), Point(0.0, 2.0)) │
+    │       9 │       3.64 │    txt5 │ Quadrangle(Point(1.0, 1.0), Point(2.0, 1.0), Point(2.0, 2.0), Point(1.0, 2.0)) │
+    │       5 │       8.05 │    txt6 │ Quadrangle(Point(2.0, 1.0), Point(3.0, 1.0), Point(3.0, 2.0), Point(2.0, 2.0)) │
+    │       2 │       0.11 │    txt7 │ Quadrangle(Point(0.0, 2.0), Point(1.0, 2.0), Point(1.0, 3.0), Point(0.0, 3.0)) │
+    │       2 │       0.64 │    txt8 │ Quadrangle(Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 3.0), Point(1.0, 3.0)) │
+    │       8 │       8.46 │    txt9 │ Quadrangle(Point(2.0, 2.0), Point(3.0, 2.0), Point(3.0, 3.0), Point(2.0, 3.0)) │
+    └─────────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘
     Additional tables encountered for the following ranks: 0"""
   end
 end

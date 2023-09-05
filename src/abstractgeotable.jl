@@ -357,7 +357,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   colnames = string.(names)
 
   # subheaders
-  typesunits = map(names) do name
+  tuples = map(names) do name
     if name === :geometry
       t = string(eltype(dom))
       u = ""
@@ -369,19 +369,18 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
     end
     t, u
   end
-  types = first.(typesunits)
-  units = last.(typesunits)
+  types = first.(tuples)
+  units = last.(tuples)
 
   # print etable
-  header = (colnames, types, units)
   pretty_table(
     io,
     geotable;
-    header,
-    max_num_of_rows=20,
+    header=(colnames, types, units),
     vcrop_mode=:middle,
+    max_num_of_rows=20,
     newline_at_end=false,
-    header_crayon=crayon"blue bold"
+    header_crayon=crayon"bold (0,128,128)"
   )
 
   # info about other tables
