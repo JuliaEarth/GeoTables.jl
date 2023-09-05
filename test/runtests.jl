@@ -345,6 +345,26 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │       8 │       8.46 │    txt9 │ Quadrangle(Point(2.0, 2.0), Point(3.0, 2.0), Point(3.0, 3.0), Point(2.0, 3.0)) │
       └─────────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘
       Additional tables encountered for the following ranks: 0"""
+    
+      gtb = georef((a=[missing; a[2:9]], b=[b[1:4]; missing; b[6:9]], c=[c[1:8]; missing]), pset)
+      @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
+      @test sprint(show, MIME("text/plain"), gtb) == """
+      9×4 GeoTable over 9 PointSet{2,Float64}
+      ┌─────────┬────────────┬─────────┬─────────────────┐
+      │       a │          b │       c │        geometry │
+      │   Count │ Continuous │ Textual │          Point2 │
+      │ NoUnits │    NoUnits │ NoUnits │                 │
+      ├─────────┼────────────┼─────────┼─────────────────┤
+      │ missing │       2.34 │    txt1 │ Point(1.0, 1.0) │
+      │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
+      │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
+      │       3 │       1.29 │    txt4 │ Point(4.0, 4.0) │
+      │       9 │    missing │    txt5 │ Point(5.0, 5.0) │
+      │       5 │       8.05 │    txt6 │ Point(6.0, 6.0) │
+      │       2 │       0.11 │    txt7 │ Point(7.0, 7.0) │
+      │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
+      │       8 │       8.46 │ missing │ Point(9.0, 9.0) │
+      └─────────┴────────────┴─────────┴─────────────────┘"""
     end
   end
 end

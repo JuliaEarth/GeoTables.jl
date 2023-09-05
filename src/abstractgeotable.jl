@@ -368,7 +368,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
         t = string(nameof(Continuous))
         u = string(unit(T))
       else
-        t = string(nameof(elscitype(x)))
+        t = string(nameof(nonmissingtype(elscitype(x))))
         u = "NoUnits"
       end
     end
