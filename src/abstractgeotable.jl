@@ -345,21 +345,14 @@ end
 Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  pretty_table(
-    io,
-    geotable;
-    backend=Val(:text),
+  pretty_table(io, geotable; backend=Val(:text),
     _common_kwargs(geotable)...,
-    newline_at_end=false,
-    header_crayon=crayon"bold (0,128,128)"
+    newline_at_end=false
   )
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(
-    io,
-    geotable;
-    backend=Val(:html),
+  pretty_table(io, geotable; backend=Val(:html),
     _common_kwargs(geotable)...
   )
 end
@@ -383,10 +376,10 @@ function _common_kwargs(geotable)
       T = eltype(x)
       if T <: Quantity
         t = string(nameof(Continuous))
-        u = string(unit(T))
+        u = "[$(unit(T))]"
       else
         t = string(nameof(nonmissingtype(elscitype(x))))
-        u = "NoUnits"
+        u = "[NoUnits]"
       end
     end
     t, u
@@ -394,5 +387,10 @@ function _common_kwargs(geotable)
   types = first.(tuples)
   units = last.(tuples)
 
-  (title=summary(geotable), header=(colnames, types, units), vcrop_mode=:middle, max_num_of_rows=20)
+  (
+    title=summary(geotable),
+    header=(colnames, types, units),
+    vcrop_mode=:middle, max_num_of_rows=20,
+    header_crayon=crayon"bold (0,128,128)"
+  )
 end
