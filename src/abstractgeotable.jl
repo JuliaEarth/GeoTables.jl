@@ -345,12 +345,12 @@ end
 Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  n = ncol(geotable)
-  yellow = crayon"bold yellow"
-  teal = crayon"bold (0,128,128)"
+  fcolor = crayon"bold magenta"
+  gcolor = crayon"bold (0,128,128)"
+  hcolors = [fill(fcolor, ncol(geotable) - 1); gcolor]
   pretty_table(io, geotable; backend=Val(:text),
     _common_kwargs(geotable)...,
-    header_crayon=[fill(yellow, n - 1); teal],
+    header_crayon=hcolors,
     newline_at_end=false
   )
 end
