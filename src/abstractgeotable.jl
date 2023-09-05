@@ -364,8 +364,13 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
     else
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
-      t = string(nameof(elscitype(x)))
-      u = T <: Quantity ? string(unit(T)) : "NoUnits"
+      if T <: Quantity
+        t = string(nameof(Continuous))
+        u = string(unit(T))
+      else
+        t = string(nameof(elscitype(x)))
+        u = "NoUnits"
+      end
     end
     t, u
   end

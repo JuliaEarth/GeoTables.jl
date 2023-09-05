@@ -306,21 +306,21 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
     @test sprint(show, MIME("text/plain"), gtb) == """
     9×4 GeoTable over 9 PointSet{2,Float64}
-    ┌──────────┬───────────────┬─────────┬─────────────────┐
-    │        a │             b │       c │        geometry │
-    │  Unknown │       Unknown │ Textual │          Point2 │
-    │   m s^-1 │      km hr^-1 │ NoUnits │                 │
-    ├──────────┼───────────────┼─────────┼─────────────────┤
-    │ 0 m s^-1 │ 2.34 km hr^-1 │    txt1 │ Point(1.0, 1.0) │
-    │ 6 m s^-1 │  7.5 km hr^-1 │    txt2 │ Point(2.0, 2.0) │
-    │ 6 m s^-1 │ 0.06 km hr^-1 │    txt3 │ Point(3.0, 3.0) │
-    │ 3 m s^-1 │ 1.29 km hr^-1 │    txt4 │ Point(4.0, 4.0) │
-    │ 9 m s^-1 │ 3.64 km hr^-1 │    txt5 │ Point(5.0, 5.0) │
-    │ 5 m s^-1 │ 8.05 km hr^-1 │    txt6 │ Point(6.0, 6.0) │
-    │ 2 m s^-1 │ 0.11 km hr^-1 │    txt7 │ Point(7.0, 7.0) │
-    │ 2 m s^-1 │ 0.64 km hr^-1 │    txt8 │ Point(8.0, 8.0) │
-    │ 8 m s^-1 │ 8.46 km hr^-1 │    txt9 │ Point(9.0, 9.0) │
-    └──────────┴───────────────┴─────────┴─────────────────┘"""
+    ┌────────────┬───────────────┬─────────┬─────────────────┐
+    │          a │             b │       c │        geometry │
+    │ Continuous │    Continuous │ Textual │          Point2 │
+    │     m s^-1 │      km hr^-1 │ NoUnits │                 │
+    ├────────────┼───────────────┼─────────┼─────────────────┤
+    │   0 m s^-1 │ 2.34 km hr^-1 │    txt1 │ Point(1.0, 1.0) │
+    │   6 m s^-1 │  7.5 km hr^-1 │    txt2 │ Point(2.0, 2.0) │
+    │   6 m s^-1 │ 0.06 km hr^-1 │    txt3 │ Point(3.0, 3.0) │
+    │   3 m s^-1 │ 1.29 km hr^-1 │    txt4 │ Point(4.0, 4.0) │
+    │   9 m s^-1 │ 3.64 km hr^-1 │    txt5 │ Point(5.0, 5.0) │
+    │   5 m s^-1 │ 8.05 km hr^-1 │    txt6 │ Point(6.0, 6.0) │
+    │   2 m s^-1 │ 0.11 km hr^-1 │    txt7 │ Point(7.0, 7.0) │
+    │   2 m s^-1 │ 0.64 km hr^-1 │    txt8 │ Point(8.0, 8.0) │
+    │   8 m s^-1 │ 8.46 km hr^-1 │    txt9 │ Point(9.0, 9.0) │
+    └────────────┴───────────────┴─────────┴─────────────────┘"""
 
     nv = length(vertices(grid))
     gtb = GeoTable(grid, etable=(; a, b, c), vtable=(; d=rand(nv)))
