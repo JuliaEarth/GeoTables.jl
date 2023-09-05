@@ -348,7 +348,10 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   fcolor = crayon"bold magenta"
   gcolor = crayon"bold (0,128,128)"
   hcolors = [fill(fcolor, ncol(geotable) - 1); gcolor]
-  pretty_table(io, geotable; backend=Val(:text),
+  pretty_table(
+    io,
+    geotable;
+    backend=Val(:text),
     _common_kwargs(geotable)...,
     header_crayon=hcolors,
     newline_at_end=false
@@ -356,9 +359,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=Val(:html),
-    _common_kwargs(geotable)...
-  )
+  pretty_table(io, geotable; backend=Val(:html), _common_kwargs(geotable)...)
 end
 
 function _common_kwargs(geotable)
@@ -391,11 +392,5 @@ function _common_kwargs(geotable)
   types = first.(tuples)
   units = last.(tuples)
 
-  (
-    title=summary(geotable),
-    header=(colnames, types, units),
-    alignment=:c,
-    max_num_of_rows=20,
-    vcrop_mode=:middle,
-  )
+  (title=summary(geotable), header=(colnames, types, units), alignment=:c, max_num_of_rows=20, vcrop_mode=:middle)
 end
