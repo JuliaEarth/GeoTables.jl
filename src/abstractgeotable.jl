@@ -392,5 +392,5 @@ function _common_kwargs(geotable)
   types = first.(tuples)
   units = last.(tuples)
 
-  (title=summary(geotable), header=(colnames, types, units), alignment=:c, max_num_of_rows=20, vcrop_mode=:middle)
+  (title=summary(geotable), header=(colnames, types, units), alignment=:c, max_num_of_rows=10, vcrop_mode=:middle)
 end
