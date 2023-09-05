@@ -343,8 +343,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │       2 │       0.11 │    txt7 │ Quadrangle(Point(0.0, 2.0), Point(1.0, 2.0), Point(1.0, 3.0), Point(0.0, 3.0)) │
       │       2 │       0.64 │    txt8 │ Quadrangle(Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 3.0), Point(1.0, 3.0)) │
       │       8 │       8.46 │    txt9 │ Quadrangle(Point(2.0, 2.0), Point(3.0, 2.0), Point(3.0, 3.0), Point(2.0, 3.0)) │
-      └─────────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘
-      Additional tables encountered for the following ranks: 0"""
+      └─────────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘"""
 
       gtb = georef((a=[missing; a[2:9]], b=[b[1:4]; missing; b[6:9]], c=[c[1:8]; missing]), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
