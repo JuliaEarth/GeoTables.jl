@@ -349,7 +349,6 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
     io,
     geotable;
     backend=Val(:text),
-    backend=Val(:text),
     _common_kwargs(geotable)...,
     newline_at_end=false,
     header_crayon=crayon"bold (0,128,128)"
