@@ -269,7 +269,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       c = ["txt1", "txt2", "txt3", "txt4", "txt5", "txt6", "txt7", "txt8", "txt9"]
       pset = PointSet(Point.(1:9, 1:9))
       grid = CartesianGrid(3, 3)
-  
+
       gtb = georef((; a, b, c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
@@ -289,7 +289,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
       │       8 │       8.46 │    txt9 │ Point(9.0, 9.0) │
       └─────────┴────────────┴─────────┴─────────────────┘"""
-  
+
       vgtb = view(gtb, 1:3)
       @test sprint(show, vgtb) == "3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}"
       @test sprint(show, MIME("text/plain"), vgtb) == """
@@ -303,7 +303,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
       │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
       └─────────┴────────────┴─────────┴─────────────────┘"""
-  
+
       gtb = georef((a=a * u"m/s", b=b * u"km/hr", c=c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
@@ -323,7 +323,7 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │   2 m s^-1 │ 0.64 km hr^-1 │    txt8 │ Point(8.0, 8.0) │
       │   8 m s^-1 │ 8.46 km hr^-1 │    txt9 │ Point(9.0, 9.0) │
       └────────────┴───────────────┴─────────┴─────────────────┘"""
-  
+
       nv = length(vertices(grid))
       gtb = GeoTable(grid, etable=(; a, b, c), vtable=(; d=rand(nv)))
       @test sprint(show, gtb) == "9×4 GeoTable over 3×3 CartesianGrid{2,Float64}"
