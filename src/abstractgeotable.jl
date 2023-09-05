@@ -345,9 +345,26 @@ end
 Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  summary(io, geotable)
-  println(io)
+  pretty_table(
+    io,
+    geotable;
+    backend=Val(:text),
+    _common_kwargs(geotable)...,
+    newline_at_end=false,
+    header_crayon=crayon"bold (0,128,128)"
+  )
+end
 
+function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
+  pretty_table(
+    io,
+    geotable;
+    backend=Val(:html),
+    _common_kwargs(geotable)...
+  )
+end
+
+function _common_kwargs(geotable)
   dom = domain(geotable)
   tab = values(geotable)
   cols = Tables.columns(tab)
@@ -377,24 +394,5 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
   types = first.(tuples)
   units = last.(tuples)
 
-  # print etable
-  pretty_table(
-    io,
-    geotable;
-    header=(colnames, types, units),
-    vcrop_mode=:middle,
-    max_num_of_rows=20,
-    newline_at_end=false,
-    header_crayon=crayon"bold (0,128,128)"
-  )
-
-  # info about other tables
-  rank = paramdim(dom)
-  if rank > 0
-    others = filter(r -> !isnothing(values(geotable, r)), 0:(rank - 1))
-    if !isempty(others)
-      println(io)
-      print(io, "Additional tables encountered for the following ranks: $(join(others, " ,"))")
-    end
-  end
+  (title=summary(geotable), header=(colnames, types, units), vcrop_mode=:middle, max_num_of_rows=20)
 end
