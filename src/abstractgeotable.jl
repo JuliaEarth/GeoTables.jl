@@ -359,7 +359,10 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=Val(:html), _common_kwargs(geotable)...)
+  pretty_table(io, geotable; backend=Val(:html),
+    _common_kwargs(geotable)...,
+    max_num_of_rows=10
+  )
 end
 
 function _common_kwargs(geotable)
@@ -374,7 +377,7 @@ function _common_kwargs(geotable)
   # subheaders
   tuples = map(names) do name
     if name === :geometry
-      t = string(eltype(dom))
+      t = Meshes.prettyname(eltype(dom))
       u = ""
     else
       x = Tables.getcolumn(cols, name)
@@ -392,5 +395,5 @@ function _common_kwargs(geotable)
   types = first.(tuples)
   units = last.(tuples)
 
-  (title=summary(geotable), header=(colnames, types, units), alignment=:c, max_num_of_rows=10, vcrop_mode=:middle)
+  (title=summary(geotable), header=(colnames, types, units), alignment=:c, vcrop_mode=:bottom)
 end
