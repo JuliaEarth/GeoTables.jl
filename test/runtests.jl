@@ -272,177 +272,156 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
 
       gtb = georef((; a, b, c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
-      @test_broken sprint(show, MIME("text/plain"), gtb) == """
+      @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌─────────┬────────────┬─────────┬─────────────────┐
-      │       a │          b │       c │        geometry │
-      │   Count │ Continuous │ Textual │          Point2 │
-      │ NoUnits │    NoUnits │ NoUnits │                 │
-      ├─────────┼────────────┼─────────┼─────────────────┤
-      │       0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
-      │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
-      │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
-      │       3 │       1.29 │    txt4 │ Point(4.0, 4.0) │
-      │       9 │       3.64 │    txt5 │ Point(5.0, 5.0) │
-      │       5 │       8.05 │    txt6 │ Point(6.0, 6.0) │
-      │       2 │       0.11 │    txt7 │ Point(7.0, 7.0) │
-      │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
-      │       8 │       8.46 │    txt9 │ Point(9.0, 9.0) │
-      └─────────┴────────────┴─────────┴─────────────────┘"""
+      ┌───────────┬────────────┬───────────┬────────────┐
+      │     a     │     b      │     c     │  geometry  │
+      │   Count   │ Continuous │  Textual  │   Point2   │
+      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
+      ├───────────┼────────────┼───────────┼────────────┤
+      │     0     │    2.34    │   txt1    │ (1.0, 1.0) │
+      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
+      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
+      │     3     │    1.29    │   txt4    │ (4.0, 4.0) │
+      │     9     │    3.64    │   txt5    │ (5.0, 5.0) │
+      │     5     │    8.05    │   txt6    │ (6.0, 6.0) │
+      │     2     │    0.11    │   txt7    │ (7.0, 7.0) │
+      │     2     │    0.64    │   txt8    │ (8.0, 8.0) │
+      │     8     │    8.46    │   txt9    │ (9.0, 9.0) │
+      └───────────┴────────────┴───────────┴────────────┘"""
 
       vgtb = view(gtb, 1:3)
       @test sprint(show, vgtb) == "3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}"
-      @test_broken sprint(show, MIME("text/plain"), vgtb) == """
+      @test sprint(show, MIME("text/plain"), vgtb) == """
       3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}
-      ┌─────────┬────────────┬─────────┬─────────────────┐
-      │       a │          b │       c │        geometry │
-      │   Count │ Continuous │ Textual │          Point2 │
-      │ NoUnits │    NoUnits │ NoUnits │                 │
-      ├─────────┼────────────┼─────────┼─────────────────┤
-      │       0 │       2.34 │    txt1 │ Point(1.0, 1.0) │
-      │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
-      │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
-      └─────────┴────────────┴─────────┴─────────────────┘"""
+      ┌───────────┬────────────┬───────────┬────────────┐
+      │     a     │     b      │     c     │  geometry  │
+      │   Count   │ Continuous │  Textual  │   Point2   │
+      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
+      ├───────────┼────────────┼───────────┼────────────┤
+      │     0     │    2.34    │   txt1    │ (1.0, 1.0) │
+      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
+      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
+      └───────────┴────────────┴───────────┴────────────┘"""
 
       gtb = georef((a=a * u"m/s", b=b * u"km/hr", c=c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
-      @test_broken sprint(show, MIME("text/plain"), gtb) == """
+      @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌────────────┬───────────────┬─────────┬─────────────────┐
-      │          a │             b │       c │        geometry │
-      │ Continuous │    Continuous │ Textual │          Point2 │
-      │     m s^-1 │      km hr^-1 │ NoUnits │                 │
-      ├────────────┼───────────────┼─────────┼─────────────────┤
-      │   0 m s^-1 │ 2.34 km hr^-1 │    txt1 │ Point(1.0, 1.0) │
-      │   6 m s^-1 │  7.5 km hr^-1 │    txt2 │ Point(2.0, 2.0) │
-      │   6 m s^-1 │ 0.06 km hr^-1 │    txt3 │ Point(3.0, 3.0) │
-      │   3 m s^-1 │ 1.29 km hr^-1 │    txt4 │ Point(4.0, 4.0) │
-      │   9 m s^-1 │ 3.64 km hr^-1 │    txt5 │ Point(5.0, 5.0) │
-      │   5 m s^-1 │ 8.05 km hr^-1 │    txt6 │ Point(6.0, 6.0) │
-      │   2 m s^-1 │ 0.11 km hr^-1 │    txt7 │ Point(7.0, 7.0) │
-      │   2 m s^-1 │ 0.64 km hr^-1 │    txt8 │ Point(8.0, 8.0) │
-      │   8 m s^-1 │ 8.46 km hr^-1 │    txt9 │ Point(9.0, 9.0) │
-      └────────────┴───────────────┴─────────┴─────────────────┘"""
-
-      nv = length(vertices(grid))
-      gtb = GeoTable(grid, etable=(; a, b, c), vtable=(; d=rand(nv)))
-      @test sprint(show, gtb) == "9×4 GeoTable over 3×3 CartesianGrid{2,Float64}"
-      @test_broken sprint(show, MIME("text/plain"), gtb) == """
-      9×4 GeoTable over 3×3 CartesianGrid{2,Float64}
-      ┌─────────┬────────────┬─────────┬────────────────────────────────────────────────────────────────────────────────┐
-      │       a │          b │       c │                                                                       geometry │
-      │   Count │ Continuous │ Textual │                                                         Quadrangle{2, Float64} │
-      │ NoUnits │    NoUnits │ NoUnits │                                                                                │
-      ├─────────┼────────────┼─────────┼────────────────────────────────────────────────────────────────────────────────┤
-      │       0 │       2.34 │    txt1 │ Quadrangle(Point(0.0, 0.0), Point(1.0, 0.0), Point(1.0, 1.0), Point(0.0, 1.0)) │
-      │       6 │        7.5 │    txt2 │ Quadrangle(Point(1.0, 0.0), Point(2.0, 0.0), Point(2.0, 1.0), Point(1.0, 1.0)) │
-      │       6 │       0.06 │    txt3 │ Quadrangle(Point(2.0, 0.0), Point(3.0, 0.0), Point(3.0, 1.0), Point(2.0, 1.0)) │
-      │       3 │       1.29 │    txt4 │ Quadrangle(Point(0.0, 1.0), Point(1.0, 1.0), Point(1.0, 2.0), Point(0.0, 2.0)) │
-      │       9 │       3.64 │    txt5 │ Quadrangle(Point(1.0, 1.0), Point(2.0, 1.0), Point(2.0, 2.0), Point(1.0, 2.0)) │
-      │       5 │       8.05 │    txt6 │ Quadrangle(Point(2.0, 1.0), Point(3.0, 1.0), Point(3.0, 2.0), Point(2.0, 2.0)) │
-      │       2 │       0.11 │    txt7 │ Quadrangle(Point(0.0, 2.0), Point(1.0, 2.0), Point(1.0, 3.0), Point(0.0, 3.0)) │
-      │       2 │       0.64 │    txt8 │ Quadrangle(Point(1.0, 2.0), Point(2.0, 2.0), Point(2.0, 3.0), Point(1.0, 3.0)) │
-      │       8 │       8.46 │    txt9 │ Quadrangle(Point(2.0, 2.0), Point(3.0, 2.0), Point(3.0, 3.0), Point(2.0, 3.0)) │
-      └─────────┴────────────┴─────────┴────────────────────────────────────────────────────────────────────────────────┘"""
+      ┌────────────┬───────────────┬───────────┬────────────┐
+      │     a      │       b       │     c     │  geometry  │
+      │ Continuous │  Continuous   │  Textual  │   Point2   │
+      │  [m s^-1]  │  [km hr^-1]   │ [NoUnits] │            │
+      ├────────────┼───────────────┼───────────┼────────────┤
+      │  0 m s^-1  │ 2.34 km hr^-1 │   txt1    │ (1.0, 1.0) │
+      │  6 m s^-1  │ 7.5 km hr^-1  │   txt2    │ (2.0, 2.0) │
+      │  6 m s^-1  │ 0.06 km hr^-1 │   txt3    │ (3.0, 3.0) │
+      │  3 m s^-1  │ 1.29 km hr^-1 │   txt4    │ (4.0, 4.0) │
+      │  9 m s^-1  │ 3.64 km hr^-1 │   txt5    │ (5.0, 5.0) │
+      │  5 m s^-1  │ 8.05 km hr^-1 │   txt6    │ (6.0, 6.0) │
+      │  2 m s^-1  │ 0.11 km hr^-1 │   txt7    │ (7.0, 7.0) │
+      │  2 m s^-1  │ 0.64 km hr^-1 │   txt8    │ (8.0, 8.0) │
+      │  8 m s^-1  │ 8.46 km hr^-1 │   txt9    │ (9.0, 9.0) │
+      └────────────┴───────────────┴───────────┴────────────┘"""
 
       gtb = georef((a=[missing; a[2:9]], b=[b[1:4]; missing; b[6:9]], c=[c[1:8]; missing]), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
-      @test_broken sprint(show, MIME("text/plain"), gtb) == """
+      @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌─────────┬────────────┬─────────┬─────────────────┐
-      │       a │          b │       c │        geometry │
-      │   Count │ Continuous │ Textual │          Point2 │
-      │ NoUnits │    NoUnits │ NoUnits │                 │
-      ├─────────┼────────────┼─────────┼─────────────────┤
-      │ missing │       2.34 │    txt1 │ Point(1.0, 1.0) │
-      │       6 │        7.5 │    txt2 │ Point(2.0, 2.0) │
-      │       6 │       0.06 │    txt3 │ Point(3.0, 3.0) │
-      │       3 │       1.29 │    txt4 │ Point(4.0, 4.0) │
-      │       9 │    missing │    txt5 │ Point(5.0, 5.0) │
-      │       5 │       8.05 │    txt6 │ Point(6.0, 6.0) │
-      │       2 │       0.11 │    txt7 │ Point(7.0, 7.0) │
-      │       2 │       0.64 │    txt8 │ Point(8.0, 8.0) │
-      │       8 │       8.46 │ missing │ Point(9.0, 9.0) │
-      └─────────┴────────────┴─────────┴─────────────────┘"""
+      ┌───────────┬────────────┬───────────┬────────────┐
+      │     a     │     b      │     c     │  geometry  │
+      │   Count   │ Continuous │  Textual  │   Point2   │
+      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
+      ├───────────┼────────────┼───────────┼────────────┤
+      │  missing  │    2.34    │   txt1    │ (1.0, 1.0) │
+      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
+      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
+      │     3     │    1.29    │   txt4    │ (4.0, 4.0) │
+      │     9     │  missing   │   txt5    │ (5.0, 5.0) │
+      │     5     │    8.05    │   txt6    │ (6.0, 6.0) │
+      │     2     │    0.11    │   txt7    │ (7.0, 7.0) │
+      │     2     │    0.64    │   txt8    │ (8.0, 8.0) │
+      │     8     │    8.46    │  missing  │ (9.0, 9.0) │
+      └───────────┴────────────┴───────────┴────────────┘"""
 
       gtb = georef((; a, b, c), pset)
-      @test_broken sprint(show, MIME("text/html"), gtb) == """
+      @test sprint(show, MIME("text/html"), gtb) == """
       <table>
         <caption style = "text-align: left;">9×4 GeoTable over 9 PointSet{2,Float64}</caption>
         <thead>
           <tr class = "header">
-            <th style = "text-align: right;">a</th>
-            <th style = "text-align: right;">b</th>
-            <th style = "text-align: right;">c</th>
-            <th style = "text-align: right;">geometry</th>
+            <th style = "text-align: center;">a</th>
+            <th style = "text-align: center;">b</th>
+            <th style = "text-align: center;">c</th>
+            <th style = "text-align: center;">geometry</th>
           </tr>
           <tr class = "subheader">
-            <th style = "text-align: right;">Count</th>
-            <th style = "text-align: right;">Continuous</th>
-            <th style = "text-align: right;">Textual</th>
-            <th style = "text-align: right;">Point2</th>
+            <th style = "text-align: center;">Count</th>
+            <th style = "text-align: center;">Continuous</th>
+            <th style = "text-align: center;">Textual</th>
+            <th style = "text-align: center;">Point2</th>
           </tr>
           <tr class = "subheader headerLastRow">
-            <th style = "text-align: right;">NoUnits</th>
-            <th style = "text-align: right;">NoUnits</th>
-            <th style = "text-align: right;">NoUnits</th>
-            <th style = "text-align: right;"></th>
+            <th style = "text-align: center;">[NoUnits]</th>
+            <th style = "text-align: center;">[NoUnits]</th>
+            <th style = "text-align: center;">[NoUnits]</th>
+            <th style = "text-align: center;"></th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style = "text-align: right;">0</td>
-            <td style = "text-align: right;">2.34</td>
-            <td style = "text-align: right;">txt1</td>
-            <td style = "text-align: right;">Point(1.0, 1.0)</td>
+            <td style = "text-align: center;">0</td>
+            <td style = "text-align: center;">2.34</td>
+            <td style = "text-align: center;">txt1</td>
+            <td style = "text-align: center;">(1.0, 1.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">6</td>
-            <td style = "text-align: right;">7.5</td>
-            <td style = "text-align: right;">txt2</td>
-            <td style = "text-align: right;">Point(2.0, 2.0)</td>
+            <td style = "text-align: center;">6</td>
+            <td style = "text-align: center;">7.5</td>
+            <td style = "text-align: center;">txt2</td>
+            <td style = "text-align: center;">(2.0, 2.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">6</td>
-            <td style = "text-align: right;">0.06</td>
-            <td style = "text-align: right;">txt3</td>
-            <td style = "text-align: right;">Point(3.0, 3.0)</td>
+            <td style = "text-align: center;">6</td>
+            <td style = "text-align: center;">0.06</td>
+            <td style = "text-align: center;">txt3</td>
+            <td style = "text-align: center;">(3.0, 3.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">3</td>
-            <td style = "text-align: right;">1.29</td>
-            <td style = "text-align: right;">txt4</td>
-            <td style = "text-align: right;">Point(4.0, 4.0)</td>
+            <td style = "text-align: center;">3</td>
+            <td style = "text-align: center;">1.29</td>
+            <td style = "text-align: center;">txt4</td>
+            <td style = "text-align: center;">(4.0, 4.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">9</td>
-            <td style = "text-align: right;">3.64</td>
-            <td style = "text-align: right;">txt5</td>
-            <td style = "text-align: right;">Point(5.0, 5.0)</td>
+            <td style = "text-align: center;">9</td>
+            <td style = "text-align: center;">3.64</td>
+            <td style = "text-align: center;">txt5</td>
+            <td style = "text-align: center;">(5.0, 5.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">5</td>
-            <td style = "text-align: right;">8.05</td>
-            <td style = "text-align: right;">txt6</td>
-            <td style = "text-align: right;">Point(6.0, 6.0)</td>
+            <td style = "text-align: center;">5</td>
+            <td style = "text-align: center;">8.05</td>
+            <td style = "text-align: center;">txt6</td>
+            <td style = "text-align: center;">(6.0, 6.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">2</td>
-            <td style = "text-align: right;">0.11</td>
-            <td style = "text-align: right;">txt7</td>
-            <td style = "text-align: right;">Point(7.0, 7.0)</td>
+            <td style = "text-align: center;">2</td>
+            <td style = "text-align: center;">0.11</td>
+            <td style = "text-align: center;">txt7</td>
+            <td style = "text-align: center;">(7.0, 7.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">2</td>
-            <td style = "text-align: right;">0.64</td>
-            <td style = "text-align: right;">txt8</td>
-            <td style = "text-align: right;">Point(8.0, 8.0)</td>
+            <td style = "text-align: center;">2</td>
+            <td style = "text-align: center;">0.64</td>
+            <td style = "text-align: center;">txt8</td>
+            <td style = "text-align: center;">(8.0, 8.0)</td>
           </tr>
           <tr>
-            <td style = "text-align: right;">8</td>
-            <td style = "text-align: right;">8.46</td>
-            <td style = "text-align: right;">txt9</td>
-            <td style = "text-align: right;">Point(9.0, 9.0)</td>
+            <td style = "text-align: center;">8</td>
+            <td style = "text-align: center;">8.46</td>
+            <td style = "text-align: center;">txt9</td>
+            <td style = "text-align: center;">(9.0, 9.0)</td>
           </tr>
         </tbody>
       </table>

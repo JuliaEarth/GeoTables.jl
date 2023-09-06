@@ -14,7 +14,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataAPI = "1.15"
-Meshes = "0.35"
+Meshes = "0.35.3"
 PrettyTables = "2.2"
 ScientificTypes = "3.0"
 Tables = "1.10"
