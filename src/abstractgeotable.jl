@@ -359,10 +359,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=Val(:html),
-    _common_kwargs(geotable)...,
-    max_num_of_rows=10
-  )
+  pretty_table(io, geotable; backend=Val(:html), _common_kwargs(geotable)..., max_num_of_rows=10)
 end
 
 function _common_kwargs(geotable)
