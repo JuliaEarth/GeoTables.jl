@@ -344,6 +344,26 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │     8     │    8.46    │  missing  │ (9.0, 9.0) │
       └───────────┴────────────┴───────────┴────────────┘"""
 
+      gtb = georef((; x=fill(missing, 9)), pset)
+      @test sprint(show, gtb) == "9×2 GeoTable over 9 PointSet{2,Float64}"
+      @test sprint(show, MIME("text/plain"), gtb) == """
+      9×2 GeoTable over 9 PointSet{2,Float64}
+      ┌───────────┬────────────┐
+      │     x     │  geometry  │
+      │  Missing  │   Point2   │
+      │ [NoUnits] │            │
+      ├───────────┼────────────┤
+      │  missing  │ (1.0, 1.0) │
+      │  missing  │ (2.0, 2.0) │
+      │  missing  │ (3.0, 3.0) │
+      │  missing  │ (4.0, 4.0) │
+      │  missing  │ (5.0, 5.0) │
+      │  missing  │ (6.0, 6.0) │
+      │  missing  │ (7.0, 7.0) │
+      │  missing  │ (8.0, 8.0) │
+      │  missing  │ (9.0, 9.0) │
+      └───────────┴────────────┘"""
+
       gtb = georef((; a, b, c), pset)
       @test sprint(show, MIME("text/html"), gtb) == """
       <table>
