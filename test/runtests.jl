@@ -189,12 +189,12 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       gtb = dummy(grid, (; a, b))
       tri = Triangle((2.5, 2.5), (4.5, 4.5), (6.5, 2.5))
       v = view(gtb, tri)
-      @test a[linds[4, 4]] ∈ v.a
-      @test a[linds[5, 4]] ∈ v.a
-      @test a[linds[6, 4]] ∈ v.a
-      @test b[linds[4, 4]] ∈ v.b
-      @test b[linds[5, 4]] ∈ v.b
-      @test b[linds[6, 4]] ∈ v.b
+      @test gtb.a[linds[4, 4]] ∈ v.a
+      @test gtb.a[linds[5, 4]] ∈ v.a
+      @test gtb.a[linds[6, 4]] ∈ v.a
+      @test gtb.b[linds[4, 4]] ∈ v.b
+      @test gtb.b[linds[5, 4]] ∈ v.b
+      @test gtb.b[linds[6, 4]] ∈ v.b
     end
   end
 
