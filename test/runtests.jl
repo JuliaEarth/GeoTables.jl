@@ -180,6 +180,21 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test centroid(domain(v), 3) == Point(1.5, 1.5)
       @test v.a == v."a" == [2, 3, 4]
       @test v.b == v."b" == [6, 7, 8]
+
+      # viewing with geometries
+      a = rand(100)
+      b = rand(100)
+      grid = CartesianGrid(10, 10)
+      linds = LinearIndices(size(grid))
+      gtb = dummy(grid, (; a, b))
+      tri = Triangle((1.5, 1.5), (4.5, 4.5), (7.5, 1.5))
+      v = view(gtb, tri)
+      @test gtb.a[linds[4, 3]] ∈ v.a
+      @test gtb.a[linds[5, 3]] ∈ v.a
+      @test gtb.a[linds[6, 3]] ∈ v.a
+      @test gtb.b[linds[4, 3]] ∈ v.b
+      @test gtb.b[linds[5, 3]] ∈ v.b
+      @test gtb.b[linds[6, 3]] ∈ v.b
     end
   end
 
