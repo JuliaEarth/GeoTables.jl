@@ -187,14 +187,14 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       grid = CartesianGrid(10, 10)
       linds = LinearIndices(size(grid))
       gtb = dummy(grid, (; a, b))
-      tri = Triangle((2.5, 2.5), (4.5, 4.5), (6.5, 2.5))
+      tri = Triangle((1.5, 1.5), (4.5, 4.5), (7.5, 1.5))
       v = view(gtb, tri)
-      @test gtb.a[linds[4, 4]] ∈ v.a
-      @test gtb.a[linds[5, 4]] ∈ v.a
-      @test gtb.a[linds[6, 4]] ∈ v.a
-      @test gtb.b[linds[4, 4]] ∈ v.b
-      @test gtb.b[linds[5, 4]] ∈ v.b
-      @test gtb.b[linds[6, 4]] ∈ v.b
+      @test gtb.a[linds[4, 3]] ∈ v.a
+      @test gtb.a[linds[5, 3]] ∈ v.a
+      @test gtb.a[linds[6, 3]] ∈ v.a
+      @test gtb.b[linds[4, 3]] ∈ v.b
+      @test gtb.b[linds[5, 3]] ∈ v.b
+      @test gtb.b[linds[6, 3]] ∈ v.b
     end
   end
 
