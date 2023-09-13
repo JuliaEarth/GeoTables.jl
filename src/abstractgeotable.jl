@@ -102,6 +102,8 @@ Tables.rows(geotable::AbstractGeoTable) = GeoTableRows(domain(geotable), Tables.
 
 Tables.schema(geotable::AbstractGeoTable) = Tables.schema(Tables.rows(geotable))
 
+Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = GeoTableView(geotable, inds)
+
 # wrapper type for rows of the geotable table
 # so that we can easily inform the schema
 struct GeoTableRows{D,R}

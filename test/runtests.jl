@@ -52,6 +52,11 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       ]
       @test collect(Tables.columns(dat)) == [[1, 2, 3, 4], [5, 6, 7, 8], [dom[1], dom[2], dom[3], dom[4]]]
       @test Tables.materializer(dat) <: DummyType
+      inds = [1, 3]
+      @test Tables.subset(dat, inds) == view(dat, inds)
+      # viewhint keyword argument is ignored
+      @test Tables.subset(dat, inds, viewhint=true) isa GeoTables.GeoTableView
+      @test Tables.subset(dat, inds, viewhint=false) isa GeoTables.GeoTableView
 
       # dataframe interface
       grid = CartesianGrid(2, 2)
