@@ -151,7 +151,7 @@ function Tables.schema(rows::GeoTableRows)
   end
 end
 
-Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = constructor(T)
+Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
 
 # --------------------
 # DATAFRAME INTERFACE
