@@ -28,10 +28,14 @@ end
 function Base.values(v::GeoTableView, rank=nothing)
   geotable = getgeotable(v)
   inds = getinds(v)
-  R = paramdim(domain(geotable))
-  r = isnothing(rank) ? R : rank
-  𝒯 = values(geotable, r)
-  r == R ? Tables.subset(𝒯, inds) : nothing
+  dim = paramdim(domain(geotable))
+  r = isnothing(rank) ? dim : rank
+  table = values(geotable, r)
+  if r == dim && !isnothing(table) 
+    Tables.subset(table, inds)
+  else
+    nothing
+  end
 end
 
 function constructor(::Type{GeoTableView{T,I}}) where {T<:AbstractGeoTable,I}

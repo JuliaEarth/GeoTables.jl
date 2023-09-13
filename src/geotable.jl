@@ -46,12 +46,12 @@ function GeoTable(domain::Domain; vtable=nothing, etable=nothing)
   d = paramdim(domain)
   values = if !isnothing(vtable) && !isnothing(etable)
     Dict(0 => vtable, d => etable)
-  elseif isnothing(vtable)
+  elseif !isnothing(etable)
     Dict(d => etable)
-  elseif isnothing(etable)
+  elseif !isnothing(vtable)
     Dict(0 => vtable)
   else
-    throw(ArgumentError("missing geotable tables"))
+    Dict(d => nothing)
   end
   GeoTable(domain, values)
 end
@@ -66,7 +66,7 @@ function Base.values(geotable::GeoTable, rank=nothing)
   domain = getdomain(geotable)
   values = getvalues(geotable)
   r = isnothing(rank) ? paramdim(domain) : rank
-  haskey(values, r) ? values[r] : nothing
+  get(values, r, nothing)
 end
 
 constructor(::Type{<:GeoTable}) = GeoTable

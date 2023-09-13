@@ -295,6 +295,60 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
     @test_throws AssertionError georef(tuple2D)
   end
 
+  @testset "GeoTables without attributes" begin
+    pset = PointSet((0, 0), (1, 1), (2, 2))
+    gtb = GeoTable(pset)
+    @test ncol(gtb) == 1
+
+    # GeoTableRows
+    rows = Tables.rows(gtb)
+    sch = Tables.schema(rows)
+    @test sch.names == (:geometry,)
+    @test sch.types == (Point2,)
+    row, state = iterate(rows)
+    @test Tables.columnnames(row) == (:geometry,)
+    @test Tables.getcolumn(row, :geometry) == pset[1]
+    row, state = iterate(rows, state)
+    @test Tables.columnnames(row) == (:geometry,)
+    @test Tables.getcolumn(row, :geometry) == pset[2]
+    row, state = iterate(rows, state)
+    @test Tables.columnnames(row) == (:geometry,)
+    @test Tables.getcolumn(row, :geometry) == pset[3]
+    @test isnothing(iterate(rows, state))
+
+    # dataframe interface
+    @test propertynames(gtb) == [:geometry]
+    @test gtb.geometry == pset
+    @test gtb[1:2, [:geometry]].geometry == view(pset, 1:2)
+    @test gtb[1, [:geometry]].geometry == pset[1]
+    @test gtb[1, :].geometry == pset[1]
+    @test gtb[:, [:geometry]] == gtb
+    ngtb = georef((; x=rand(3)), pset)
+    hgtb = hcat(gtb, ngtb)
+    @test propertynames(hgtb) == [:x, :geometry]
+    @test hgtb.x == ngtb.x
+    @test hgtb.geometry == pset
+    npset = PointSet((4, 4), (5, 5), (6, 6))
+    ngtb = GeoTable(npset)
+    vgtb = vcat(gtb, ngtb)
+    @test propertynames(vgtb) == [:geometry]
+    @test vgtb.geometry == PointSet([collect(pset); collect(npset)])
+
+    # viewing
+    v = view(gtb, [1, 3])
+    @test isnothing(values(v))
+    @test v.geometry == view(pset, [1, 3])
+
+    # throws
+    @test_throws ErrorException gtb.test
+    @test_throws ErrorException gtb[[1, 3], [:test]]
+    @test_throws ErrorException gtb[2, [:test]]
+    @test_throws ErrorException gtb[:, [:test]]
+    @test_throws ErrorException gtb[:, r"test"]
+    ngtb = georef((; x=rand(3)), npset)
+    @test_throws ArgumentError vcat(gtb, ngtb)
+  end
+
   # terminal prints are different on macOS
   if !Sys.isapple()
     @testset "show" begin
@@ -302,7 +356,6 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       b = [2.34, 7.5, 0.06, 1.29, 3.64, 8.05, 0.11, 0.64, 8.46]
       c = ["txt1", "txt2", "txt3", "txt4", "txt5", "txt6", "txt7", "txt8", "txt9"]
       pset = PointSet(Point.(1:9, 1:9))
-      grid = CartesianGrid(3, 3)
 
       gtb = georef((; a, b, c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
@@ -397,6 +450,26 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │  missing  │ (8.0, 8.0) │
       │  missing  │ (9.0, 9.0) │
       └───────────┴────────────┘"""
+
+      gtb = georef(nothing, pset)
+      @test sprint(show, gtb) == "9×1 GeoTable over 9 PointSet{2,Float64}"
+      @test sprint(show, MIME("text/plain"), gtb) == """
+      9×1 GeoTable over 9 PointSet{2,Float64}
+      ┌────────────┐
+      │  geometry  │
+      │   Point2   │
+      │            │
+      ├────────────┤
+      │ (1.0, 1.0) │
+      │ (2.0, 2.0) │
+      │ (3.0, 3.0) │
+      │ (4.0, 4.0) │
+      │ (5.0, 5.0) │
+      │ (6.0, 6.0) │
+      │ (7.0, 7.0) │
+      │ (8.0, 8.0) │
+      │ (9.0, 9.0) │
+      └────────────┘"""
 
       gtb = georef((; a, b, c), pset)
       @test sprint(show, MIME("text/html"), gtb) == """
