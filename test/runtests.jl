@@ -55,8 +55,8 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       inds = [1, 3]
       @test Tables.subset(dat, inds) == view(dat, inds)
       # viewhint keyword argument is ignored
-      @test Tables.subset(dat, inds, viewhint=true) isa GeoTables.GeoTableView
-      @test Tables.subset(dat, inds, viewhint=false) isa GeoTables.GeoTableView
+      @test Tables.subset(dat, inds, viewhint=true) isa GeoTables.SubGeoTable
+      @test Tables.subset(dat, inds, viewhint=false) isa GeoTables.SubGeoTable
 
       # dataframe interface
       grid = CartesianGrid(2, 2)
@@ -378,9 +378,9 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       └───────────┴────────────┴───────────┴────────────┘"""
 
       vgtb = view(gtb, 1:3)
-      @test sprint(show, vgtb) == "3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}"
+      @test sprint(show, vgtb) == "3×4 SubGeoTable over 3 View{9 PointSet{2,Float64}}"
       @test sprint(show, MIME("text/plain"), vgtb) == """
-      3×4 GeoTableView over 3 View{9 PointSet{2,Float64}}
+      3×4 SubGeoTable over 3 View{9 PointSet{2,Float64}}
       ┌───────────┬────────────┬───────────┬────────────┐
       │     a     │     b      │     c     │  geometry  │
       │   Count   │ Continuous │  Textual  │   Point2   │

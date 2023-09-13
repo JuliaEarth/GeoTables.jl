@@ -92,9 +92,9 @@ function ncol(geotable::AbstractGeoTable)
   length(vars) + 1
 end
 
-Base.view(geotable::AbstractGeoTable, inds) = GeoTableView(geotable, inds)
+Base.view(geotable::AbstractGeoTable, inds) = SubGeoTable(geotable, inds)
 
-Base.view(geotable::AbstractGeoTable, geometry::Geometry) = GeoTableView(geotable, indices(domain(geotable), geometry))
+Base.view(geotable::AbstractGeoTable, geometry::Geometry) = SubGeoTable(geotable, indices(domain(geotable), geometry))
 
 # -----------------
 # TABLES INTERFACE
@@ -112,7 +112,7 @@ end
 
 Tables.schema(geotable::AbstractGeoTable) = Tables.schema(Tables.rows(geotable))
 
-Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = GeoTableView(geotable, inds)
+Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = SubGeoTable(geotable, inds)
 
 # wrapper type for rows of the geotable table
 # so that we can easily inform the schema
