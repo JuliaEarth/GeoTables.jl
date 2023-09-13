@@ -84,7 +84,13 @@ end
 
 nrow(geotable::AbstractGeoTable) = nelements(domain(geotable))
 
-ncol(geotable::AbstractGeoTable) = length(Tables.columnnames(Tables.columns(values(geotable)))) + 1
+function ncol(geotable::AbstractGeoTable)
+  table = values(geotable)
+  isnothing(table) && return 1
+  cols = Tables.columns(table)
+  vars = Tables.columnnames(cols)
+  length(vars) + 1
+end
 
 Base.view(geotable::AbstractGeoTable, inds) = GeoTableView(geotable, inds)
 
@@ -98,7 +104,11 @@ Tables.istable(::Type{<:AbstractGeoTable}) = true
 
 Tables.rowaccess(::Type{<:AbstractGeoTable}) = true
 
-Tables.rows(geotable::AbstractGeoTable) = GeoTableRows(domain(geotable), Tables.rows(values(geotable)))
+function Tables.rows(geotable::AbstractGeoTable)
+  table = values(geotable)
+  trows = isnothing(table) ? nothing : Tables.rows(table)
+  GeoTableRows(domain(geotable), trows)
+end
 
 Tables.schema(geotable::AbstractGeoTable) = Tables.schema(Tables.rows(geotable))
 
@@ -106,7 +116,7 @@ Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = GeoTableView
 
 # wrapper type for rows of the geotable table
 # so that we can easily inform the schema
-struct GeoTableRows{D,R}
+struct GeoTableRows{D<:Domain,R}
   domain::D
   trows::R
 end
@@ -125,6 +135,15 @@ function Base.iterate(rows::GeoTableRows, state=1)
   end
 end
 
+function Base.iterate(rows::GeoTableRows{<:Domain,Nothing}, state=1)
+  if state > length(rows)
+    nothing
+  else
+    elm, _ = iterate(rows.domain, state)
+    (; geometry=elm), state + 1
+  end
+end
+
 function Tables.schema(rows::GeoTableRows)
   geomtype = eltype(rows.domain)
   schema = Tables.schema(rows.trows)
@@ -132,7 +151,12 @@ function Tables.schema(rows::GeoTableRows)
   Tables.Schema((names..., :geometry), (types..., geomtype))
 end
 
-Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
+function Tables.schema(rows::GeoTableRows{<:Domain,Nothing})
+  geomtype = eltype(rows.domain)
+  Tables.Schema((:geometry,), (geomtype,))
+end
+
+Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = constructor(T)
 
 # --------------------
 # DATAFRAME INTERFACE
@@ -141,16 +165,23 @@ Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
 Base.names(geotable::AbstractGeoTable) = string.(propertynames(geotable))
 
 function Base.propertynames(geotable::AbstractGeoTable)
-  cols = Tables.columns(values(geotable))
-  vars = Tables.columnnames(cols)
-  [collect(vars); :geometry]
+  table = values(geotable)
+  if isnothing(table)
+    [:geometry]
+  else
+    cols = Tables.columns(table)
+    vars = Tables.columnnames(cols)
+    [collect(vars); :geometry]
+  end
 end
 
 function Base.getproperty(geotable::AbstractGeoTable, var::Symbol)
-  if var == :geometry
+  if var === :geometry
     domain(geotable)
   else
-    cols = Tables.columns(values(geotable))
+    table = values(geotable)
+    isnothing(table) && _noattrs()
+    cols = Tables.columns(table)
     Tables.getcolumn(cols, var)
   end
 end
@@ -159,14 +190,19 @@ Base.getproperty(geotable::AbstractGeoTable, var::AbstractString) = getproperty(
 
 function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::AbstractVector{Symbol})
   _checkvars(vars)
-  _rmgeometry!(vars)
   dom = domain(geotable)
   tab = values(geotable)
+  vars = setdiff(vars, [:geometry])
   newdom = view(dom, inds)
-  subset = Tables.subset(tab, inds)
-  cols = Tables.columns(subset)
-  pairs = (var => Tables.getcolumn(cols, var) for var in vars)
-  newtab = (; pairs...) |> Tables.materializer(tab)
+  newtab = if isnothing(tab)
+    !isempty(vars) && _noattrs()
+    nothing
+  else
+    sub = Tables.subset(tab, inds)
+    cols = Tables.columns(sub)
+    pairs = (var => Tables.getcolumn(cols, var) for var in vars)
+    (; pairs...) |> Tables.materializer(tab)
+  end
   newval = Dict(paramdim(newdom) => newtab)
   constructor(geotable)(newdom, newval)
 end
@@ -184,12 +220,17 @@ end
 
 function Base.getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Symbol})
   _checkvars(vars)
-  _rmgeometry!(vars)
   dom = domain(geotable)
   tab = values(geotable)
-  row = Tables.subset(tab, ind)
-  pairs = (var => Tables.getcolumn(row, var) for var in vars)
-  (; pairs..., geometry=dom[ind])
+  vars = setdiff(vars, [:geometry])
+  if isnothing(tab)
+    !isempty(vars) && _noattrs()
+    (; geometry=dom[ind])
+  else
+    row = Tables.subset(tab, ind)
+    pairs = (var => Tables.getcolumn(row, var) for var in vars)
+    (; pairs..., geometry=dom[ind])
+  end
 end
 
 Base.getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(geotable, var)[ind]
@@ -197,20 +238,30 @@ Base.getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(g
 function Base.getindex(geotable::AbstractGeoTable, ind::Int, ::Colon)
   dom = domain(geotable)
   tab = values(geotable)
-  row = Tables.subset(tab, ind)
-  vars = Tables.columnnames(row)
-  pairs = (var => Tables.getcolumn(row, var) for var in vars)
-  (; pairs..., geometry=dom[ind])
+  if isnothing(tab)
+    !isempty(vars) && _noattrs()
+    (; geometry=dom[ind])
+  else
+    row = Tables.subset(tab, ind)
+    vars = Tables.columnnames(row)
+    pairs = (var => Tables.getcolumn(row, var) for var in vars)
+    (; pairs..., geometry=dom[ind])
+  end
 end
 
 function Base.getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector{Symbol})
   _checkvars(vars)
-  _rmgeometry!(vars)
   dom = domain(geotable)
   tab = values(geotable)
-  cols = Tables.columns(tab)
-  pairs = (var => Tables.getcolumn(cols, var) for var in vars)
-  newtab = (; pairs...) |> Tables.materializer(tab)
+  vars = setdiff(vars, [:geometry])
+  newtab = if isnothing(tab)
+    !isempty(vars) && _noattrs()
+    nothing
+  else
+    cols = Tables.columns(tab)
+    pairs = (var => Tables.getcolumn(cols, var) for var in vars)
+    (; pairs...) |> Tables.materializer(tab)
+  end
   newval = Dict(paramdim(dom) => newtab)
   constructor(geotable)(dom, newval)
 end
@@ -224,10 +275,14 @@ Base.getindex(geotable::AbstractGeoTable, inds, var::AbstractString) = getindex(
 
 function Base.getindex(geotable::AbstractGeoTable, inds, var::Regex)
   tab = values(geotable)
-  cols = Tables.columns(tab)
-  names = Tables.columnnames(cols) |> collect
-  snames = filter(nm -> occursin(var, String(nm)), names)
-  getindex(geotable, inds, snames)
+  if isnothing(tab)
+    _noattrs()
+  else
+    cols = Tables.columns(tab)
+    names = Tables.columnnames(cols) |> collect
+    snames = filter(nm -> occursin(var, String(nm)), names)
+    getindex(geotable, inds, snames)
+  end
 end
 
 Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars) =
@@ -240,26 +295,35 @@ Base.vcat(geotable::AbstractGeoTable...) = reduce(_vcat, geotable)
 function _hcat(geotable1, geotable2)
   dom = domain(geotable1)
   if dom ≠ domain(geotable2)
-    throw(ArgumentError("All geotable must have the same domain"))
+    throw(ArgumentError("all geotables must have the same domain"))
   end
 
   tab1 = values(geotable1)
   tab2 = values(geotable2)
-  cols1 = Tables.columns(tab1)
-  cols2 = Tables.columns(tab2)
-  names1 = Tables.columnnames(cols1)
-  names2 = Tables.columnnames(cols2)
-  names = [collect(names1); collect(names2)]
+  newtab = if !isnothing(tab1) && !isnothing(tab2)
+    cols1 = Tables.columns(tab1)
+    cols2 = Tables.columns(tab2)
+    names1 = Tables.columnnames(cols1)
+    names2 = Tables.columnnames(cols2)
+    names = [collect(names1); collect(names2)]
 
-  if !allunique(names)
-    throw(ArgumentError("All geotable must have different variables"))
+    if !allunique(names)
+      throw(ArgumentError("all geotables must have different variables"))
+    end
+
+    columns1 = [Tables.getcolumn(cols1, name) for name in names1]
+    columns2 = [Tables.getcolumn(cols2, name) for name in names2]
+    columns = [columns1; columns2]
+
+    newtab = (; zip(names, columns)...)
+  elseif !isnothing(tab1)
+    tab1
+  elseif !isnothing(tab2)
+    tab2
+  else
+    nothing
   end
 
-  columns1 = [Tables.getcolumn(cols1, name) for name in names1]
-  columns2 = [Tables.getcolumn(cols2, name) for name in names2]
-  columns = [columns1; columns2]
-
-  newtab = (; zip(names, columns)...)
   newval = Dict(paramdim(dom) => newtab)
   constructor(geotable1)(dom, newval)
 end
@@ -269,36 +333,41 @@ function _vcat(geotable1, geotable2)
   dom2 = domain(geotable2)
   tab1 = values(geotable1)
   tab2 = values(geotable2)
-  cols1 = Tables.columns(tab1)
-  cols2 = Tables.columns(tab2)
-  names = Tables.columnnames(cols1)
 
-  if Set(names) ≠ Set(Tables.columnnames(cols2))
-    throw(ArgumentError("All geotable must have the same variables"))
+  newtab = if !isnothing(tab1) && !isnothing(tab2)
+    cols1 = Tables.columns(tab1)
+    cols2 = Tables.columns(tab2)
+    names = Tables.columnnames(cols1)
+
+    if Set(names) ≠ Set(Tables.columnnames(cols2))
+      throw(ArgumentError("all geotables must have the same variables"))
+    end
+
+    columns = map(names) do name
+      column1 = Tables.getcolumn(cols1, name)
+      column2 = Tables.getcolumn(cols2, name)
+      [column1; column2]
+    end
+
+    newtab = (; zip(names, columns)...)
+  elseif !isnothing(tab1)
+    tab1
+  elseif !isnothing(tab2)
+    tab2
+  else
+    nothing
   end
 
-  columns = map(names) do name
-    column1 = Tables.getcolumn(cols1, name)
-    column2 = Tables.getcolumn(cols2, name)
-    [column1; column2]
-  end
-
-  newtab = (; zip(names, columns)...)
   newdom = GeometrySet([collect(dom1); collect(dom2)])
   newval = Dict(paramdim(newdom) => newtab)
   constructor(geotable1)(newdom, newval)
 end
 
+_noattrs() = error("there are no attributes in the geotable")
+
 function _checkvars(vars)
   if !allunique(vars)
-    throw(ArgumentError("The variable names must be unique"))
-  end
-end
-
-function _rmgeometry!(vars)
-  ind = findfirst(==(:geometry), vars)
-  if !isnothing(ind)
-    popat!(vars, ind)
+    throw(ArgumentError("variable names must be unique"))
   end
 end
 
@@ -355,7 +424,6 @@ end
 function _common_kwargs(geotable)
   dom = domain(geotable)
   tab = values(geotable)
-  cols = Tables.columns(tab)
   names = propertynames(geotable)
 
   # header
@@ -367,6 +435,7 @@ function _common_kwargs(geotable)
       t = Meshes.prettyname(eltype(dom))
       u = ""
     else
+      cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
       if T <: Quantity
