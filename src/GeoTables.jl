@@ -14,10 +14,9 @@ using Unitful
 import DataAPI: nrow, ncol
 
 include("abstractgeotable.jl")
-include("geotableview.jl")
 include("geotable.jl")
+include("subgeotable.jl")
 include("georef.jl")
-include("deprecations.jl")
 
 export
   # AbstractGeoTable interface
