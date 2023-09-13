@@ -90,6 +90,20 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test data[3, r"a"] == (a=3, geometry=grid[3])
       @test data[3:4, r"b"] == dummy(view(grid, 3:4), (b=[7, 8],))
       @test data[:, r"[ab]"] == data
+      # geometries
+      a = rand(100)
+      b = rand(100)
+      grid = CartesianGrid(10, 10)
+      linds = LinearIndices(size(grid))
+      gtb = dummy(grid, (; a, b))
+      tri = Triangle((1.5, 1.5), (4.5, 4.5), (7.5, 1.5))
+      sub = gtb[tri, :]
+      @test gtb[linds[4, 3], :a] ∈ sub.a
+      @test gtb[linds[5, 3], :a] ∈ sub.a
+      @test gtb[linds[6, 3], :a] ∈ sub.a
+      @test gtb[linds[4, 3], :b] ∈ sub.b
+      @test gtb[linds[5, 3], :b] ∈ sub.b
+      @test gtb[linds[6, 3], :b] ∈ sub.b
 
       # hcat
       dom = PointSet(rand(Point2, 10))
