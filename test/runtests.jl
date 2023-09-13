@@ -302,6 +302,9 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
 
     # GeoTableRows
     rows = Tables.rows(gtb)
+    sch = Tables.schema(rows)
+    @test sch.names == (:geometry,)
+    @test sch.types == (Point2,)
     row, state = iterate(rows)
     @test Tables.columnnames(row) == (:geometry,)
     @test Tables.getcolumn(row, :geometry) == pset[1]
