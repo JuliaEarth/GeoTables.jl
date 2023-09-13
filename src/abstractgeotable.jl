@@ -230,6 +230,9 @@ function Base.getindex(geotable::AbstractGeoTable, inds, var::Regex)
   getindex(geotable, inds, snames)
 end
 
+Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars) =
+  getindex(geotable, indices(domain(geotable), geometry), vars)
+
 Base.hcat(geotable::AbstractGeoTable...) = reduce(_hcat, geotable)
 
 Base.vcat(geotable::AbstractGeoTable...) = reduce(_vcat, geotable)
