@@ -127,33 +127,28 @@ function Base.iterate(rows::GeoTableRows, state=1)
   if state > length(rows)
     nothing
   else
-    row, _ = iterate(rows.trows, state)
     elm, _ = iterate(rows.domain, state)
-    names = Tables.columnnames(row)
-    pairs = (nm => Tables.getcolumn(row, nm) for nm in names)
-    (; pairs..., geometry=elm), state + 1
-  end
-end
-
-function Base.iterate(rows::GeoTableRows{<:Domain,Nothing}, state=1)
-  if state > length(rows)
-    nothing
-  else
-    elm, _ = iterate(rows.domain, state)
-    (; geometry=elm), state + 1
+    row = if isnothing(rows.trows)
+      (; geometry=elm)
+    else
+      trow, _ = iterate(rows.trows, state)
+      names = Tables.columnnames(trow)
+      pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+      (; pairs..., geometry=elm)
+    end
+    row, state + 1
   end
 end
 
 function Tables.schema(rows::GeoTableRows)
   geomtype = eltype(rows.domain)
-  schema = Tables.schema(rows.trows)
-  names, types = schema.names, schema.types
-  Tables.Schema((names..., :geometry), (types..., geomtype))
-end
-
-function Tables.schema(rows::GeoTableRows{<:Domain,Nothing})
-  geomtype = eltype(rows.domain)
-  Tables.Schema((:geometry,), (geomtype,))
+  if isnothing(rows.trows)
+    Tables.Schema((:geometry,), (geomtype,))
+  else
+    schema = Tables.schema(rows.trows)
+    names, types = schema.names, schema.types
+    Tables.Schema((names..., :geometry), (types..., geomtype))
+  end
 end
 
 Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = constructor(T)
@@ -315,7 +310,7 @@ function _hcat(geotable1, geotable2)
     columns2 = [Tables.getcolumn(cols2, name) for name in names2]
     columns = [columns1; columns2]
 
-    newtab = (; zip(names, columns)...)
+    (; zip(names, columns)...)
   elseif !isnothing(tab1)
     tab1
   elseif !isnothing(tab2)
@@ -349,7 +344,7 @@ function _vcat(geotable1, geotable2)
       [column1; column2]
     end
 
-    newtab = (; zip(names, columns)...)
+    (; zip(names, columns)...)
   elseif !isnothing(tab1)
     tab1
   elseif !isnothing(tab2)
