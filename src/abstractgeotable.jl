@@ -175,7 +175,7 @@ function Base.getproperty(geotable::AbstractGeoTable, var::Symbol)
     domain(geotable)
   else
     table = values(geotable)
-    isnothing(table) && _noattrs()
+    isnothing(table) && _noattrs_error()
     cols = Tables.columns(table)
     Tables.getcolumn(cols, var)
   end
@@ -190,7 +190,7 @@ function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, va
   vars = setdiff(vars, [:geometry])
   newdom = view(dom, inds)
   newtab = if isnothing(tab)
-    !isempty(vars) && _noattrs()
+    !isempty(vars) && _noattrs_error()
     nothing
   else
     sub = Tables.subset(tab, inds)
@@ -219,7 +219,7 @@ function Base.getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVecto
   tab = values(geotable)
   vars = setdiff(vars, [:geometry])
   if isnothing(tab)
-    !isempty(vars) && _noattrs()
+    !isempty(vars) && _noattrs_error()
     (; geometry=dom[ind])
   else
     row = Tables.subset(tab, ind)
@@ -234,7 +234,6 @@ function Base.getindex(geotable::AbstractGeoTable, ind::Int, ::Colon)
   dom = domain(geotable)
   tab = values(geotable)
   if isnothing(tab)
-    !isempty(vars) && _noattrs()
     (; geometry=dom[ind])
   else
     row = Tables.subset(tab, ind)
@@ -250,7 +249,7 @@ function Base.getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector
   tab = values(geotable)
   vars = setdiff(vars, [:geometry])
   newtab = if isnothing(tab)
-    !isempty(vars) && _noattrs()
+    !isempty(vars) && _noattrs_error()
     nothing
   else
     cols = Tables.columns(tab)
@@ -271,7 +270,7 @@ Base.getindex(geotable::AbstractGeoTable, inds, var::AbstractString) = getindex(
 function Base.getindex(geotable::AbstractGeoTable, inds, var::Regex)
   tab = values(geotable)
   if isnothing(tab)
-    _noattrs()
+    _noattrs_error()
   else
     cols = Tables.columns(tab)
     names = Tables.columnnames(cols) |> collect
@@ -335,7 +334,7 @@ function _vcat(geotable1, geotable2)
     names = Tables.columnnames(cols1)
 
     if Set(names) ≠ Set(Tables.columnnames(cols2))
-      throw(ArgumentError("all geotables must have the same variables"))
+      _vcat_error()
     end
 
     columns = map(names) do name
@@ -345,12 +344,10 @@ function _vcat(geotable1, geotable2)
     end
 
     (; zip(names, columns)...)
-  elseif !isnothing(tab1)
-    tab1
-  elseif !isnothing(tab2)
-    tab2
-  else
+  elseif isnothing(tab1) && isnothing(tab2)
     nothing
+  else
+    _vcat_error()
   end
 
   newdom = GeometrySet([collect(dom1); collect(dom2)])
@@ -358,7 +355,9 @@ function _vcat(geotable1, geotable2)
   constructor(geotable1)(newdom, newval)
 end
 
-_noattrs() = error("there are no attributes in the geotable")
+_vcat_error() = throw(ArgumentError("all geotables must have the same variables"))
+
+_noattrs_error() = error("there are no attributes in the geotable")
 
 function _checkvars(vars)
   if !allunique(vars)
