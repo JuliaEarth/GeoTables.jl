@@ -378,9 +378,9 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       └───────────┴────────────┴───────────┴────────────┘"""
 
       vgtb = view(gtb, 1:3)
-      @test sprint(show, vgtb) == "3×4 SubGeoTable over 3 View{9 PointSet{2,Float64}}"
+      @test sprint(show, vgtb) == "3×4 SubGeoTable over 3 view(::PointSet{2,Float64}, 1:3)"
       @test sprint(show, MIME("text/plain"), vgtb) == """
-      3×4 SubGeoTable over 3 View{9 PointSet{2,Float64}}
+      3×4 SubGeoTable over 3 view(::PointSet{2,Float64}, 1:3)
       ┌───────────┬────────────┬───────────┬────────────┐
       │     a     │     b      │     c     │  geometry  │
       │   Count   │ Continuous │  Textual  │   Point2   │
