@@ -12,24 +12,25 @@ using ScientificTypes
 using Unitful
 
 import DataAPI: nrow, ncol
+import Meshes: partitioninds
+import Meshes: sampleinds
+import Meshes: sortinds
 
 include("abstractgeotable.jl")
 include("geotable.jl")
 include("subgeotable.jl")
+include("indices.jl")
 include("georef.jl")
 
 export
-  # AbstractGeoTable interface
+  # interface
   AbstractGeoTable,
+  GeoTable,
   domain,
-  # Base.values,
   constructor,
   nrow,
   ncol,
   asarray,
-
-  # implementation
-  GeoTable,
 
   # georeferencing
   georef
