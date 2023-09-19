@@ -125,6 +125,12 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test hdata.e == data₃.e
       @test hdata.f == data₃.f
       @test hdata.geometry == dom
+      # maintain column types
+      data₁ = dummy(dom, (; a=rand(10)))
+      data₂ = dummy(dom, (; b=rand(1:10, 10)))
+      hdata = hcat(data₁, data₂)
+      @test eltype(hdata.a) === Float64
+      @test eltype(hdata.b) === Int
       # throws
       data₁ = dummy(dom, (a=rand(10), b=rand(10)))
       data₂ = dummy(dom, (a=rand(10), c=rand(10)))
