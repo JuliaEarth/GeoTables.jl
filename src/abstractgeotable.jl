@@ -309,9 +309,10 @@ function _hcat(geotable1, geotable2)
       throw(ArgumentError("all geotables must have different variables"))
     end
 
-    columns1 = [Tables.getcolumn(cols1, name) for name in names1]
-    columns2 = [Tables.getcolumn(cols2, name) for name in names2]
-    columns = [columns1; columns2]
+    columns = Any[Tables.getcolumn(cols1, name) for name in names1]
+    for name in names2
+      push!(columns, Tables.getcolumn(cols2, name))
+    end
 
     (; zip(names, columns)...)
   elseif !isnothing(tab1)
