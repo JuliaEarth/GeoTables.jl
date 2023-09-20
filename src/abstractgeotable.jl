@@ -187,6 +187,10 @@ end
 
 Base.getproperty(geotable::AbstractGeoTable, var::AbstractString) = getproperty(geotable, Symbol(var))
 
+const ColIndex = Union{Symbol,AbstractString}
+const RowSelector = Union{Int,AbstractVector{Int},Colon}
+const ColSelector = Union{ColIndex,AbstractVector{<:ColIndex},Regex,Colon}
+
 function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::AbstractVector{Symbol})
   _checkvars(vars)
   dom = domain(geotable)
@@ -266,12 +270,13 @@ end
 
 Base.getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotable, var)
 
-Base.getindex(geotable::AbstractGeoTable, inds, vars::AbstractVector{<:AbstractString}) =
+Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, vars::AbstractVector{<:AbstractString}) =
   getindex(geotable, inds, Symbol.(vars))
 
-Base.getindex(geotable::AbstractGeoTable, inds, var::AbstractString) = getindex(geotable, inds, Symbol(var))
+Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, var::AbstractString) =
+  getindex(geotable, inds, Symbol(var))
 
-function Base.getindex(geotable::AbstractGeoTable, inds, var::Regex)
+function Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, var::Regex)
   tab = values(geotable)
   if isnothing(tab)
     _noattrs_error()
@@ -283,7 +288,9 @@ function Base.getindex(geotable::AbstractGeoTable, inds, var::Regex)
   end
 end
 
-Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars) =
+Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
+
+Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars::ColSelector) =
   getindex(geotable, indices(domain(geotable), geometry), vars)
 
 Base.hcat(geotable::AbstractGeoTable...) = reduce(_hcat, geotable)
