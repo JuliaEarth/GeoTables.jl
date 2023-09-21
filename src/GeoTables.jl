@@ -16,10 +16,20 @@ import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
 
+# abstract type
 include("abstractgeotable.jl")
+include("api/tables.jl")
+include("api/dataframes.jl")
+include("api/geotables.jl")
+
+# concrete types
 include("geotable.jl")
 include("subgeotable.jl")
+
+# indices specializations
 include("indices.jl")
+
+# georeferencing
 include("georef.jl")
 
 export
@@ -28,9 +38,9 @@ export
   GeoTable,
   domain,
   constructor,
+  asarray,
   nrow,
   ncol,
-  asarray,
 
   # georeferencing
   georef

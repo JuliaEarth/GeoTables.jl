@@ -1,0 +1,56 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENSE in the project root.
+# ------------------------------------------------------------------
+
+Tables.istable(::Type{<:AbstractGeoTable}) = true
+
+Tables.rowaccess(::Type{<:AbstractGeoTable}) = true
+
+function Tables.rows(geotable::AbstractGeoTable)
+  table = values(geotable)
+  trows = isnothing(table) ? nothing : Tables.rows(table)
+  GeoTableRows(domain(geotable), trows)
+end
+
+Tables.schema(geotable::AbstractGeoTable) = Tables.schema(Tables.rows(geotable))
+
+Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = SubGeoTable(geotable, inds)
+
+# wrapper type for rows of the geotable table
+# so that we can easily inform the schema
+struct GeoTableRows{D<:Domain,R}
+  domain::D
+  trows::R
+end
+
+Base.length(rows::GeoTableRows) = nelements(rows.domain)
+
+function Base.iterate(rows::GeoTableRows, state=1)
+  if state > length(rows)
+    nothing
+  else
+    elm, _ = iterate(rows.domain, state)
+    row = if isnothing(rows.trows)
+      (; geometry=elm)
+    else
+      trow, _ = iterate(rows.trows, state)
+      names = Tables.columnnames(trow)
+      pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+      (; pairs..., geometry=elm)
+    end
+    row, state + 1
+  end
+end
+
+function Tables.schema(rows::GeoTableRows)
+  geomtype = eltype(rows.domain)
+  if isnothing(rows.trows)
+    Tables.Schema((:geometry,), (geomtype,))
+  else
+    schema = Tables.schema(rows.trows)
+    names, types = schema.names, schema.types
+    Tables.Schema((names..., :geometry), (types..., geomtype))
+  end
+end
+
+Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
