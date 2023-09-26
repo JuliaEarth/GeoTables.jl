@@ -136,7 +136,7 @@ function _common_kwargs(geotable)
     else
       cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
-      T = eltype(x)
+      T = nonmissingtype(eltype(x))
       if T <: Quantity
         t = "Continuous"
         u = "[$(unit(T))]"

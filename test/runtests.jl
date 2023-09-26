@@ -444,6 +444,26 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       │     8     │    8.46    │  missing  │ (9.0, 9.0) │
       └───────────┴────────────┴───────────┴────────────┘"""
 
+      gtb = georef((a=[missing; a[2:9]] * u"m/s", b=[b[1:4]; missing; b[6:9]] * u"km/hr", c=[c[1:8]; missing]), pset)
+      @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
+      @test sprint(show, MIME("text/plain"), gtb) == """
+      9×4 GeoTable over 9 PointSet{2,Float64}
+      ┌────────────┬───────────────┬───────────┬────────────┐
+      │     a      │       b       │     c     │  geometry  │
+      │ Continuous │  Continuous   │  Textual  │   Point2   │
+      │  [m s^-1]  │  [km hr^-1]   │ [NoUnits] │            │
+      ├────────────┼───────────────┼───────────┼────────────┤
+      │  missing   │ 2.34 km hr^-1 │   txt1    │ (1.0, 1.0) │
+      │  6 m s^-1  │ 7.5 km hr^-1  │   txt2    │ (2.0, 2.0) │
+      │  6 m s^-1  │ 0.06 km hr^-1 │   txt3    │ (3.0, 3.0) │
+      │  3 m s^-1  │ 1.29 km hr^-1 │   txt4    │ (4.0, 4.0) │
+      │  9 m s^-1  │    missing    │   txt5    │ (5.0, 5.0) │
+      │  5 m s^-1  │ 8.05 km hr^-1 │   txt6    │ (6.0, 6.0) │
+      │  2 m s^-1  │ 0.11 km hr^-1 │   txt7    │ (7.0, 7.0) │
+      │  2 m s^-1  │ 0.64 km hr^-1 │   txt8    │ (8.0, 8.0) │
+      │  8 m s^-1  │ 8.46 km hr^-1 │  missing  │ (9.0, 9.0) │
+      └────────────┴───────────────┴───────────┴────────────┘"""
+
       gtb = georef((; x=fill(missing, 9)), pset)
       @test sprint(show, gtb) == "9×2 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
