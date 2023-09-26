@@ -137,11 +137,14 @@ function _common_kwargs(geotable)
       cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
-      if T <: Quantity
+      if T <: Missing
+        t = "Missing"
+        u = "[NoUnits]"
+      elseif nonmissingtype(T) <: AbstractQuantity
         t = "Continuous"
         u = "[$(unit(T))]"
       else
-        t = _coltype(x)
+        t = string(nameof(nonmissingtype(elscitype(x))))
         u = "[NoUnits]"
       end
     end
@@ -152,7 +155,3 @@ function _common_kwargs(geotable)
 
   (title=summary(geotable), header=(colnames, types, units), alignment=:c, vcrop_mode=:bottom)
 end
-
-_coltype(x) = _coltype(x, elscitype(x))
-_coltype(x, ::Type) = string(nameof(nonmissingtype(elscitype(x))))
-_coltype(x, ::Type{Missing}) = "Missing"
