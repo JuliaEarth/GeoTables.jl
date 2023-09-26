@@ -11,6 +11,8 @@ using PrettyTables
 using ScientificTypes
 using Unitful
 
+using Unitful: AbstractQuantity
+
 import DataAPI: nrow, ncol
 import Meshes: partitioninds
 import Meshes: sampleinds
