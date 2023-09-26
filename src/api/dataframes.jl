@@ -38,11 +38,23 @@ end
 
 Base.getproperty(geotable::AbstractGeoTable, var::AbstractString) = getproperty(geotable, Symbol(var))
 
-const ColIndex = Union{Symbol,AbstractString}
 const RowSelector = Union{Int,AbstractVector{Int},Colon}
-const ColSelector = Union{ColIndex,AbstractVector{<:ColIndex},Regex,Colon}
 
-function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::AbstractVector{Symbol})
+Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
+
+Base.getindex(geotable::AbstractGeoTable, rows::RowSelector, vars) = _getindex(geotable, rows, selector(vars))
+
+function _getindex(geotable::AbstractGeoTable, rows::RowSelector, selector::ColumnSelector)
+  svars = selector(propertynames(geotable))
+  _getindex(geotable, rows, svars)
+end
+
+function _getindex(geotable::AbstractGeoTable, rows::RowSelector, selector::SingleColumnSelector)
+  svar = selectsingle(selector, propertynames(geotable))
+  _getindex(geotable, rows, svar)
+end
+
+function _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::AbstractVector{Symbol})
   _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
@@ -61,18 +73,7 @@ function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, va
   constructor(geotable)(newdom, newval)
 end
 
-Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, var::Symbol) =
-  getproperty(view(geotable, inds), var)
-
-function Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, ::Colon)
-  dview = view(geotable, inds)
-  newdom = domain(dview)
-  newtab = values(dview)
-  newval = Dict(paramdim(newdom) => newtab)
-  constructor(geotable)(newdom, newval)
-end
-
-function Base.getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Symbol})
+function _getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Symbol})
   _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
@@ -87,22 +88,7 @@ function Base.getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVecto
   end
 end
 
-Base.getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(geotable, var)[ind]
-
-function Base.getindex(geotable::AbstractGeoTable, ind::Int, ::Colon)
-  dom = domain(geotable)
-  tab = values(geotable)
-  if isnothing(tab)
-    (; geometry=dom[ind])
-  else
-    row = Tables.subset(tab, ind)
-    vars = Tables.columnnames(row)
-    pairs = (var => Tables.getcolumn(row, var) for var in vars)
-    (; pairs..., geometry=dom[ind])
-  end
-end
-
-function Base.getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector{Symbol})
+function _getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector{Symbol})
   _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
@@ -119,27 +105,11 @@ function Base.getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector
   constructor(geotable)(dom, newval)
 end
 
-Base.getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotable, var)
+_getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, var::Symbol) = getproperty(view(geotable, inds), var)
 
-Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, vars::AbstractVector{<:AbstractString}) =
-  getindex(geotable, inds, Symbol.(vars))
+_getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(geotable, var)[ind]
 
-Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, var::AbstractString) =
-  getindex(geotable, inds, Symbol(var))
-
-function Base.getindex(geotable::AbstractGeoTable, inds::RowSelector, var::Regex)
-  tab = values(geotable)
-  if isnothing(tab)
-    _noattrs_error()
-  else
-    cols = Tables.columns(tab)
-    names = Tables.columnnames(cols) |> collect
-    snames = filter(nm -> occursin(var, String(nm)), names)
-    getindex(geotable, inds, snames)
-  end
-end
-
-Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
+_getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotable, var)
 
 Base.hcat(geotable::AbstractGeoTable...) = reduce(_hcat, geotable)
 
