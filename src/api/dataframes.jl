@@ -55,7 +55,6 @@ function _getindex(geotable::AbstractGeoTable, rows::RowSelector, selector::Sing
 end
 
 function _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::AbstractVector{Symbol})
-  _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
   vars = setdiff(vars, [:geometry])
@@ -74,7 +73,6 @@ function _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::
 end
 
 function _getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Symbol})
-  _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
   vars = setdiff(vars, [:geometry])
@@ -89,7 +87,6 @@ function _getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Sy
 end
 
 function _getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector{Symbol})
-  _checkvars(vars)
   dom = domain(geotable)
   tab = values(geotable)
   vars = setdiff(vars, [:geometry])
@@ -188,9 +185,3 @@ end
 _vcat_error() = throw(ArgumentError("all geotables must have the same variables"))
 
 _noattrs_error() = error("there are no attributes in the geotable")
-
-function _checkvars(vars)
-  if !allunique(vars)
-    throw(ArgumentError("variable names must be unique"))
-  end
-end
