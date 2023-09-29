@@ -4,6 +4,7 @@ authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "1.7.3"
 
 [deps]
+ColumnSelectors = "9cc86067-7e36-4c61-b350-1ac9833d277f"
 DataAPI = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
@@ -13,6 +14,7 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+ColumnSelectors = "0.1"
 DataAPI = "1.15"
 Meshes = "0.35.3"
 PrettyTables = "2.2"

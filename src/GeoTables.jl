@@ -12,6 +12,8 @@ using ScientificTypes
 using Unitful
 
 using Unitful: AbstractQuantity
+using ColumnSelectors: ColumnSelector, SingleColumnSelector
+using ColumnSelectors: selector, selectsingle
 
 import DataAPI: nrow, ncol
 import Meshes: partitioninds

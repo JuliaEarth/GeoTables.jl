@@ -2,8 +2,8 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars::ColSelector) =
-  getindex(geotable, indices(domain(geotable), geometry), vars)
+Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars) =
+  _getindex(geotable, indices(domain(geotable), geometry), selector(vars))
 
 """
     asarray(geotable, var)
