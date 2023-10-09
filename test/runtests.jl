@@ -769,6 +769,22 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test jgtb.f[2] == mean(ngtb.f[[3, 4]])
       @test jgtb.f[3] == mean(ngtb.f[[6, 7]])
       @test jgtb.f[4] == mean(ngtb.f[[8, 9]])
+
+      # quantity aggregation
+      box1 = Box((0, 0), (1, 1))
+      box2 = Box((1, 1), (2, 2))
+      pset = PointSet((0.5, 0.5), (1.2, 1.2), (1.8, 1.8))
+      gset = GeometrySet([box1, box2])
+      gtb1 = georef((; a=rand(2)), gset)
+      gtb2 = georef((; b=[1, 2, 3] * u"K"), pset)
+      jgtb = geojoin(gtb1, gtb2)
+      @test propertynames(jgtb) == [:a, :b, :geometry]
+      @test jgtb.geometry == gtb1.geometry
+      @test jgtb.a == gtb1.a
+      @test unit(eltype(jgtb.b)) == u"K"
+      @test Unitful.numtype(eltype(jgtb.b)) === Float64
+      @test jgtb.b[1] == mean(gtb2.b[[1]])
+      @test jgtb.b[2] == mean(gtb2.b[[2, 3]])
     end
 
     @testset "@groupby" begin

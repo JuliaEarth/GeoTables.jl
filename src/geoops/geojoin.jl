@@ -114,8 +114,6 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
       vs = rows[i][j]
       if isempty(vs)
         missing
-      elseif length(vs) == 1
-        first(vs)
       else
         agg[var](vs)
       end
@@ -174,11 +172,7 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
   function gencol(j, var)
     map(inds) do i
       vs = rows[i][j]
-      if length(vs) > 1
-        agg[var](vs)
-      else
-        first(vs)
-      end
+      agg[var](vs)
     end
   end
 
