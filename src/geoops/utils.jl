@@ -54,8 +54,3 @@ function _absunit(x, ::Type{Q}) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
 end
-
-_elunit(x) = _typeunit(nonmissingtype(eltype(x)))
-
-_typeunit(::Type) = NoUnits
-_typeunit(::Type{Q}) where {Q<:AbstractQuantity} = unit(Q)
