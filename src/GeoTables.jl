@@ -8,9 +8,9 @@ using Meshes
 using Tables
 using Random
 using Unitful
+using SciTypes
 using Statistics
 using PrettyTables
-using ScientificTypes
 
 using Unitful: AbstractQuantity, AffineQuantity
 using ColumnSelectors: ColumnSelector, SingleColumnSelector

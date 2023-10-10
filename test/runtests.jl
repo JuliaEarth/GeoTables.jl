@@ -375,95 +375,95 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌───────────┬────────────┬───────────┬────────────┐
-      │     a     │     b      │     c     │  geometry  │
-      │   Count   │ Continuous │  Textual  │   Point2   │
-      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
-      ├───────────┼────────────┼───────────┼────────────┤
-      │     0     │    2.34    │   txt1    │ (1.0, 1.0) │
-      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
-      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
-      │     3     │    1.29    │   txt4    │ (4.0, 4.0) │
-      │     9     │    3.64    │   txt5    │ (5.0, 5.0) │
-      │     5     │    8.05    │   txt6    │ (6.0, 6.0) │
-      │     2     │    0.11    │   txt7    │ (7.0, 7.0) │
-      │     2     │    0.64    │   txt8    │ (8.0, 8.0) │
-      │     8     │    8.46    │   txt9    │ (9.0, 9.0) │
-      └───────────┴────────────┴───────────┴────────────┘"""
+      ┌─────────────┬────────────┬─────────────┬────────────┐
+      │      a      │     b      │      c      │  geometry  │
+      │ Categorical │ Continuous │ Categorical │   Point2   │
+      │  [NoUnits]  │ [NoUnits]  │  [NoUnits]  │            │
+      ├─────────────┼────────────┼─────────────┼────────────┤
+      │      0      │    2.34    │    txt1     │ (1.0, 1.0) │
+      │      6      │    7.5     │    txt2     │ (2.0, 2.0) │
+      │      6      │    0.06    │    txt3     │ (3.0, 3.0) │
+      │      3      │    1.29    │    txt4     │ (4.0, 4.0) │
+      │      9      │    3.64    │    txt5     │ (5.0, 5.0) │
+      │      5      │    8.05    │    txt6     │ (6.0, 6.0) │
+      │      2      │    0.11    │    txt7     │ (7.0, 7.0) │
+      │      2      │    0.64    │    txt8     │ (8.0, 8.0) │
+      │      8      │    8.46    │    txt9     │ (9.0, 9.0) │
+      └─────────────┴────────────┴─────────────┴────────────┘"""
 
       vgtb = view(gtb, 1:3)
       @test sprint(show, vgtb) == "3×4 SubGeoTable over 3 view(::PointSet{2,Float64}, 1:3)"
       @test sprint(show, MIME("text/plain"), vgtb) == """
       3×4 SubGeoTable over 3 view(::PointSet{2,Float64}, 1:3)
-      ┌───────────┬────────────┬───────────┬────────────┐
-      │     a     │     b      │     c     │  geometry  │
-      │   Count   │ Continuous │  Textual  │   Point2   │
-      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
-      ├───────────┼────────────┼───────────┼────────────┤
-      │     0     │    2.34    │   txt1    │ (1.0, 1.0) │
-      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
-      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
-      └───────────┴────────────┴───────────┴────────────┘"""
+      ┌─────────────┬────────────┬─────────────┬────────────┐
+      │      a      │     b      │      c      │  geometry  │
+      │ Categorical │ Continuous │ Categorical │   Point2   │
+      │  [NoUnits]  │ [NoUnits]  │  [NoUnits]  │            │
+      ├─────────────┼────────────┼─────────────┼────────────┤
+      │      0      │    2.34    │    txt1     │ (1.0, 1.0) │
+      │      6      │    7.5     │    txt2     │ (2.0, 2.0) │
+      │      6      │    0.06    │    txt3     │ (3.0, 3.0) │
+      └─────────────┴────────────┴─────────────┴────────────┘"""
 
       gtb = georef((a=a * u"m/s", b=b * u"km/hr", c=c), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌────────────┬───────────────┬───────────┬────────────┐
-      │     a      │       b       │     c     │  geometry  │
-      │ Continuous │  Continuous   │  Textual  │   Point2   │
-      │  [m s^-1]  │  [km hr^-1]   │ [NoUnits] │            │
-      ├────────────┼───────────────┼───────────┼────────────┤
-      │  0 m s^-1  │ 2.34 km hr^-1 │   txt1    │ (1.0, 1.0) │
-      │  6 m s^-1  │ 7.5 km hr^-1  │   txt2    │ (2.0, 2.0) │
-      │  6 m s^-1  │ 0.06 km hr^-1 │   txt3    │ (3.0, 3.0) │
-      │  3 m s^-1  │ 1.29 km hr^-1 │   txt4    │ (4.0, 4.0) │
-      │  9 m s^-1  │ 3.64 km hr^-1 │   txt5    │ (5.0, 5.0) │
-      │  5 m s^-1  │ 8.05 km hr^-1 │   txt6    │ (6.0, 6.0) │
-      │  2 m s^-1  │ 0.11 km hr^-1 │   txt7    │ (7.0, 7.0) │
-      │  2 m s^-1  │ 0.64 km hr^-1 │   txt8    │ (8.0, 8.0) │
-      │  8 m s^-1  │ 8.46 km hr^-1 │   txt9    │ (9.0, 9.0) │
-      └────────────┴───────────────┴───────────┴────────────┘"""
+      ┌─────────────┬───────────────┬─────────────┬────────────┐
+      │      a      │       b       │      c      │  geometry  │
+      │ Categorical │  Continuous   │ Categorical │   Point2   │
+      │  [m s^-1]   │  [km hr^-1]   │  [NoUnits]  │            │
+      ├─────────────┼───────────────┼─────────────┼────────────┤
+      │  0 m s^-1   │ 2.34 km hr^-1 │    txt1     │ (1.0, 1.0) │
+      │  6 m s^-1   │ 7.5 km hr^-1  │    txt2     │ (2.0, 2.0) │
+      │  6 m s^-1   │ 0.06 km hr^-1 │    txt3     │ (3.0, 3.0) │
+      │  3 m s^-1   │ 1.29 km hr^-1 │    txt4     │ (4.0, 4.0) │
+      │  9 m s^-1   │ 3.64 km hr^-1 │    txt5     │ (5.0, 5.0) │
+      │  5 m s^-1   │ 8.05 km hr^-1 │    txt6     │ (6.0, 6.0) │
+      │  2 m s^-1   │ 0.11 km hr^-1 │    txt7     │ (7.0, 7.0) │
+      │  2 m s^-1   │ 0.64 km hr^-1 │    txt8     │ (8.0, 8.0) │
+      │  8 m s^-1   │ 8.46 km hr^-1 │    txt9     │ (9.0, 9.0) │
+      └─────────────┴───────────────┴─────────────┴────────────┘"""
 
       gtb = georef((a=[missing; a[2:9]], b=[b[1:4]; missing; b[6:9]], c=[c[1:8]; missing]), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌───────────┬────────────┬───────────┬────────────┐
-      │     a     │     b      │     c     │  geometry  │
-      │   Count   │ Continuous │  Textual  │   Point2   │
-      │ [NoUnits] │ [NoUnits]  │ [NoUnits] │            │
-      ├───────────┼────────────┼───────────┼────────────┤
-      │  missing  │    2.34    │   txt1    │ (1.0, 1.0) │
-      │     6     │    7.5     │   txt2    │ (2.0, 2.0) │
-      │     6     │    0.06    │   txt3    │ (3.0, 3.0) │
-      │     3     │    1.29    │   txt4    │ (4.0, 4.0) │
-      │     9     │  missing   │   txt5    │ (5.0, 5.0) │
-      │     5     │    8.05    │   txt6    │ (6.0, 6.0) │
-      │     2     │    0.11    │   txt7    │ (7.0, 7.0) │
-      │     2     │    0.64    │   txt8    │ (8.0, 8.0) │
-      │     8     │    8.46    │  missing  │ (9.0, 9.0) │
-      └───────────┴────────────┴───────────┴────────────┘"""
+      ┌─────────────┬────────────┬─────────────┬────────────┐
+      │      a      │     b      │      c      │  geometry  │
+      │ Categorical │ Continuous │ Categorical │   Point2   │
+      │  [NoUnits]  │ [NoUnits]  │  [NoUnits]  │            │
+      ├─────────────┼────────────┼─────────────┼────────────┤
+      │   missing   │    2.34    │    txt1     │ (1.0, 1.0) │
+      │      6      │    7.5     │    txt2     │ (2.0, 2.0) │
+      │      6      │    0.06    │    txt3     │ (3.0, 3.0) │
+      │      3      │    1.29    │    txt4     │ (4.0, 4.0) │
+      │      9      │  missing   │    txt5     │ (5.0, 5.0) │
+      │      5      │    8.05    │    txt6     │ (6.0, 6.0) │
+      │      2      │    0.11    │    txt7     │ (7.0, 7.0) │
+      │      2      │    0.64    │    txt8     │ (8.0, 8.0) │
+      │      8      │    8.46    │   missing   │ (9.0, 9.0) │
+      └─────────────┴────────────┴─────────────┴────────────┘"""
 
       gtb = georef((a=[missing; a[2:9]] * u"m/s", b=[b[1:4]; missing; b[6:9]] * u"km/hr", c=[c[1:8]; missing]), pset)
       @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet{2,Float64}"
       @test sprint(show, MIME("text/plain"), gtb) == """
       9×4 GeoTable over 9 PointSet{2,Float64}
-      ┌────────────┬───────────────┬───────────┬────────────┐
-      │     a      │       b       │     c     │  geometry  │
-      │ Continuous │  Continuous   │  Textual  │   Point2   │
-      │  [m s^-1]  │  [km hr^-1]   │ [NoUnits] │            │
-      ├────────────┼───────────────┼───────────┼────────────┤
-      │  missing   │ 2.34 km hr^-1 │   txt1    │ (1.0, 1.0) │
-      │  6 m s^-1  │ 7.5 km hr^-1  │   txt2    │ (2.0, 2.0) │
-      │  6 m s^-1  │ 0.06 km hr^-1 │   txt3    │ (3.0, 3.0) │
-      │  3 m s^-1  │ 1.29 km hr^-1 │   txt4    │ (4.0, 4.0) │
-      │  9 m s^-1  │    missing    │   txt5    │ (5.0, 5.0) │
-      │  5 m s^-1  │ 8.05 km hr^-1 │   txt6    │ (6.0, 6.0) │
-      │  2 m s^-1  │ 0.11 km hr^-1 │   txt7    │ (7.0, 7.0) │
-      │  2 m s^-1  │ 0.64 km hr^-1 │   txt8    │ (8.0, 8.0) │
-      │  8 m s^-1  │ 8.46 km hr^-1 │  missing  │ (9.0, 9.0) │
-      └────────────┴───────────────┴───────────┴────────────┘"""
+      ┌─────────────┬───────────────┬─────────────┬────────────┐
+      │      a      │       b       │      c      │  geometry  │
+      │ Categorical │  Continuous   │ Categorical │   Point2   │
+      │  [m s^-1]   │  [km hr^-1]   │  [NoUnits]  │            │
+      ├─────────────┼───────────────┼─────────────┼────────────┤
+      │   missing   │ 2.34 km hr^-1 │    txt1     │ (1.0, 1.0) │
+      │  6 m s^-1   │ 7.5 km hr^-1  │    txt2     │ (2.0, 2.0) │
+      │  6 m s^-1   │ 0.06 km hr^-1 │    txt3     │ (3.0, 3.0) │
+      │  3 m s^-1   │ 1.29 km hr^-1 │    txt4     │ (4.0, 4.0) │
+      │  9 m s^-1   │    missing    │    txt5     │ (5.0, 5.0) │
+      │  5 m s^-1   │ 8.05 km hr^-1 │    txt6     │ (6.0, 6.0) │
+      │  2 m s^-1   │ 0.11 km hr^-1 │    txt7     │ (7.0, 7.0) │
+      │  2 m s^-1   │ 0.64 km hr^-1 │    txt8     │ (8.0, 8.0) │
+      │  8 m s^-1   │ 8.46 km hr^-1 │   missing   │ (9.0, 9.0) │
+      └─────────────┴───────────────┴─────────────┴────────────┘"""
 
       gtb = georef((; x=fill(missing, 9)), pset)
       @test sprint(show, gtb) == "9×2 GeoTable over 9 PointSet{2,Float64}"
@@ -517,9 +517,9 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
             <th style = "text-align: center;">geometry</th>
           </tr>
           <tr class = "subheader">
-            <th style = "text-align: center;">Count</th>
+            <th style = "text-align: center;">Categorical</th>
             <th style = "text-align: center;">Continuous</th>
-            <th style = "text-align: center;">Textual</th>
+            <th style = "text-align: center;">Categorical</th>
             <th style = "text-align: center;">Point2</th>
           </tr>
           <tr class = "subheader headerLastRow">
@@ -777,14 +777,23 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       gset = GeometrySet([box1, box2])
       gtb1 = georef((; a=rand(2)), gset)
       gtb2 = georef((; b=[1, 2, 3] * u"K"), pset)
+      gtb3 = georef((; c=[1.0, 2.0, 3.0] * u"K"), pset)
       jgtb = geojoin(gtb1, gtb2)
       @test propertynames(jgtb) == [:a, :b, :geometry]
       @test jgtb.geometry == gtb1.geometry
       @test jgtb.a == gtb1.a
       @test unit(eltype(jgtb.b)) == u"K"
-      @test Unitful.numtype(eltype(jgtb.b)) === Float64
-      @test jgtb.b[1] == mean(gtb2.b[[1]])
-      @test jgtb.b[2] == mean(gtb2.b[[2, 3]])
+      @test Unitful.numtype(eltype(jgtb.b)) <: Int
+      @test jgtb.b[1] == first(gtb2.b[[1]])
+      @test jgtb.b[2] == first(gtb2.b[[2, 3]])
+      jgtb = geojoin(gtb1, gtb3)
+      @test propertynames(jgtb) == [:a, :c, :geometry]
+      @test jgtb.geometry == gtb1.geometry
+      @test jgtb.a == gtb1.a
+      @test unit(eltype(jgtb.c)) == u"K"
+      @test Unitful.numtype(eltype(jgtb.c)) <: Float64
+      @test jgtb.c[1] == mean(gtb3.c[[1]])
+      @test jgtb.c[2] == mean(gtb3.c[[2, 3]])
     end
 
     @testset "@groupby" begin
