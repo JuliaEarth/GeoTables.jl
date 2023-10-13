@@ -48,9 +48,9 @@ function _adjustunits(geotable::AbstractGeoTable)
   constructor(geotable)(dom, vals)
 end
 
-_absunit(x) = _absunit(x, nonmissingtype(eltype(x)))
-_absunit(x, ::Type) = x
-function _absunit(x, ::Type{Q}) where {Q<:AffineQuantity}
+_absunit(x) = _absunit(nonmissingtype(eltype(x)), x)
+_absunit(::Type, x) = x
+function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
 end
