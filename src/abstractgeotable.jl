@@ -140,12 +140,10 @@ function _common_kwargs(geotable)
       if T <: Missing
         t = "Missing"
         u = "[NoUnits]"
-      elseif nonmissingtype(T) <: AbstractQuantity
-        t = "Continuous"
-        u = "[$(unit(T))]"
       else
-        t = string(nameof(nonmissingtype(elscitype(x))))
-        u = "[NoUnits]"
+        S = nonmissingtype(T)
+        t = string(nameof(scitype(S)))
+        u = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
     t, u

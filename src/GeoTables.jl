@@ -10,12 +10,13 @@ using Random
 using Unitful
 using Statistics
 using PrettyTables
-using ScientificTypes
+using DataScienceTraits
 
 using Unitful: AbstractQuantity, AffineQuantity
 using ColumnSelectors: ColumnSelector, SingleColumnSelector
 using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
+using DataScienceTraits: Continuous
 
 import DataAPI: nrow, ncol
 import Meshes: partitioninds

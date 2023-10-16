@@ -20,10 +20,9 @@ end
 # AGGREGATION
 #-------------
 
-_defaultagg(x) = _defaultagg(nonmissingtype(elscitype(x)), nonmissingtype(eltype(x)))
-_defaultagg(::Type{<:Continuous}, ::Type) = _skipmissing(mean)
-_defaultagg(::Type, ::Type{<:AbstractQuantity}) = _skipmissing(mean)
-_defaultagg(::Type, ::Type) = _skipmissing(first)
+_defaultagg(x) = _defaultagg(elscitype(x))
+_defaultagg(::Type) = _skipmissing(first)
+_defaultagg(::Type{Continuous}) = _skipmissing(mean)
 
 function _skipmissing(fun)
   x -> begin
@@ -49,10 +48,9 @@ function _adjustunits(geotable::AbstractGeoTable)
   constructor(geotable)(dom, vals)
 end
 
-_absunit(x) = _absunit(x, nonmissingtype(eltype(x)))
-_absunit(x, ::Type) = x
-_absunit(x, ::Type{Q}) where {Q<:AbstractQuantity} = x
-function _absunit(x, ::Type{Q}) where {Q<:AffineQuantity}
+_absunit(x) = _absunit(nonmissingtype(eltype(x)), x)
+_absunit(::Type, x) = x
+function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
 end
