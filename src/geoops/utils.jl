@@ -22,7 +22,7 @@ end
 
 _defaultagg(x) = _defaultagg(elscitype(x))
 _defaultagg(::Type) = _skipmissing(first)
-_defaultagg(::Type{SciTypes.Continuous}) = _skipmissing(mean)
+_defaultagg(::Type{Continuous}) = _skipmissing(mean)
 
 function _skipmissing(fun)
   x -> begin

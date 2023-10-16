@@ -8,14 +8,15 @@ using Meshes
 using Tables
 using Random
 using Unitful
-using SciTypes
 using Statistics
 using PrettyTables
+using DataScienceTraits
 
 using Unitful: AbstractQuantity, AffineQuantity
 using ColumnSelectors: ColumnSelector, SingleColumnSelector
 using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
+using DataScienceTraits: Continuous
 
 import DataAPI: nrow, ncol
 import Meshes: partitioninds
