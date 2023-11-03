@@ -55,9 +55,12 @@ dummymeta(domain, table) = GeoTable(domain, Dict(paramdim(domain) => table))
       @test Tables.materializer(dat) <: DummyType
       inds = [1, 3]
       @test Tables.subset(dat, inds) == view(dat, inds)
+      @test Tables.subset(dat, 1) == (a=1, b=5, geometry=Quadrangle((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)))
       # viewhint keyword argument is ignored
       @test Tables.subset(dat, inds, viewhint=true) isa GeoTables.SubGeoTable
       @test Tables.subset(dat, inds, viewhint=false) isa GeoTables.SubGeoTable
+      @test Tables.subset(dat, 1, viewhint=true) isa NamedTuple
+      @test Tables.subset(dat, 1, viewhint=false) isa NamedTuple
 
       # dataframe interface
       grid = CartesianGrid(2, 2)

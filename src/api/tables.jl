@@ -15,6 +15,7 @@ end
 Tables.schema(geotable::AbstractGeoTable) = Tables.schema(Tables.rows(geotable))
 
 Tables.subset(geotable::AbstractGeoTable, inds; viewhint=nothing) = SubGeoTable(geotable, inds)
+Tables.subset(geotable::AbstractGeoTable, ind::Int; viewhint=nothing) = geotable[ind, :]
 
 # wrapper type for rows of the geotable table
 # so that we can easily inform the schema
