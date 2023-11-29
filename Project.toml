@@ -17,7 +17,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 [compat]
 ColumnSelectors = "0.1"
 DataAPI = "1.15"
-DataScienceTraits = "0.1"
+DataScienceTraits = "0.2"
 Meshes = "0.36"
 PrettyTables = "2.2"
 Random = "1.9"
