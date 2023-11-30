@@ -16,7 +16,7 @@
     Map(:z => identity),
     Replace(1.0 => 2.0),
     Coalesce(value=0.0),
-    Coerce(:z => DST.Continuous),
+    Coerce(:z => Continuous),
     Indicator(:z),
     Identity(),
     Center(),

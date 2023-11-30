@@ -1,6 +1,7 @@
 using GeoTables
 using TypedTables
 using TableTransforms
+using CategoricalArrays
 using Unitful
 using Tables
 using Meshes
@@ -8,10 +9,21 @@ using LinearAlgebra
 using Statistics
 using Test
 
+using DataScienceTraits: Continuous
+
 include("dummy.jl")
 
 # list of tests
-testfiles = ["basics.jl"]
+testfiles = [
+  "basics.jl",
+  "views.jl",
+  "georef.jl",
+  "noattribs.jl",
+  "indices.jl",
+  "operations.jl",
+  "feature.jl",
+  "shows.jl"
+]
 
 @testset "GeoTables.jl" begin
   for testfile in testfiles
