@@ -14,16 +14,8 @@ using DataScienceTraits: Continuous
 include("dummy.jl")
 
 # list of tests
-testfiles = [
-  "basics.jl",
-  "views.jl",
-  "georef.jl",
-  "noattribs.jl",
-  "indices.jl",
-  "operations.jl",
-  "feature.jl",
-  "shows.jl"
-]
+testfiles =
+  ["basics.jl", "views.jl", "georef.jl", "noattribs.jl", "indices.jl", "operations.jl", "feature.jl", "shows.jl"]
 
 @testset "GeoTables.jl" begin
   for testfile in testfiles
