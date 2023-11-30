@@ -23,6 +23,7 @@ testfiles = [
   "operations.jl",
   "feature.jl",
   "geometric.jl",
+  "misc.jl",
   "shows.jl"
 ]
 
