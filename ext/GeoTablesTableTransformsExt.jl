@@ -10,11 +10,18 @@ using TableTransforms
 
 import TableTransforms: divide, attach
 import TableTransforms: applymeta, revertmeta
+import TableTransforms: apply, revert, reapply
 
-# table traits
+# -----------------------
+# TABLE TRANSFORM TRAITS
+# -----------------------
 
 divide(geotable::AbstractGeoTable) = values(geotable), domain(geotable)
 attach(table, dom::Domain) = georef(table, dom)
+
+# -------------------
+# FEATURE TRANSFORMS
+# -------------------
 
 # transforms that change the order or number of
 # rows in the table need a special treatment
@@ -106,6 +113,26 @@ function revertmeta(::Sample, newdom::Domain, mcache)
   end
 
   GeometrySet(ugeoms)
+end
+
+# ---------------------
+# GEOMETRIC TRANSFORMS
+# ---------------------
+
+function apply(transform::GeometricTransform, geotable::AbstractGeoTable)
+  newdom, cache = apply(transform, domain(geotable))
+  newdata = georef(values(geotable), newdom)
+  newdata, cache
+end
+
+function revert(transform::GeometricTransform, newdata::AbstractGeoTable, cache)
+  dom = revert(transform, domain(newdata), cache)
+  georef(values(newdata), dom)
+end
+
+function reapply(transform::GeometricTransform, geotable::AbstractGeoTable, cache)
+  newdom = reapply(transform, domain(geotable), cache)
+  georef(values(geotable), newdom)
 end
 
 end
