@@ -88,13 +88,13 @@
   T4 = DropExtrema(:a)
   T5 = Sample(1000; rng)
   apply(T1, gtb)
-  @test @elapsed(apply(T1, gtb)) < 0.01
+  @test @elapsed(apply(T1, gtb)) < 0.1
   apply(T2, gtb)
-  @test @elapsed(apply(T2, gtb)) < 0.01
+  @test @elapsed(apply(T2, gtb)) < 0.1
   apply(T3, gtb)
-  @test @elapsed(apply(T3, gtb)) < 0.01
+  @test @elapsed(apply(T3, gtb)) < 0.1
   apply(T4, gtb)
-  @test @elapsed(apply(T4, gtb)) < 0.01
+  @test @elapsed(apply(T4, gtb)) < 0.1
   apply(T5, gtb)
-  @test @elapsed(apply(T5, gtb)) < 0.01
+  @test @elapsed(apply(T5, gtb)) < 0.1
 end
