@@ -73,23 +73,28 @@
   @test r == d
 
   # performance tests
-  N = 100
-  S = N * N
+  sz = (100, 100)
+  n = prod(sz)
   rng = MersenneTwister(2)
 
-  a = randn(rng, S)
-  b = shuffle(rng, [fill(missing, N); randn(rng, S - N)])
-  coda = CoDaArray((c=randn(rng, S), d=randn(rng, S), e=randn(rng, S)))
-  gtb = georef((; a, b, coda), CartesianGrid(N, N))
+  a = rand(rng, n)
+  b = shuffle(rng, [fill(missing, 100); rand(rng, n - 100)])
+  coda = CoDaArray((c=rand(rng, n), d=rand(rng, n), e=rand(rng, n)))
+  gtb = georef((; a, b, coda), CartesianGrid(sz))
 
   T1 = Sort(:a)
   T2 = Filter(row -> row.a > 0.5)
   T3 = DropMissing(:b)
   T4 = DropExtrema(:a)
   T5 = Sample(1000; rng)
-  @test @elapsed(apply(T1, gtb)) < 1.2
-  @test @elapsed(apply(T2, gtb)) < 0.6
-  @test @elapsed(apply(T3, gtb)) < 0.8
-  @test @elapsed(apply(T4, gtb)) < 0.8
-  @test @elapsed(apply(T5, gtb)) < 0.6
+  apply(T1, gtb)
+  @test @elapsed(apply(T1, gtb)) < 0.01
+  apply(T2, gtb)
+  @test @elapsed(apply(T2, gtb)) < 0.01
+  apply(T3, gtb)
+  @test @elapsed(apply(T3, gtb)) < 0.01
+  apply(T4, gtb)
+  @test @elapsed(apply(T4, gtb)) < 0.01
+  apply(T5, gtb)
+  @test @elapsed(apply(T5, gtb)) < 0.01
 end
