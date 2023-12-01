@@ -5,8 +5,10 @@ using CategoricalArrays
 using Unitful
 using Tables
 using Meshes
+using CoDa
 using LinearAlgebra
 using Statistics
+using Random
 using Test
 
 using DataScienceTraits: Continuous
