@@ -71,4 +71,25 @@
   @test length(domain(n)) == 2
   r = revert(p, n, c)
   @test r == d
+
+  # performance tests
+  N = 100
+  S = N * N
+  rng = MersenneTwister(2)
+
+  a = randn(rng, S)
+  b = shuffle(rng, [fill(missing, N); randn(rng, S - N)])
+  coda = CoDaArray((c=randn(rng, S), d=randn(rng, S), e=randn(rng, S)))
+  gtb = georef((; a, b, coda), CartesianGrid(N, N))
+
+  T1 = Sort(:a)
+  T2 = Filter(row -> row.a > 0.5)
+  T3 = DropMissing(:b)
+  T4 = DropExtrema(:a)
+  T5 = Sample(1000; rng)
+  @test @elapsed(apply(T1, gtb)) < 1.2
+  @test @elapsed(apply(T2, gtb)) < 0.6
+  @test @elapsed(apply(T3, gtb)) < 0.8
+  @test @elapsed(apply(T4, gtb)) < 0.8
+  @test @elapsed(apply(T5, gtb)) < 0.6
 end
