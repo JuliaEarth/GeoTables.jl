@@ -269,6 +269,27 @@
     @test indices(p) == [[1, 2, 3], [4], [5, 6, 7, 8]]
     p = @groupby(sdata, :x, :y)
     @test indices(p) == [[1, 2], [3], [4], [5, 6], [7, 8]]
+
+    # expression as first argument
+    x = [1, 1, 1, 1, 2, 2, 2, 2]
+    y = [1, 1, 2, 2, 3, 3, 4, 4]
+    table = (; x, y)
+    sdata = georef(table, CartesianGrid(2, 4))
+    opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
+
+    p = @groupby(sdata |> opr, :x)
+    pinds = [[1, 2, 3, 4], [5, 6, 7, 8]]
+    @test indices(p) == pinds
+    for (pdata, inds) in zip(p, pinds)
+      @test pdata.geometry == GeometrySet(centroid.(domain(sdata)[inds]))
+    end
+    # symbols
+    p = @groupby(sdata |> opr, :y)
+    pinds = [[1, 2], [3, 4], [5, 6], [7, 8]]
+    @test indices(p) == pinds
+    for (pdata, inds) in zip(p, pinds)
+      @test pdata.geometry == GeometrySet(centroid.(domain(sdata)[inds]))
+    end
   end
 
   @testset "@transform" begin
@@ -353,6 +374,15 @@
     @test indices(np) == indices(p)
     @test metadata(np) == metadata(p)
 
+    # expression as first argument
+    table = (x=rand(25), y=rand(25))
+    sdata = georef(table, CartesianGrid(5, 5))
+    opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
+  
+    ndata = @transform(sdata |> opr, :z = :x - 2 * :y)
+    @test ndata.z == sdata.x .- 2 .* sdata.y
+    @test ndata.geometry == GeometrySet(centroid.(domain(sdata)))
+
     @test_throws ArgumentError @transform(p, :x = 3 * :x)
     @test_throws ArgumentError @transform(p, :y = 3 * :y)
   end
@@ -420,5 +450,13 @@
     @test c.y == [first(data.y) for data in p]
     @test c.z_mean == [mean(data.z) for data in p]
     @test domain(c) == GeometrySet([centroid(domain(data)) for data in p])
+
+    # expression as first argument
+    opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
+
+    c = @combine(sdata |> opr, :x_sum = sum(:x))
+    @test c.x_sum == [sum(sdata.x)]
+    @test domain(c) == GeometrySet([Multi(centroid.(domain(sdata)))])
+    @test Tables.schema(values(c)).names == (:x_sum,)
   end
 end
