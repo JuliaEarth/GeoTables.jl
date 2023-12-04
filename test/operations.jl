@@ -283,7 +283,7 @@
     for (pdata, inds) in zip(p, pinds)
       @test pdata.geometry == GeometrySet(centroid.(domain(sdata)[inds]))
     end
-    # symbols
+
     p = @groupby(sdata |> opr, :y)
     pinds = [[1, 2], [3, 4], [5, 6], [7, 8]]
     @test indices(p) == pinds
