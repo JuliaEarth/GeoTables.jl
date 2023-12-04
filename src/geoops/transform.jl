@@ -26,18 +26,18 @@ xnm, ynm, znm = :x, :y, :z
 @transform(geotable, {znm} = {xnm} - 2*{ynm})
 ```
 """
-macro transform(object::Symbol, exprs...)
+macro transform(object, exprs...)
   splits = map(expr -> _split(expr), exprs)
   colnames = first.(splits)
   colexprs = last.(splits)
-  escobj = esc(object)
   quote
-    if $escobj isa Partition
-      local partition = $escobj
+    local obj = $(esc(object))
+    if obj isa Partition
+      local partition = obj
       local geotable = parent(partition)
       _transform(partition, [$(colnames...)], [$(colexprs...)])
     else
-      local geotable = $escobj
+      local geotable = obj
       _transform(geotable, [$(colnames...)], [$(colexprs...)])
     end
   end

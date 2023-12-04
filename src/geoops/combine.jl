@@ -30,17 +30,17 @@ xnm, ynm, znm = :x, :y, :z
 @combine(geotable, {znm} = sum({xnm}) + prod({ynm}))
 ```
 """
-macro combine(object::Symbol, exprs...)
+macro combine(object, exprs...)
   splits = map(expr -> _split(expr, false), exprs)
   colnames = first.(splits)
   colexprs = last.(splits)
-  escobj = esc(object)
   quote
-    if $escobj isa Partition
-      local partition = $escobj
+    local obj = $(esc(object))
+    if obj isa Partition
+      local partition = obj
       _combine(partition, [$(colnames...)], [$(map(_partexpr, colexprs)...)])
     else
-      local geotable = $escobj
+      local geotable = obj
       _combine(geotable, [$(colnames...)], [$(map(_dataexpr, colexprs)...)])
     end
   end

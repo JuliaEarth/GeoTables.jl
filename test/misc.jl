@@ -14,17 +14,17 @@
   n = d |> ALR()
   t = Tables.columns(n)
   @test n isa AbstractGeoTable
-  @test Tables.columnnames(t) == (:z, :geometry)
+  @test Tables.columnnames(t) == (:ARL1, :geometry)
 
   n = d |> CLR()
   t = Tables.columns(n)
   @test n isa AbstractGeoTable
-  @test Tables.columnnames(t) == (:z, :w, :geometry)
+  @test Tables.columnnames(t) == (:CLR1, :CLR2, :geometry)
 
   n = d |> ILR()
   t = Tables.columns(n)
   @test n isa AbstractGeoTable
-  @test Tables.columnnames(t) == (:z, :geometry)
+  @test Tables.columnnames(t) == (:ILR1, :geometry)
 
   # feature + geometric transform
   d = georef((z=rand(1000), w=rand(1000)))

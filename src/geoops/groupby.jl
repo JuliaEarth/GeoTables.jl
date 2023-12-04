@@ -22,12 +22,12 @@ Group geospatial `geotable` by columns that match with `regex`.
 @groupby(geotable, r"[ace]")
 ```
 """
-macro groupby(geotable::Symbol, cols...)
+macro groupby(geotable, cols...)
   tuple = Expr(:tuple, esc.(cols)...)
   :(_groupby($(esc(geotable)), $tuple))
 end
 
-macro groupby(geotable::Symbol, cols)
+macro groupby(geotable, cols)
   :(_groupby($(esc(geotable)), $(esc(cols))))
 end
 
