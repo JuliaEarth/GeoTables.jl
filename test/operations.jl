@@ -378,7 +378,7 @@
     table = (x=rand(25), y=rand(25))
     sdata = georef(table, CartesianGrid(5, 5))
     opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
-  
+
     ndata = @transform(sdata |> opr, :z = :x - 2 * :y)
     @test ndata.z == sdata.x .- 2 .* sdata.y
     @test ndata.geometry == GeometrySet(centroid.(domain(sdata)))
