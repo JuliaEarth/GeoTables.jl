@@ -4,9 +4,12 @@ authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "1.10.2"
 
 [deps]
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 ColumnSelectors = "9cc86067-7e36-4c61-b350-1ac9833d277f"
 DataAPI = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 DataScienceTraits = "6cb2f572-2d2b-4ba6-bdb3-e710fa044d6c"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Meshes = "eacbb407-ea5a-433e-ab97-5258b1ca43fa"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -15,15 +18,21 @@ Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [weakdeps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 TableTransforms = "0d432bfd-3ee1-4ac1-886a-39f05cc69a3e"
 
 [extensions]
 GeoTablesTableTransformsExt = "TableTransforms"
+GeoTablesMakieExt = "Makie"
 
 [compat]
+CategoricalArrays = "0.10"
 ColumnSelectors = "0.1"
 DataAPI = "1.15"
 DataScienceTraits = "0.2"
+Dates = "1.9"
+Distributions = "0.25"
+Makie = "0.20"
 Meshes = "0.37"
 PrettyTables = "2.2"
 Random = "1.9"

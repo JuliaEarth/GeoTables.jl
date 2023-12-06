@@ -47,6 +47,9 @@ include("indices.jl")
 # georeferencing
 include("georef.jl")
 
+# plotting
+include("viewer.jl")
+
 export
   # interface
   AbstractGeoTable,
@@ -64,6 +67,9 @@ export
   @combine,
 
   # georeferencing
-  georef
+  georef,
+
+  # plotting
+  viewer
 
 end
