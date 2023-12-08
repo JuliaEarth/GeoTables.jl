@@ -110,8 +110,6 @@ _getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotab
 
 Base.hcat(geotable::AbstractGeoTable...) = reduce(_hcat, geotable)
 
-Base.vcat(geotable::AbstractGeoTable...) = reduce(_vcat, geotable)
-
 function _hcat(geotable1, geotable2)
   dom = domain(geotable1)
   if dom ≠ domain(geotable2)
@@ -149,39 +147,112 @@ function _hcat(geotable1, geotable2)
   constructor(geotable1)(dom, newval)
 end
 
-function _vcat(geotable1, geotable2)
+const VCATKINDS = [:union, :intersect]
+
+"""
+    vcat(geotables...; kind=:union)
+  
+Vertically concatenate the `geotables` using a certain `kind` of vcat.
+
+## Kinds
+
+* `:union` - The columns of all geotables are preserved, filling the entries with `missing` 
+  when one of the geotables does not have the column present in the other.
+* `:intersect` - Only columns that are present in all geotables are returned and, 
+  if there is no intersection, an error will be thrown.
+"""
+Base.vcat(geotables::AbstractGeoTable...; kwars...) = reduce((gtb1, gtb2) -> vcat(gtb1, gtb2; kwars...), geotables)
+
+function Base.vcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable; kind=:union)
+  if kind ∉ VCATKINDS
+    throw(ArgumentError("invalid kind of vcat, use one these $VCATKINDS"))
+  end
+
   dom1 = domain(geotable1)
   dom2 = domain(geotable2)
   tab1 = values(geotable1)
   tab2 = values(geotable2)
 
-  newtab = if !isnothing(tab1) && !isnothing(tab2)
+  newtab = if kind == :union
+    nrows1 = nrow(geotable1)
+    nrows2 = nrow(geotable2)
+    _unionvcat(tab1, tab2, nrows1, nrows2)
+  else
+    _intersectvcat(tab1, tab2)
+  end
+
+  newdom = GeometrySet(vcat(collect(dom1), collect(dom2)))
+  newval = Dict(paramdim(newdom) => newtab)
+  constructor(geotable1)(newdom, newval)
+end
+
+function _unionvcat(tab1, tab2, nrows1, nrows2)
+  if !isnothing(tab1) && !isnothing(tab2)
     cols1 = Tables.columns(tab1)
     cols2 = Tables.columns(tab2)
-    names = Tables.columnnames(cols1)
+    names1 = Tables.columnnames(cols1) |> collect
+    names2 = Tables.columnnames(cols2) |> collect
+    names = unique(vcat(names1, names2))
 
-    if Set(names) ≠ Set(Tables.columnnames(cols2))
-      _vcat_error()
+    missings1 = fill(missing, nrows1)
+    missings2 = fill(missing, nrows2)
+    columns = map(names) do name
+      column1 = name ∈ names1 ? Tables.getcolumn(cols1, name) : missings1
+      column2 = name ∈ names2 ? Tables.getcolumn(cols2, name) : missings2
+      vcat(column1, column2)
     end
+
+    (; zip(names, columns)...)
+  elseif !isnothing(tab1)
+    cols = Tables.columns(tab1)
+    names = Tables.columnnames(cols)
+    
+    missings = fill(missing, nrows2)
+    columns = map(names) do name
+      column = Tables.getcolumn(cols, name)
+      vcat(column, missings)
+    end
+
+    (; zip(names, columns)...)
+  elseif !isnothing(tab2)
+    cols = Tables.columns(tab2)
+    names = Tables.columnnames(cols)
+    
+    missings = fill(missing, nrows1)
+    columns = map(names) do name
+      column = Tables.getcolumn(cols, name)
+      vcat(missings, column)
+    end
+
+    (; zip(names, columns)...)
+  else
+    nothing
+  end
+end
+
+function _intersectvcat(tab1, tab2)
+  if !isnothing(tab1) && !isnothing(tab2)
+    cols1 = Tables.columns(tab1)
+    cols2 = Tables.columns(tab2)
+    names1 = Tables.columnnames(cols1) |> collect
+    names2 = Tables.columnnames(cols2) |> collect
+    names = names1 ∩ names2
+    isempty(names) && _nointersection_error()
 
     columns = map(names) do name
       column1 = Tables.getcolumn(cols1, name)
       column2 = Tables.getcolumn(cols2, name)
-      [column1; column2]
+      vcat(column1, column2)
     end
 
     (; zip(names, columns)...)
   elseif isnothing(tab1) && isnothing(tab2)
     nothing
   else
-    _vcat_error()
+    _nointersection_error()
   end
-
-  newdom = GeometrySet([collect(dom1); collect(dom2)])
-  newval = Dict(paramdim(newdom) => newtab)
-  constructor(geotable1)(newdom, newval)
 end
 
-_vcat_error() = throw(ArgumentError("all geotables must have the same variables"))
+_nointersection_error() = throw(ArgumentError("no intersection found"))
 
 _noattrs_error() = error("there are no attributes in the geotable")

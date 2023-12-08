@@ -136,9 +136,13 @@
     @test_throws ArgumentError hcat(data₁, data₂)
 
     # vcat
-    data₁ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
-    data₂ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
-    data₃ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
+    pset₁ = PointSet(rand(Point2, 10))
+    pset₂ = PointSet(rand(Point2, 10))
+    pset₃ = PointSet(rand(Point2, 10))
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy((a=rand(10), b=rand(10)), pset₂)
+    data₃ = dummy((a=rand(10), b=rand(10)), pset₃)
+
     @test vcat(data₁) == data₁
     vdata = vcat(data₁, data₂)
     @test vdata.a == [data₁.a; data₂.a]
@@ -148,10 +152,63 @@
     @test vdata.a == [data₁.a; data₂.a; data₃.a]
     @test vdata.b == [data₁.b; data₂.b; data₃.b]
     @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry); collect(data₃.geometry)])
-    # throws
-    data₁ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
-    data₂ = dummy((a=rand(10), c=rand(10)), PointSet(rand(Point2, 10)))
-    @test_throws ArgumentError vcat(data₁, data₂)
+
+    # union (default)
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy((a=rand(10), c=rand(10)), pset₂)
+    vdata = vcat(data₁, data₂)
+    @test propertynames(vdata) == [:a, :b, :c, :geometry]
+    @test vdata.a == [data₁.a; data₂.a]
+    @test isequal(vdata.b, [data₁.b; fill(missing, 10)])
+    @test isequal(vdata.c, [fill(missing, 10); data₂.c])
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy(nothing, pset₂)
+    vdata = vcat(data₁, data₂)
+    @test isequal(vdata.a, [data₁.a; fill(missing, 10)])
+    @test isequal(vdata.b, [data₁.b; fill(missing, 10)])
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    data₁ = dummy(nothing, pset₁)
+    data₂ = dummy((a=rand(10), b=rand(10)), pset₂)
+    vdata = vcat(data₁, data₂)
+    @test isequal(vdata.a, [fill(missing, 10); data₂.a])
+    @test isequal(vdata.b, [fill(missing, 10); data₂.b])
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    data₁ = dummy(nothing, pset₁)
+    data₂ = dummy(nothing, pset₂)
+    vdata = vcat(data₁, data₂)
+    @test isnothing(values(vdata))
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    # intersect
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy((a=rand(10), c=rand(10)), pset₂)
+    vdata = vcat(data₁, data₂, kind=:intersect)
+    @test propertynames(vdata) == [:a, :geometry]
+    @test vdata.a == [data₁.a; data₂.a]
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    data₁ = dummy(nothing, pset₁)
+    data₂ = dummy(nothing, pset₂)
+    vdata = vcat(data₁, data₂, kind=:intersect)
+    @test isnothing(values(vdata))
+    @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
+
+    # error: invalid kind
+    @test_throws ArgumentError vcat(data₁, data₂, kind=:test)
+    # error: no intersection found
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy((c=rand(10), d=rand(10)), pset₂)
+    @test_throws ArgumentError vcat(data₁, data₂, kind=:intersect)
+    data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
+    data₂ = dummy(nothing, pset₂)
+    @test_throws ArgumentError vcat(data₁, data₂, kind=:intersect)
+    data₁ = dummy(nothing, pset₁)
+    data₂ = dummy((a=rand(10), b=rand(10)), pset₂)
+    @test_throws ArgumentError vcat(data₁, data₂, kind=:intersect)
 
     # variables interface
     data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point2, 4)))
