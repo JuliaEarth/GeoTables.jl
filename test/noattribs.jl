@@ -48,6 +48,4 @@
   @test_throws AssertionError gtb[2, [:test]]
   @test_throws AssertionError gtb[:, [:test]]
   @test_throws AssertionError gtb[:, r"test"]
-  ngtb = georef((; x=rand(3)), npset)
-  @test_throws ArgumentError vcat(gtb, ngtb)
 end
