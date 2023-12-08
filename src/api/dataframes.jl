@@ -181,7 +181,7 @@ function Base.vcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable; kin
     _intersectvcat(tab1, tab2)
   end
 
-  newdom = GeometrySet(vcat(collect(dom1), collect(dom2)))
+  newdom = vcat(dom1, dom2)
   newval = Dict(paramdim(newdom) => newtab)
   constructor(geotable1)(newdom, newval)
 end
