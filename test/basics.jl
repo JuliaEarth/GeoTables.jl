@@ -197,6 +197,8 @@
     @test isnothing(values(vdata))
     @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry)])
 
+    # error: invalid kind
+    @test_throws ArgumentError vcat(data₁, data₂, kind=:test)
     # error: no intersection found
     data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
     data₂ = dummy((c=rand(10), d=rand(10)), pset₂)
