@@ -242,7 +242,7 @@ function _intersectvcat(tab1, tab2)
     columns = map(names) do name
       column1 = Tables.getcolumn(cols1, name)
       column2 = Tables.getcolumn(cols2, name)
-      [column1; column2]
+      vcat(column1, column2)
     end
 
     (; zip(names, columns)...)
