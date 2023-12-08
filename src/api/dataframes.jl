@@ -206,7 +206,7 @@ function _unionvcat(tab1, tab2, nrows1, nrows2)
   elseif !isnothing(tab1)
     cols = Tables.columns(tab1)
     names = Tables.columnnames(cols)
-    
+
     missings = fill(missing, nrows2)
     columns = map(names) do name
       column = Tables.getcolumn(cols, name)
@@ -217,7 +217,7 @@ function _unionvcat(tab1, tab2, nrows1, nrows2)
   elseif !isnothing(tab2)
     cols = Tables.columns(tab2)
     names = Tables.columnnames(cols)
-    
+
     missings = fill(missing, nrows1)
     columns = map(names) do name
       column = Tables.getcolumn(cols, name)
