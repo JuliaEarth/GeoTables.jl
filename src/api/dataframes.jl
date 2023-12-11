@@ -108,9 +108,17 @@ _getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(geota
 
 _getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotable, var)
 
-Base.hcat(geotable::AbstractGeoTable...) = reduce(_hcat, geotable)
+"""
+    hcat(geotables...)
+  
+Horizontally concatenate the `geotables` that have the same domain.
 
-function _hcat(geotable1, geotable2)
+If a geotable has the same column names as others,
+an underscore will be added to these names to make them unique.
+"""
+Base.hcat(geotables::AbstractGeoTable...) = reduce(hcat, geotables)
+
+function Base.hcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable)
   dom = domain(geotable1)
   if dom ≠ domain(geotable2)
     throw(ArgumentError("all geotables must have the same domain"))
@@ -121,12 +129,20 @@ function _hcat(geotable1, geotable2)
   newtab = if !isnothing(tab1) && !isnothing(tab2)
     cols1 = Tables.columns(tab1)
     cols2 = Tables.columns(tab2)
-    names1 = Tables.columnnames(cols1)
-    names2 = Tables.columnnames(cols2)
-    names = [collect(names1); collect(names2)]
+    names1 = Tables.columnnames(cols1) |> collect
+    names2 = Tables.columnnames(cols2) |> collect
 
-    if !allunique(names)
-      throw(ArgumentError("all geotables must have different variables"))
+    names = if isdisjoint(names1, names2)
+      vcat(names1, names2)
+    else
+      # make unique
+      newnames2 = map(names2) do name
+        while name ∈ names1
+          name = Symbol(name, :_)
+        end
+        name
+      end
+      vcat(names1, newnames2)
     end
 
     columns = Any[Tables.getcolumn(cols1, name) for name in names1]

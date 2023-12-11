@@ -121,18 +121,49 @@
     @test hdata.e == data₃.e
     @test hdata.f == data₃.f
     @test hdata.geometry == dom
+
     # maintain column types
     data₁ = dummy((; a=rand(10)), dom)
     data₂ = dummy((; b=rand(1:10, 10)), dom)
     hdata = hcat(data₁, data₂)
     @test eltype(hdata.a) === Float64
     @test eltype(hdata.b) === Int
-    # throws
+
+    # same column names
     data₁ = dummy((a=rand(10), b=rand(10)), dom)
     data₂ = dummy((a=rand(10), c=rand(10)), dom)
-    @test_throws ArgumentError hcat(data₁, data₂)
+    hdata = hcat(data₁, data₂)
+    @test propertynames(hdata) == [:a, :b, :a_, :c, :geometry]
+    @test hdata.a == data₁.a
+    @test hdata.b == data₁.b
+    @test hdata.a_ == data₂.a
+    @test hdata.c == data₂.c
+    @test hdata.geometry == dom
+    data₁ = dummy((a=rand(10), b=rand(10)), dom)
+    data₂ = dummy((a=rand(10), b=rand(10)), dom)
+    hdata = hcat(data₁, data₂)
+    @test propertynames(hdata) == [:a, :b, :a_, :b_, :geometry]
+    @test hdata.a == data₁.a
+    @test hdata.b == data₁.b
+    @test hdata.a_ == data₂.a
+    @test hdata.b_ == data₂.b
+    @test hdata.geometry == dom
+    data₁ = dummy((a=rand(10), b=rand(10)), dom)
+    data₂ = dummy((a=rand(10), b=rand(10)), dom)
+    data₃ = dummy((a=rand(10), b=rand(10)), dom)
+    hdata = hcat(data₁, data₂, data₃)
+    @test propertynames(hdata) == [:a, :b, :a_, :b_, :a__, :b__, :geometry]
+    @test hdata.a == data₁.a
+    @test hdata.b == data₁.b
+    @test hdata.a_ == data₂.a
+    @test hdata.b_ == data₂.b
+    @test hdata.a__ == data₃.a
+    @test hdata.b__ == data₃.b
+    @test hdata.geometry == dom
+
+    # error: different domains
     data₁ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
-    data₂ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point2, 10)))
+    data₂ = dummy((c=rand(10), d=rand(10)), PointSet(rand(Point2, 10)))
     @test_throws ArgumentError hcat(data₁, data₂)
 
     # vcat
