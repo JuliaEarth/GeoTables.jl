@@ -344,7 +344,7 @@
     @test ndata.a == fill(1.5, nrow(sdata))
     @test ndata.b == fill("test", nrow(sdata))
 
-    # strings
+    # string literals
     ndata = @transform(sdata, :x_str = join([:x, "test"]))
     @test ndata.x_str == [join([x, "test"]) for x in sdata.x]
 
