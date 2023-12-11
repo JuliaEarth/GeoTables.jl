@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENSE in the project root.
+# ------------------------------------------------------------------
+
 function _split(expr::Expr, rowwise=true)
   if expr.head ≠ :(=)
     throw(ArgumentError("invalid expression syntax"))
