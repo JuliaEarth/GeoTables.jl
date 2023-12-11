@@ -44,8 +44,7 @@ function _colexpr(expr, rowwise)
       funexpr = _funexpr(expr, colnames)
       columns = map(_getcolexpr, colnames)
       if rowwise
-        escmap = esc(:map)
-        :($escmap($funexpr, $(columns...)))
+        :(map($funexpr, $(columns...)))
       else
         :($funexpr($(columns...)))
       end
