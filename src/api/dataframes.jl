@@ -114,7 +114,7 @@ _getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotab
 Horizontally concatenate the `geotables` that have the same domain.
 
 If a geotable has the same column names as others,
-an underline will be added to these names to make them unique.
+an underscore will be added to these names to make them unique.
 """
 Base.hcat(geotables::AbstractGeoTable...) = reduce(hcat, geotables)
 
