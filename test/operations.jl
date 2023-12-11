@@ -331,10 +331,22 @@
     @test ndata.z == sdata.x .- 2 .* sdata.y
 
     # variable interpolation
-    z = rand(10)
-    ndata = @transform(sdata, :z = z, :w = :x - z)
-    @test ndata.z == z
-    @test ndata.w == sdata.x .- z
+    k = 10
+    ndata = @transform(sdata, :z = k + :y, :w = :x - k)
+    @test ndata.z == k .+ sdata.y
+    @test ndata.w == sdata.x .- k
+
+    # contant columns
+    k = 1
+    ndata = @transform(sdata, :z = k, :w = 5, :a = 1.5, :b = "test")
+    @test ndata.z == fill(k, nrow(sdata))
+    @test ndata.w == fill(5, nrow(sdata))
+    @test ndata.a == fill(1.5, nrow(sdata))
+    @test ndata.b == fill("test", nrow(sdata))
+
+    # strings
+    ndata = @transform(sdata, :x_str = join([:x, "test"]))
+    @test ndata.x_str == [join([x, "test"]) for x in sdata.x]
 
     # column replacement
     table = (x=rand(10), y=rand(10), z=rand(10))
