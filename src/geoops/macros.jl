@@ -27,7 +27,7 @@ function _colexpr(expr, rowwise)
   else
     colnames = _colnames(expr)
     if isempty(colnames)
-      # if the RHS expression don't have column name expressions
+      # if the RHS expression doesn't have column name expressions
       # returns a constant column expression
       constexpr = esc(expr)
       if rowwise
