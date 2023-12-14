@@ -22,8 +22,8 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 TableTransforms = "0d432bfd-3ee1-4ac1-886a-39f05cc69a3e"
 
 [extensions]
-GeoTablesTableTransformsExt = "TableTransforms"
 GeoTablesMakieExt = "Makie"
+GeoTablesTableTransformsExt = "TableTransforms"
 
 [compat]
 CategoricalArrays = "0.10"
@@ -37,7 +37,7 @@ Meshes = "0.37.2"
 PrettyTables = "2.2"
 Random = "1.9"
 Statistics = "1.9"
-TableTransforms = "1.23"
+TableTransforms = "1.27"
 Tables = "1.10"
 Unitful = "1.17"
 julia = "1.9"

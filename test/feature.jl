@@ -34,17 +34,17 @@
     ColTable()
   ]
     n, c = apply(p, d)
-    t = Tables.columns(n)
-    r = revert(p, n, c)
     @test n isa AbstractGeoTable
-    @test r isa AbstractGeoTable
+    if isrevertible(p)
+      r = revert(p, n, c)
+      @test r isa AbstractGeoTable
+    end
   end
 
   # transforms with categorical variables
   d = georef((c=categorical([1, 2, 3]),))
   for p in [Levels(:c => [1, 2, 3]), OneHot(:c)]
     n, c = apply(p, d)
-    t = Tables.columns(n)
     r = revert(p, n, c)
     @test n isa AbstractGeoTable
     @test r isa AbstractGeoTable
@@ -53,24 +53,19 @@
   d = georef((z=rand(100), w=rand(100)))
   p = Select(:w)
   n, c = apply(p, d)
-  t = Tables.columns(n)
-  @test Tables.columnnames(t) == (:w, :geometry)
+  @test propertynames(n) == [:w, :geometry]
 
   d = georef((z=rand(100), w=rand(100)))
   p = Sample(100)
   n, c = apply(p, d)
-  r = revert(p, n, c)
-  @test r == d
-  t = Tables.columns(n)
-  @test Tables.columnnames(t) == (:z, :w, :geometry)
+  @test propertynames(n) == [:z, :w, :geometry]
 
   d = georef((a=[1, missing, 3], b=[3, 2, 1]))
   p = DropMissing()
   n, c = apply(p, d)
-  @test Tables.columns(values(n)) == (a=[1, 3], b=[3, 1])
-  @test length(domain(n)) == 2
-  r = revert(p, n, c)
-  @test r == d
+  @test n.a == [1, 3]
+  @test n.b == [3, 1]
+  @test nelements(domain(n)) == 2
 
   # performance tests
   sz = (100, 100)
