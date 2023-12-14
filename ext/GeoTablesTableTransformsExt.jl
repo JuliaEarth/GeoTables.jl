@@ -9,8 +9,7 @@ using GeoTables
 using TableTransforms
 
 import TableTransforms: divide, attach
-import TableTransforms: applymeta, revertmeta
-import TableTransforms: apply, revert, reapply
+import TableTransforms: applymeta, apply, revert, reapply
 
 # -----------------------
 # TABLE TRANSFORM TRAITS
