@@ -13,7 +13,7 @@ function viewer(data::AbstractGeoTable; kwargs...)
   # list of viewable variables
   viewable = filter(vars) do var
     vals = Tables.getcolumn(cols, var)
-    isviewable(elscitype(vals))
+    isviewable(vals)
   end
 
   # throw error if there are no viewable variables
@@ -26,7 +26,7 @@ function viewer(data::AbstractGeoTable; kwargs...)
   end
 
   # constant variables
-  isconst = Dict(var => allequal(skipmissing(Tables.getcolumn(cols, var))) for var in viewable)
+  isconst = Dict(var => allequal(skipinvalid(Tables.getcolumn(cols, var))) for var in viewable)
 
   # distributional variables
   isdist = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Distributional for var in viewable)
@@ -34,8 +34,8 @@ function viewer(data::AbstractGeoTable; kwargs...)
   # list of menu options
   options = map(viewable) do var
     opt = if isconst[var]
-      vals = skipmissing(Tables.getcolumn(cols, var))
-      val = isempty(vals) ? missing : first(vals)
+      vals = Tables.getcolumn(cols, var)
+      val = first(skipinvalid(vals))
       "$var = $val (constant)"
     else
       "$var"
@@ -113,8 +113,8 @@ function viewer(data::AbstractGeoTable; kwargs...)
 end
 
 defaultlimits(vals) = defaultlimits(elscitype(vals), vals)
-defaultlimits(::Type, vals) = asfloat.(extrema(skipmissing(vals)))
-defaultlimits(::Type{Distributional}, vals) = extrema(location.(skipmissing(vals)))
+defaultlimits(::Type, vals) = asfloat.(extrema(skipinvalid(vals)))
+defaultlimits(::Type{Distributional}, vals) = extrema(location.(skipinvalid(vals)))
 defaultlimits(vals::CategArray) = (0.0, asfloat(length(levels(vals))))
 
 defaultticks(vals) = range(defaultlimits(vals)..., 5)
@@ -148,7 +148,11 @@ end
 
 asstring(x) = sprint(print, x, context=:compact => true)
 
-isviewable(::Type) = false
-isviewable(::Type{Continuous}) = true
-isviewable(::Type{Categorical}) = true
-isviewable(::Type{Distributional}) = true
+isinvalid(v) = ismissing(v) || (v isa Number && isnan(v))
+skipinvalid(vals) = (v for v in vals if !isinvalid(v))
+
+isviewable(vals) = isviewable(elscitype(vals), vals)
+isviewable(::Type, vals) = false
+isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
+isviewable(::Type{Categorical}, vals) = true
+isviewable(::Type{Distributional}, vals) = true
