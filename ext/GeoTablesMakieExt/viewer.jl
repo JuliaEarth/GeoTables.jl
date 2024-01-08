@@ -153,6 +153,12 @@ skipinvalid(vals) = (v for v in vals if !isinvalid(v))
 
 isviewable(vals) = isviewable(elscitype(vals), vals)
 isviewable(::Type, vals) = false
+isviewable(::Type{Unknown}, vals) = iscolor(vals)
 isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
 isviewable(::Type{Categorical}, vals) = true
 isviewable(::Type{Distributional}, vals) = true
+
+iscolor(vals) = iscolor(nonmissingtype(eltype(vals)))
+iscolor(::Type) = false
+iscolor(::Type{Union{}}) = false
+iscolor(::Type{<:Colorant}) = true
