@@ -52,3 +52,7 @@ end
 
 # specialize methods for performance
 Base.:(==)(v₁::SubGeoTable, v₂::SubGeoTable) = getgeotable(v₁) == getgeotable(v₂) && getinds(v₁) == getinds(v₂)
+
+Base.parent(v::SubGeoTable) = getgeotable(v)
+
+Base.parentindices(v::SubGeoTable) = getinds(v)

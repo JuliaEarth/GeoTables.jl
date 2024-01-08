@@ -20,6 +20,13 @@
     data₂ = dummy((a=[1, missing, 3], b=[3, 2, 1]), PointSet([1 2 3; 4 5 6]))
     @test data₁ == data₂
 
+    # parent and parentindices
+    dom = CartesianGrid(2, 2)
+    tab = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
+    dat = Dummy(tab)
+    @test parent(dat) === dat
+    @test parentindices(dat) == 1:4
+
     # Tables interface
     dom = CartesianGrid(2, 2)
     dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)

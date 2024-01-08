@@ -90,6 +90,10 @@ Base.view(geotable::AbstractGeoTable, inds) = SubGeoTable(geotable, inds)
 
 Base.view(geotable::AbstractGeoTable, geometry::Geometry) = SubGeoTable(geotable, indices(domain(geotable), geometry))
 
+Base.parent(geotable::AbstractGeoTable) = geotable
+
+Base.parentindices(geotable::AbstractGeoTable) = 1:nrow(geotable)
+
 # -----------
 # IO METHODS
 # -----------

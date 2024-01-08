@@ -4,6 +4,8 @@
     t = (a=1:100, b=1:100)
     d = dummy(t, g)
     v = view(d, 1:3)
+    @test parent(v) === d
+    @test parentindices(v) == 1:3
 
     g = CartesianGrid(10, 10)
     t = (a=1:100, b=1:100)
