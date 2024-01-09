@@ -92,9 +92,6 @@
     @test data[:, :] == data
     # inds with colon
     @test data[1:2, :] isa GeoTables.SubGeoTable
-    # preserve the parent geotable
-    @test parent(data[2:4, :][1:2, :]) === data
-    @test parentindices(data[2:4, :][1:2, :]) == [2, 3]
 
     # geometries
     a = rand(100)

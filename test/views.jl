@@ -3,9 +3,11 @@
     g = CartesianGrid(10, 10)
     t = (a=1:100, b=1:100)
     d = dummy(t, g)
-    v = view(d, 1:3)
+    v = view(d, 20:50)
     @test parent(v) === d
-    @test parentindices(v) == 1:3
+    @test parentindices(v) == 20:50
+    @test parent(view(v, 1:10)) === d
+    @test parentindices(view(v, 1:10)) == 20:29
 
     g = CartesianGrid(10, 10)
     t = (a=1:100, b=1:100)
