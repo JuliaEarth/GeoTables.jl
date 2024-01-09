@@ -42,6 +42,14 @@
   @test isnothing(values(v))
   @test v.geometry == view(pset, [1, 3])
 
+  # grid indexing
+  grid = CartesianGrid(10, 10)
+  linds = LinearIndices(size(grid))
+  gtb = GeoTable(grid)
+  @test isnothing(values(gtb[(1:3, :), :]))
+  @test gtb[(1:3, :), :].geometry == grid[1:3, :]
+  @test gtb[(1:3, :), :].geometry isa CartesianGrid
+
   # throws
   @test_throws ErrorException gtb.test
   @test_throws AssertionError gtb[[1, 3], [:test]]
