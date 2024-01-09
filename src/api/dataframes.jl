@@ -42,6 +42,8 @@ const RowSelector = Union{Int,AbstractVector{Int},Colon}
 
 Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
 
+Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, ::Colon) = view(geotable, inds)
+
 Base.getindex(geotable::AbstractGeoTable, rows::RowSelector, vars) = _getindex(geotable, rows, selector(vars))
 
 function _getindex(geotable::AbstractGeoTable, rows::RowSelector, selector::ColumnSelector)

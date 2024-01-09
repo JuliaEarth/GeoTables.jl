@@ -7,7 +7,7 @@
 
 Return a view of `geotable` at indices `inds`.
 """
-struct SubGeoTable{T<:AbstractGeoTable,I} <: AbstractGeoTable
+struct SubGeoTable{T<:AbstractGeoTable,I<:AbstractVector{Int}} <: AbstractGeoTable
   geotable::T
   inds::I
 end
@@ -17,7 +17,7 @@ getgeotable(v::SubGeoTable) = getfield(v, :geotable)
 getinds(v::SubGeoTable) = getfield(v, :inds)
 
 # specialize constructor to avoid infinite loops
-SubGeoTable(v::SubGeoTable, inds) = SubGeoTable(getgeotable(v), getinds(v)[inds])
+SubGeoTable(v::SubGeoTable, inds::AbstractVector{Int}) = SubGeoTable(getgeotable(v), getinds(v)[inds])
 
 # ----------------------------
 # ABSTRACT GEOTABLE INTERFACE

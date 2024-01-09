@@ -86,7 +86,7 @@ function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable
   return true
 end
 
-Base.view(geotable::AbstractGeoTable, inds) = SubGeoTable(geotable, inds)
+Base.view(geotable::AbstractGeoTable, inds::AbstractVector{Int}) = SubGeoTable(geotable, inds)
 
 Base.view(geotable::AbstractGeoTable, geometry::Geometry) = SubGeoTable(geotable, indices(domain(geotable), geometry))
 
