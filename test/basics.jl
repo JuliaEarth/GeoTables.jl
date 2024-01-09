@@ -70,6 +70,7 @@
       @test isequal(data[1:2, b], [5, missing])
       @test isequal(data[1:2, geometry], view(grid, 1:2))
       @test data[1:2, :] == dummy((a=[1, 2], b=[5, missing]), view(grid, 1:2))
+      @test data[1:2, :] isa GeoTables.SubGeoTable
       @test isequal(data[1, [a, b]], (a=1, b=5, geometry=grid[1]))
       @test isequal(data[1, [a, b, geometry]], (a=1, b=5, geometry=grid[1]))
       @test isequal(data[1, a], 1)
