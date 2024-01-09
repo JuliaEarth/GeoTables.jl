@@ -108,6 +108,25 @@
     @test first(gtb[Point(1, 1), ["a"]].a) == gtb[linds[1, 1], :a]
     @test first(gtb[Point(1, 1), r"a"].a) == gtb[linds[1, 1], :a]
 
+    # grid indexing
+    a = rand(100)
+    b = rand(100)
+    grid = CartesianGrid(10, 10)
+    linds = LinearIndices(size(grid))
+    gtb = dummy((; a, b), grid)
+    @test gtb[(1, 1), :a] == gtb[linds[1, 1], :a]
+    @test gtb[(1:3, :), "a"] == gtb[vec(linds[1:3, :]), :a]
+    @test gtb[(10, 10), [:b]] == gtb[linds[10, 10], [:b]]
+    @test gtb[(1:3, :), ["b"]] == gtb[vec(linds[1:3, :]), [:b]]
+    @test domain(gtb[(1:3, :), :]) isa CartesianGrid
+
+    # error: cartesian indexing only works with grids
+    gtb = dummy((; a=rand(4)), PointSet(rand(Point2, 4)))
+    @test_throws ArgumentError gtb[(1, 1), :a]
+    # error: invalid cartesian indexing
+    gtb = dummy((; a=rand(8)), CartesianGrid(2, 2))
+    @test_throws ArgumentError gtb[(1, 1, 1), :a]
+
     # hcat
     dom = PointSet(rand(Point2, 10))
     data₁ = dummy((a=rand(10), b=rand(10)), dom)
