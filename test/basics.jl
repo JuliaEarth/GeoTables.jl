@@ -70,7 +70,6 @@
       @test isequal(data[1:2, b], [5, missing])
       @test isequal(data[1:2, geometry], view(grid, 1:2))
       @test data[1:2, :] == dummy((a=[1, 2], b=[5, missing]), view(grid, 1:2))
-      @test data[1:2, :] isa GeoTables.SubGeoTable
       @test isequal(data[1, [a, b]], (a=1, b=5, geometry=grid[1]))
       @test isequal(data[1, [a, b, geometry]], (a=1, b=5, geometry=grid[1]))
       @test isequal(data[1, a], 1)
@@ -87,8 +86,16 @@
     @test data[3, r"a"] == (a=3, geometry=grid[3])
     @test data[3:4, r"b"] == dummy((b=[7, 8],), view(grid, 3:4))
     @test data[:, r"[ab]"] == data
+
+    # optimizations
     # colon with colon
     @test data[:, :] == data
+    # inds with colon
+    @test data[1:2, :] isa GeoTables.SubGeoTable
+    # preserve the parent geotable
+    @test parent(data[2:4, :][1:2, :]) === data
+    @test parentindices(data[2:4, :][1:2, :]) == [2, 3]
+
     # geometries
     a = rand(100)
     b = rand(100)
