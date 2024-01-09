@@ -5,7 +5,6 @@
 Base.getindex(geotable::AbstractGeoTable, geometry::Geometry, vars) =
   _getindex(geotable, indices(domain(geotable), geometry), selector(vars))
 
-
 # --------------
 # GRID INDEXING
 # --------------
