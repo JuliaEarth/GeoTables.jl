@@ -124,8 +124,7 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
   pairs2 = (var => gencol(j, var) for (j, var) in enumerate(vars2))
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
-  vals = Dict(paramdim(dom1) => newtab)
-  constructor(gtb1)(dom1, vals)
+  georef(newtab, dom1)
 end
 
 function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
@@ -183,6 +182,5 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
   newdom = view(dom1, inds)
-  vals = Dict(paramdim(newdom) => newtab)
-  constructor(gtb1)(newdom, vals)
+  georef(newtab, newdom)
 end

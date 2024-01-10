@@ -55,7 +55,6 @@ export
   AbstractGeoTable,
   GeoTable,
   domain,
-  constructor,
   asarray,
   nrow,
   ncol,

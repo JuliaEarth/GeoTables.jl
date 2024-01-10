@@ -67,8 +67,7 @@ function _transform(geotable::AbstractGeoTable, tnames, tcolumns)
   𝒯 = (; zip(names, columns)...)
   newtab = 𝒯 |> Tables.materializer(table)
 
-  vals = Dict(paramdim(newdom) => newtab)
-  constructor(geotable)(newdom, vals)
+  georef(newtab, newdom)
 end
 
 function _transform(partition::Partition{<:AbstractGeoTable}, tnames, tcolumns)

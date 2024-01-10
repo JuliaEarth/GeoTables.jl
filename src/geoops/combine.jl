@@ -65,8 +65,7 @@ function _combine(geotable::AbstractGeoTable, names, columns)
     𝒯 |> Tables.materializer(table)
   end
 
-  vals = Dict(paramdim(newdom) => newtab)
-  constructor(geotable)(newdom, vals)
+  georef(newtab, newdom)
 end
 
 function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeoTable}
@@ -91,8 +90,7 @@ function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeo
   𝒯 = (; zip(gnames, gcolumns)...)
   newtab = 𝒯 |> Tables.materializer(table)
 
-  vals = Dict(paramdim(newdom) => newtab)
-  constructor(T)(newdom, vals)
+  georef(newtab, newdom)
 end
 
 # utils
