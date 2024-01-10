@@ -61,7 +61,7 @@ function _geojoin(
   onpred = _onpred(onvars)
   if !isnothing(onvars)
     if onvars ⊈ vars1 || onvars ⊈ vars2
-      throw(ArgumentError("all variables in `on` kwarg must be exist in both geotables"))
+      throw(ArgumentError("all variables in `on` kwarg must exist in both geotables"))
     end
   end
 

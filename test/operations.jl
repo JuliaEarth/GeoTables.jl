@@ -216,6 +216,9 @@
     @test jgtb.b == gtb1.b[[1, 3]]
     @test jgtb.c[1] == gtb2.c[1]
     @test jgtb.c[2] == gtb2.c[7]
+
+    # error: all variables in "on" kwarg must exist in both geotables
+    @test_throws ArgumentError geojoin(gtb1, gtb2, on=[:a, :c])
   end
 
   @testset "@groupby" begin
