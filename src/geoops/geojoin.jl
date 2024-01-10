@@ -5,10 +5,14 @@
 const KINDS = [:left, :inner]
 
 """
-    geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects)
+    geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
 
 Joins `geotable₁` with `geotable₂` using a certain `kind` of join and predicate function `pred`
 that takes two geometries and returns a boolean (`(g1, g2) -> g1 ⊆ g2`).
+
+Optionally, add a variable value match to join, in addition to geometric match, by passing
+a single name or list of variable names (strings or symbols) to the `on` keyword argument.
+The variable value match use the `isequal` function.
 
 Whenever two or more matches are encountered, aggregate `varᵢ` with aggregation function `aggᵢ`.
 If no aggregation function is provided for a variable, then the aggregation function will be
@@ -26,6 +30,8 @@ geojoin(gtb1, gtb2)
 geojoin(gtb1, gtb2, 1 => mean)
 geojoin(gtb1, gtb2, :a => mean, :b => std)
 geojoin(gtb1, gtb2, "a" => mean, pred=issubset)
+geojoin(gtb1, gtb2, on=:a)
+geojoin(gtb1, gtb2, kind=:inner, on=["a", "b"])
 ```
 """
 geojoin(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; kwargs...) =
@@ -40,18 +46,32 @@ function _geojoin(
   selector::ColumnSelector,
   aggfuns::Vector{Function};
   kind=:left,
-  pred=intersects
+  pred=intersects,
+  on=nothing
 )
   if kind ∉ KINDS
     throw(ArgumentError("invalid kind of join, use one these $KINDS"))
   end
 
-  # make variable names unique
   vars1 = Tables.schema(values(gtb1)).names
   vars2 = Tables.schema(values(gtb2)).names
+
+  # check "on" variables
+  onvars = _onvars(on)
+  onpred = _onpred(onvars)
+  if !isnothing(onvars)
+    if onvars ⊈ vars1 || onvars ⊈ vars2
+      throw(ArgumentError("all variables in `on` kwarg must be exist in both geotables"))
+    end
+  end
+
+  # make variable names unique
   if !isdisjoint(vars1, vars2)
     # repeated variable names
     vars = vars1 ∩ vars2
+    if !isnothing(onvars)
+      vars = setdiff(vars, onvars)
+    end
     newvars = map(vars) do var
       while var ∈ vars1
         var = Symbol(var, :_)
@@ -65,21 +85,28 @@ function _geojoin(
   gtb2 = _adjustunits(gtb2)
 
   if kind === :inner
-    _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
+    _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   else
-    _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
+    _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 end
 
-function _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
+function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
+  rows1 = Tables.rows(tab1)
+  rows2 = Tables.rows(tab2)
   cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
   vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
+
+  # remove "on" variables from gtb2
+  if !isnothing(onvars)
+    vars2 = setdiff(vars2, onvars)
+  end
 
   # aggregation functions
   svars = selector(vars2)
@@ -91,18 +118,16 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
     end
   end
 
-  # rows to join
   nrows = nrow(gtb1)
-  ncols = ncol(gtb2) - 1
-  types = Tables.schema(tab2).types
+  types = [Tables.columntype(tab2, var) for var in vars2]
+  # rows of gtb2 to join
   rows = [[T[] for T in types] for _ in 1:nrows]
-  for (i1, geom1) in enumerate(dom1)
-    for (i2, geom2) in enumerate(dom2)
-      if pred(geom1, geom2)
-        row = Tables.subset(tab2, i2)
-        for j in 1:ncols
-          v = Tables.getcolumn(row, j)
-          push!(rows[i1][j], v)
+  for (i, geom1, row1) in zip(1:nrows, dom1, rows1)
+    for (geom2, row2) in zip(dom2, rows2)
+      if pred(geom1, geom2) && onpred(row1, row2)
+        for (j, var) in enumerate(vars2)
+          v = Tables.getcolumn(row2, var)
+          push!(rows[i][j], v)
         end
       end
     end
@@ -127,15 +152,22 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred)
   georef(newtab, dom1)
 end
 
-function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
+function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
+  rows1 = Tables.rows(tab1)
+  rows2 = Tables.rows(tab2)
   cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
   vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
+
+  # remove "on" variables from gtb2
+  if !isnothing(onvars)
+    vars2 = setdiff(vars2, onvars)
+  end
 
   # aggregation functions
   svars = selector(vars2)
@@ -148,20 +180,18 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
   end
 
   nrows = nrow(gtb1)
-  ncols = ncol(gtb2) - 1
-  types = Tables.schema(tab2).types
+  types = [Tables.columntype(tab2, var) for var in vars2]
   # rows of gtb2 to join
   rows = [[T[] for T in types] for _ in 1:nrows]
   # row indices of gtb1 to preserve
   inds = Int[]
-  for (i1, geom1) in enumerate(dom1)
-    for (i2, geom2) in enumerate(dom2)
-      if pred(geom1, geom2)
-        i1 ∉ inds && push!(inds, i1)
-        row = Tables.subset(tab2, i2)
-        for j in 1:ncols
-          v = Tables.getcolumn(row, j)
-          push!(rows[i1][j], v)
+  for (i, geom1, row1) in zip(1:nrows, dom1, rows1)
+    for (geom2, row2) in zip(dom2, rows2)
+      if pred(geom1, geom2) && onpred(row1, row2)
+        i ∉ inds && push!(inds, i)
+        for (j, var) in enumerate(vars2)
+          v = Tables.getcolumn(row2, var)
+          push!(rows[i][j], v)
         end
       end
     end
@@ -184,3 +214,18 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred)
   newdom = view(dom1, inds)
   georef(newtab, newdom)
 end
+
+_onvars(::Nothing) = nothing
+_onvars(var::Symbol) = [var]
+_onvars(var::AbstractString) = [Symbol(var)]
+_onvars(vars) = Symbol.(vars)
+
+function _onpred(onvars)
+  if isnothing(onvars)
+    (_, _) -> true
+  else
+    (row1, row2) -> all(_isvarequal(row1, row2, var) for var in onvars)
+  end
+end
+
+_isvarequal(row1, row2, var) = isequal(Tables.getcolumn(row1, var), Tables.getcolumn(row2, var))
