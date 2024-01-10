@@ -58,8 +58,7 @@ function _getgridindex(geotable, ijk::CartesianIndices, vars::Vector{Symbol})
     pairs = (var => Tables.getcolumn(cols, var) for var in vars)
     (; pairs...) |> Tables.materializer(tab)
   end
-  newval = Dict(paramdim(newgrid) => newtab)
-  constructor(geotable)(newgrid, newval)
+  georef(newtab, newgrid)
 end
 
 function _getgridindex(geotable, ijk::CartesianIndices, var::Symbol)

@@ -13,6 +13,4 @@ function GeoTables.values(data::DummyGeoTable, rank=nothing)
   haskey(values, r) ? values[r] : nothing
 end
 
-GeoTables.constructor(::Type{<:DummyGeoTable}) = DummyGeoTable
-
 dummygeoref(table, domain) = DummyGeoTable(domain, Dict(paramdim(domain) => table))

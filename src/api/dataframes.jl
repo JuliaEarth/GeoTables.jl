@@ -70,8 +70,7 @@ function _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::
     pairs = (var => Tables.getcolumn(cols, var) for var in vars)
     (; pairs...) |> Tables.materializer(tab)
   end
-  newval = Dict(paramdim(newdom) => newtab)
-  constructor(geotable)(newdom, newval)
+  georef(newtab, newdom)
 end
 
 function _getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Symbol})
@@ -100,8 +99,7 @@ function _getindex(geotable::AbstractGeoTable, ::Colon, vars::AbstractVector{Sym
     pairs = (var => Tables.getcolumn(cols, var) for var in vars)
     (; pairs...) |> Tables.materializer(tab)
   end
-  newval = Dict(paramdim(dom) => newtab)
-  constructor(geotable)(dom, newval)
+  georef(newtab, dom)
 end
 
 _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, var::Symbol) = getproperty(view(geotable, inds), var)
@@ -161,8 +159,7 @@ function Base.hcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable)
     nothing
   end
 
-  newval = Dict(paramdim(dom) => newtab)
-  constructor(geotable1)(dom, newval)
+  georef(newtab, dom)
 end
 
 const VCATKINDS = [:union, :intersect]
@@ -200,8 +197,7 @@ function Base.vcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable; kin
   end
 
   newdom = vcat(dom1, dom2)
-  newval = Dict(paramdim(newdom) => newtab)
-  constructor(geotable1)(newdom, newval)
+  georef(newtab, newdom)
 end
 
 function _unionvcat(tab1, tab2, nrows1, nrows2)

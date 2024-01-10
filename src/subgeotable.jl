@@ -42,14 +42,6 @@ function Base.values(v::SubGeoTable, rank=nothing)
   end
 end
 
-function constructor(::Type{SubGeoTable{T,I}}) where {T<:AbstractGeoTable,I}
-  function ctor(domain, values)
-    geotable = constructor(T)(domain, values)
-    inds = 1:nelements(domain)
-    SubGeoTable(geotable, inds)
-  end
-end
-
 # specialize methods for performance
 Base.:(==)(v₁::SubGeoTable, v₂::SubGeoTable) = getgeotable(v₁) == getgeotable(v₂) && getinds(v₁) == getinds(v₂)
 

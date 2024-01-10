@@ -35,20 +35,9 @@ of the elements of the domain.
 """
 values
 
-"""
-    constructor(T::Type)
-
-Return the constructor of the geotable type `T` as a function.
-The function takes a domain and a dictionary of tables as
-inputs and combines them into an instance of the geotable type.
-"""
-function constructor end
-
 # ----------
 # FALLBACKS
 # ----------
-
-constructor(::T) where {T<:AbstractGeoTable} = constructor(T)
 
 function (::Type{T})(table) where {T<:AbstractGeoTable}
   # build domain from geometry column
@@ -61,11 +50,7 @@ function (::Type{T})(table) where {T<:AbstractGeoTable}
   pairs = (var => Tables.getcolumn(cols, var) for var in vars)
   newtable = (; pairs...)
 
-  # data table for elements
-  values = Dict(paramdim(domain) => newtable)
-
-  # combine the two with constructor
-  constructor(T)(domain, values)
+  georef(newtable, domain)
 end
 
 function Base.:(==)(geotable₁::AbstractGeoTable, geotable₂::AbstractGeoTable)

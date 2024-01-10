@@ -68,5 +68,3 @@ function Base.values(geotable::GeoTable, rank=nothing)
   r = isnothing(rank) ? paramdim(domain) : rank
   get(values, r, nothing)
 end
-
-constructor(::Type{<:GeoTable}) = GeoTable
