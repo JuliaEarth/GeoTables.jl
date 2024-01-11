@@ -75,9 +75,42 @@ Base.view(geotable::AbstractGeoTable, inds::AbstractVector{Int}) = SubGeoTable(g
 
 Base.view(geotable::AbstractGeoTable, geometry::Geometry) = SubGeoTable(geotable, indices(domain(geotable), geometry))
 
-Base.parent(geotable::AbstractGeoTable) = geotable
+function Base.parent(geotable::AbstractGeoTable)
+  dom = domain(geotable)
+  if dom isa Meshes.SubDomain
+    pdom = parent(dom)
 
-Base.parentindices(geotable::AbstractGeoTable) = 1:nrow(geotable)
+    tab = values(geotable)
+    newtab = if !isnothing(tab)
+      n = nelements(pdom)
+      inds = parentindices(dom)
+      cols = Tables.columns(tab)
+      vars = Tables.columnnames(cols)
+      pairs = map(vars) do var
+        x = Tables.getcolumn(cols, var)
+        y = Vector{Union{Missing,eltype(x)}}(missing, n)
+        y[inds] .= x
+        var => y
+      end
+      (; pairs...) |> Tables.materializer(tab)
+    else
+      nothing
+    end
+
+    georef(newtab, pdom)
+  else
+    geotable
+  end
+end
+
+function Base.parentindices(geotable::AbstractGeoTable)
+  dom = domain(geotable)
+  if dom isa Meshes.SubDomain
+    parentindices(dom)
+  else
+    1:nrow(geotable)
+  end
+end
 
 # -----------
 # IO METHODS

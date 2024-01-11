@@ -22,10 +22,23 @@
 
     # parent and parentindices
     dom = CartesianGrid(2, 2)
-    tab = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
-    dat = Dummy(tab)
+    dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
     @test parent(dat) === dat
     @test parentindices(dat) == 1:4
+    # geotable with subdomain
+    dom = CartesianGrid(3, 3)
+    inds = [1, 3, 5, 7, 9]
+    dat = dummy((a=[1, 2, 3, 4, 5], b=[6, 7, 8, 9, 10]), view(dom, inds))
+    pdat = parent(dat)
+    @test domain(pdat) == dom
+    @test parentindices(dat) == inds
+    @test isequal(pdat.a, [1, missing, 2, missing, 3, missing, 4, missing, 5])
+    @test isequal(pdat.b, [6, missing, 7, missing, 8, missing, 9, missing, 10])
+    dat = dummy(nothing, view(dom, inds))
+    pdat = parent(dat)
+    @test domain(pdat) == dom
+    @test parentindices(dat) == inds
+    @test isnothing(values(pdat))
 
     # Tables interface
     dom = CartesianGrid(2, 2)
