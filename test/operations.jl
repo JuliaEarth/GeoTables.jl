@@ -144,11 +144,10 @@
     # quantity aggregation
     box1 = Box((0, 0), (1, 1))
     box2 = Box((1, 1), (2, 2))
-    pset = PointSet((0.5, 0.5), (1.2, 1.2), (1.8, 1.8))
-    gset = GeometrySet([box1, box2])
-    gtb1 = georef((; a=rand(2)), gset)
-    gtb2 = georef((; b=[1, 2, 3] * u"K"), pset)
-    gtb3 = georef((; c=[1.0, 2.0, 3.0] * u"K"), pset)
+    pts = Point2[(0.5, 0.5), (1.2, 1.2), (1.8, 1.8)]
+    gtb1 = georef((; a=rand(2)), [box1, box2])
+    gtb2 = georef((; b=[1, 2, 3] * u"K"), pts)
+    gtb3 = georef((; c=[1.0, 2.0, 3.0] * u"K"), pts)
     jgtb = geojoin(gtb1, gtb2)
     @test propertynames(jgtb) == [:a, :b, :geometry]
     @test jgtb.geometry == gtb1.geometry
@@ -165,6 +164,61 @@
     @test Unitful.numtype(eltype(jgtb.c)) <: Float64
     @test jgtb.c[1] == mean(gtb3.c[[1]])
     @test jgtb.c[2] == mean(gtb3.c[[2, 3]])
+
+    # "on" kwarg
+    tab1 = (a=1:4, b=["a", "b", "c", "d"])
+    tab2 = (a=[1, 1, 0, 0, 0, 3, 3, 0, 0], b=["a", "z", "z", "z", "z", "z", "c", "z", "z"], c=rand(9))
+    gtb1 = georef(tab1, gset)
+    gtb2 = georef(tab2, pset)
+
+    # left join
+    jgtb = geojoin(gtb1, gtb2, on=:a)
+    @test propertynames(jgtb) == [:a, :b, :b_, :c, :geometry]
+    @test jgtb.geometry == gtb1.geometry
+    @test jgtb.a == gtb1.a
+    @test jgtb.b == gtb1.b
+    @test jgtb.b_[1] == first(gtb2.b[[1, 2]])
+    @test ismissing(jgtb.b_[2])
+    @test jgtb.b_[3] == first(gtb2.b[[6, 7]])
+    @test ismissing(jgtb.b_[4])
+    @test jgtb.c[1] == mean(gtb2.c[[1, 2]])
+    @test ismissing(jgtb.c[2])
+    @test jgtb.c[3] == mean(gtb2.c[[6, 7]])
+    @test ismissing(jgtb.c[4])
+
+    jgtb = geojoin(gtb1, gtb2, on=["a", "b"])
+    @test propertynames(jgtb) == [:a, :b, :c, :geometry]
+    @test jgtb.geometry == gtb1.geometry
+    @test jgtb.a == gtb1.a
+    @test jgtb.b == gtb1.b
+    @test jgtb.c[1] == gtb2.c[1]
+    @test ismissing(jgtb.c[2])
+    @test jgtb.c[3] == gtb2.c[7]
+    @test ismissing(jgtb.c[4])
+
+    # inner join
+    jgtb = geojoin(gtb1, gtb2, kind=:inner, on="a")
+    @test nrow(jgtb) == 2
+    @test propertynames(jgtb) == [:a, :b, :b_, :c, :geometry]
+    @test jgtb.geometry == view(gtb1.geometry, [1, 3])
+    @test jgtb.a == gtb1.a[[1, 3]]
+    @test jgtb.b == gtb1.b[[1, 3]]
+    @test jgtb.b_[1] == first(gtb2.b[[1, 2]])
+    @test jgtb.b_[2] == first(gtb2.b[[6, 7]])
+    @test jgtb.c[1] == mean(gtb2.c[[1, 2]])
+    @test jgtb.c[2] == mean(gtb2.c[[6, 7]])
+
+    jgtb = geojoin(gtb1, gtb2, kind=:inner, on=[:a, :b])
+    @test nrow(jgtb) == 2
+    @test propertynames(jgtb) == [:a, :b, :c, :geometry]
+    @test jgtb.geometry == view(gtb1.geometry, [1, 3])
+    @test jgtb.a == gtb1.a[[1, 3]]
+    @test jgtb.b == gtb1.b[[1, 3]]
+    @test jgtb.c[1] == gtb2.c[1]
+    @test jgtb.c[2] == gtb2.c[7]
+
+    # error: all variables in "on" kwarg must exist in both geotables
+    @test_throws ArgumentError geojoin(gtb1, gtb2, on=[:a, :c])
   end
 
   @testset "@groupby" begin
