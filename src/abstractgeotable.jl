@@ -79,19 +79,23 @@ function Base.parent(geotable::AbstractGeoTable)
   dom = domain(geotable)
   if dom isa Meshes.SubDomain
     pdom = parent(dom)
-    pinds = parentindices(dom)
 
-    n = nelements(pdom)
     tab = values(geotable)
-    cols = Tables.columns(tab)
-    vars = Tables.columnnames(cols)
-    pairs = map(vars) do var
-      x = Tables.getcolumn(cols, var)
-      y = Vector{Union{Missing,eltype(x)}}(missing, n)
-      y[pinds] .= x
-      var => y
+    newtab = if !isnothing(tab)
+      n = nelements(pdom)
+      inds = parentindices(dom)
+      cols = Tables.columns(tab)
+      vars = Tables.columnnames(cols)
+      pairs = map(vars) do var
+        x = Tables.getcolumn(cols, var)
+        y = Vector{Union{Missing,eltype(x)}}(missing, n)
+        y[inds] .= x
+        var => y
+      end
+      newtab = (; pairs...) |> Tables.materializer(tab)
+    else
+      nothing
     end
-    newtab = (; pairs...) |> Tables.materializer(tab)
 
     georef(newtab, pdom)
   else

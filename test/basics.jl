@@ -34,6 +34,11 @@
     @test parentindices(dat) == inds
     @test isequal(pdat.a, [1, missing, 2, missing, 3, missing, 4, missing, 5])
     @test isequal(pdat.b, [6, missing, 7, missing, 8, missing, 9, missing, 10])
+    dat = dummy(nothing, view(dom, inds))
+    pdat = parent(dat)
+    @test domain(pdat) == dom
+    @test parentindices(dat) == inds
+    @test isnothing(values(pdat))
 
     # Tables interface
     dom = CartesianGrid(2, 2)
