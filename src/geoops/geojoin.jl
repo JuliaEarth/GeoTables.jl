@@ -96,8 +96,6 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
-  rows1 = Tables.rows(tab1)
-  rows2 = Tables.rows(tab2)
   cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
   vars1 = Tables.columnnames(cols1)
@@ -118,16 +116,21 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     end
   end
 
+  # rows of gtb2 to join
   nrows = nrow(gtb1)
   types = [Tables.columntype(tab2, var) for var in vars2]
-  # rows of gtb2 to join
-  rows = [[T[] for T in types] for _ in 1:nrows]
-  for (i, geom1, row1) in zip(1:nrows, dom1, rows1)
+  jrows = [[T[] for T in types] for _ in 1:nrows]
+
+  # join loop
+  rows2 = Tables.rows(tab2)
+  Threads.@threads for i in 1:nrows
+    geom1 = element(dom1, i)
+    row1 = Tables.subset(tab1, i)
     for (geom2, row2) in zip(dom2, rows2)
       if pred(geom1, geom2) && onpred(row1, row2)
         for (j, var) in enumerate(vars2)
           v = Tables.getcolumn(row2, var)
-          push!(rows[i][j], v)
+          push!(jrows[i][j], v)
         end
       end
     end
@@ -136,7 +139,7 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # generate joined column
   function gencol(j, var)
     map(1:nrows) do i
-      vs = rows[i][j]
+      vs = jrows[i][j]
       if isempty(vs)
         missing
       else
@@ -157,8 +160,6 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
-  rows1 = Tables.rows(tab1)
-  rows2 = Tables.rows(tab2)
   cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
   vars1 = Tables.columnnames(cols1)
@@ -179,28 +180,37 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     end
   end
 
+  # rows of gtb2 to join
   nrows = nrow(gtb1)
   types = [Tables.columntype(tab2, var) for var in vars2]
-  # rows of gtb2 to join
-  rows = [[T[] for T in types] for _ in 1:nrows]
+  jrows = [[T[] for T in types] for _ in 1:nrows]
   # row indices of gtb1 to preserve
   inds = Int[]
-  for (i, geom1, row1) in zip(1:nrows, dom1, rows1)
+
+  # join loop
+  rows2 = Tables.rows(tab2)
+  Threads.@threads for i in 1:nrows
+    geom1 = element(dom1, i)
+    row1 = Tables.subset(tab1, i)
     for (geom2, row2) in zip(dom2, rows2)
       if pred(geom1, geom2) && onpred(row1, row2)
-        i ∉ inds && push!(inds, i)
+        push!(inds, i)
         for (j, var) in enumerate(vars2)
           v = Tables.getcolumn(row2, var)
-          push!(rows[i][j], v)
+          push!(jrows[i][j], v)
         end
       end
     end
   end
 
+  # remove repeated row indexes and sort them
+  # sort is necessary because of multi-threading
+  sort!(unique!(inds))
+
   # generate joined column
   function gencol(j, var)
     map(inds) do i
-      vs = rows[i][j]
+      vs = jrows[i][j]
       agg[var](vs)
     end
   end
