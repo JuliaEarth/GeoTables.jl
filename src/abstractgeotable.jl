@@ -92,7 +92,7 @@ function Base.parent(geotable::AbstractGeoTable)
         y[inds] .= x
         var => y
       end
-      newtab = (; pairs...) |> Tables.materializer(tab)
+      (; pairs...) |> Tables.materializer(tab)
     else
       nothing
     end
