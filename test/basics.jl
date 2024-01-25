@@ -14,10 +14,12 @@
     # another domain
     newdom = convert(SimpleMesh, dom)
     dat.geometry = newdom
+    @test dat.geometry isa SimpleMesh
     @test dat.geometry == newdom
     # vector of geometries
     pts = rand(Point2, 100)
     dat.geometry = pts
+    @test dat.geometry isa PointSet
     @test dat.geometry == PointSet(pts)
     # error: only the "geometry" field can be set in the current version
     @test_throws ErrorException dat.a = 1:100
