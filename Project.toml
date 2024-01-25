@@ -1,7 +1,7 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
-version = "1.16.2"
+version = "1.16.3"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
@@ -33,11 +33,11 @@ DataScienceTraits = "0.2"
 Dates = "1.9"
 Distributions = "0.25"
 Makie = "0.20"
-Meshes = "0.39"
+Meshes = "0.40"
 PrettyTables = "2.2"
 Random = "1.9"
 Statistics = "1.9"
-TableTransforms = "1.27"
+TableTransforms = "1.29"
 Tables = "1.10"
 Unitful = "1.17"
 julia = "1.9"

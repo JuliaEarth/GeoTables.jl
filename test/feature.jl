@@ -20,7 +20,7 @@
     Indicator(:z),
     Identity(),
     Center(),
-    Scale(),
+    LowHigh(),
     MinMax(),
     Interquartile(),
     ZScore(),
