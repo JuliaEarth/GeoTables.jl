@@ -10,7 +10,7 @@
     # mutability
     dom = CartesianGrid(10, 10)
     tab = (; a=rand(100))
-    dat = georef(tab, dom)
+    dat = dummy(tab, dom)
     # another domain
     newdom = convert(SimpleMesh, dom)
     dat.geometry = newdom
@@ -20,7 +20,7 @@
     dat.geometry = pts
     @test dat.geometry == PointSet(pts)
     # error: only the "geometry" field can be set in the current version
-    @test_throws ErrorException dat.test = 1:100
+    @test_throws ErrorException dat.a = 1:100
     # error: only domains and vectors of geometries are supported
     @test_throws ErrorException dat.geometry = 1:100
     # error: the new domain must have the same number of elements as the geotable
