@@ -131,7 +131,7 @@ function Base.setproperty!(geotable::AbstractGeoTable, name::Symbol, value)
     end
     setdomain!(geotable, value)
   else
-    error("only the `geometry` column can be set in the current version")
+    error("only the `geometry` column can be set with this syntax currently")
   end
   value
 end
