@@ -21,7 +21,7 @@
     dat.geometry = pts
     @test dat.geometry isa PointSet
     @test dat.geometry == PointSet(pts)
-    # error: only the "geometry" field can be set in the current version
+    # error: only the "geometry" column can be set in the current version
     @test_throws ErrorException dat.a = 1:100
     # error: only domains and vectors of geometries are supported
     @test_throws ErrorException dat.geometry = 1:100
