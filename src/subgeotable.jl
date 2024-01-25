@@ -45,10 +45,10 @@ end
 function setdomain!(v::SubGeoTable, newdomain::Domain)
   geotable = getgeotable(v)
   inds = getinds(v)
-  odomain = domain(geotable)
+  olddomain = domain(geotable)
   viewind = Dict(zip(inds, eachindex(inds)))
   newgeoms = map(1:nrow(geotable)) do i
-    haskey(viewind, i) ? newdomain[viewind[i]] : odomain[i]
+    haskey(viewind, i) ? newdomain[viewind[i]] : olddomain[i]
   end
   setdomain!(geotable, GeometrySet(newgeoms))
 end
