@@ -314,6 +314,6 @@
     # error: only the "geometry" field can be changed
     @test_throws ErrorException gtb.test = newdom
     # error: the new domain must have the same number of elements as the geotable
-    @test_throws ErrorException gtb.test = rand(Point2, 10)
+    @test_throws ErrorException gtb.geometry = rand(Point2, 10)
   end
 end
