@@ -62,7 +62,7 @@ end
 
 function Base.setproperty!(geotable::GeoTable, name::Symbol, domain::Domain)
   if name !== :geometry
-    error("only the `geometry` field can be changed")
+    error("only the `geometry` column can be set in the current version")
   end
   if length(domain) ≠ nrow(geotable)
     error("the new domain must have the same number of elements as the geotable")
