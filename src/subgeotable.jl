@@ -45,8 +45,8 @@ end
 function setdomain!(v::SubGeoTable, newdomain::Domain)
   geotable = getgeotable(v)
   inds = getinds(v)
-  geomind = Dict(zip(inds, eachindex(inds)))
   odomain = domain(geotable)
+  geomind = Dict(zip(inds, eachindex(inds)))
   newgeoms = map(1:nrow(geotable)) do i
     haskey(geomind, i) ? newdomain[geomind[i]] : odomain[i]
   end
