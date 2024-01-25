@@ -296,4 +296,24 @@
     @test asarray(data, :a) == asarray(data, "a") == [1 3; 2 4]
     @test asarray(data, :b) == asarray(data, "b") == [5 7; 6 8]
   end
+
+  @testset "GeoTable mutability" begin
+    grid = CartesianGrid(10, 10)
+    table = (; a=rand(100))
+    gtb = georef(table, grid)
+
+    # another domain
+    newdom = convert(SimpleMesh, grid)
+    gtb.geometry = newdom
+    @test gtb.geometry == newdom
+    # vector of geometries
+    pts = rand(Point2, 100)
+    gtb.geometry = pts
+    @test gtb.geometry == PointSet(pts)
+
+    # error: only the "geometry" field can be changed
+    @test_throws ErrorException gtb.test = newdom
+    # error: the new domain must have the same number of elements as the geotable
+    @test_throws ErrorException gtb.test = rand(Point2, 10)
+  end
 end

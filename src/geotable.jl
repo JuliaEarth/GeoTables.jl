@@ -18,8 +18,8 @@ GeoTable(CartesianGrid(10,10),
 )
 ```
 """
-struct GeoTable{D<:Domain,T} <: AbstractGeoTable
-  domain::D
+mutable struct GeoTable{T} <: AbstractGeoTable
+  domain::Domain
   values::Dict{Int,T}
 end
 
@@ -55,6 +55,23 @@ function GeoTable(domain::Domain; vtable=nothing, etable=nothing)
   end
   GeoTable(domain, values)
 end
+
+# -----------
+# MUTABILITY
+# -----------
+
+function Base.setproperty!(geotable::GeoTable, name::Symbol, domain::Domain)
+  if name !== :geometry
+    error("only the `geometry` field can be changed")
+  end
+  if length(domain) ≠ nrow(geotable)
+    error("the new domain must have the same number of elements as the geotable")
+  end
+  setfield!(geotable, :domain, domain)
+end
+
+Base.setproperty!(geotable::GeoTable, name::Symbol, geoms::AbstractVector{<:Geometry}) =
+  setproperty!(geotable, name, GeometrySet(geoms))
 
 # ----------------------------
 # ABSTRACT GEOTABLE INTERFACE
