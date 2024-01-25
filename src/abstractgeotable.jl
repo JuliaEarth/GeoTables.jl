@@ -124,7 +124,7 @@ setdomain!(geotable::AbstractGeoTable, geoms::AbstractVector{<:Geometry}) = setd
 function Base.setproperty!(geotable::AbstractGeoTable, name::Symbol, value)
   if name === :geometry
     if !(value isa Domain || value isa AbstractVector{<:Geometry})
-      error("only domains and vectors of geometries are supported")
+      error("only domains and vectors of geometries are supported as `geometry` column values")
     end
     if length(value) ≠ nrow(geotable)
       error("the new domain must have the same number of elements as the geotable")

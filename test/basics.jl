@@ -21,9 +21,9 @@
     dat.geometry = pts
     @test dat.geometry isa PointSet
     @test dat.geometry == PointSet(pts)
-    # error: only the "geometry" column can be set in the current version
+    # error: only the "geometry" column can be set with this syntax currently
     @test_throws ErrorException dat.a = 1:100
-    # error: only domains and vectors of geometries are supported
+    # error: only domains and vectors of geometries are supported as "geometry" column values
     @test_throws ErrorException dat.geometry = 1:100
     # error: the new domain must have the same number of elements as the geotable
     @test_throws ErrorException dat.geometry = rand(Point2, 10)
