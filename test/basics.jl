@@ -7,6 +7,25 @@
     @test domain(dat) == domain(tab)
     @test values(dat) == values(tab)
 
+    # mutability
+    dom = CartesianGrid(10, 10)
+    tab = (; a=rand(100))
+    dat = georef(tab, dom)
+    # another domain
+    newdom = convert(SimpleMesh, dom)
+    dat.geometry = newdom
+    @test dat.geometry == newdom
+    # vector of geometries
+    pts = rand(Point2, 100)
+    dat.geometry = pts
+    @test dat.geometry == PointSet(pts)
+    # error: only the "geometry" field can be set in the current version
+    @test_throws ErrorException dat.test = 1:100
+    # error: only domains and vectors of geometries are supported
+    @test_throws ErrorException dat.geometry = 1:100
+    # error: the new domain must have the same number of elements as the geotable
+    @test_throws ErrorException dat.geometry = rand(Point2, 10)
+
     # equality of data sets
     data₁ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
     data₂ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
@@ -295,25 +314,5 @@
     data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
     @test asarray(data, :a) == asarray(data, "a") == [1 3; 2 4]
     @test asarray(data, :b) == asarray(data, "b") == [5 7; 6 8]
-  end
-
-  @testset "GeoTable mutability" begin
-    grid = CartesianGrid(10, 10)
-    table = (; a=rand(100))
-    gtb = georef(table, grid)
-
-    # another domain
-    newdom = convert(SimpleMesh, grid)
-    gtb.geometry = newdom
-    @test gtb.geometry == newdom
-    # vector of geometries
-    pts = rand(Point2, 100)
-    gtb.geometry = pts
-    @test gtb.geometry == PointSet(pts)
-
-    # error: only the "geometry" field can be changed
-    @test_throws ErrorException gtb.test = newdom
-    # error: the new domain must have the same number of elements as the geotable
-    @test_throws ErrorException gtb.geometry = rand(Point2, 10)
   end
 end

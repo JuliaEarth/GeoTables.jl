@@ -56,23 +56,6 @@ function GeoTable(domain::Domain; vtable=nothing, etable=nothing)
   GeoTable(domain, values)
 end
 
-# -----------
-# MUTABILITY
-# -----------
-
-function Base.setproperty!(geotable::GeoTable, name::Symbol, domain::Domain)
-  if name !== :geometry
-    error("only the `geometry` column can be set in the current version")
-  end
-  if length(domain) ≠ nrow(geotable)
-    error("the new domain must have the same number of elements as the geotable")
-  end
-  setfield!(geotable, :domain, domain)
-end
-
-Base.setproperty!(geotable::GeoTable, name::Symbol, geoms::AbstractVector{<:Geometry}) =
-  setproperty!(geotable, name, GeometrySet(geoms))
-
 # ----------------------------
 # ABSTRACT GEOTABLE INTERFACE
 # ----------------------------
@@ -85,3 +68,5 @@ function Base.values(geotable::GeoTable, rank=nothing)
   r = isnothing(rank) ? paramdim(domain) : rank
   get(values, r, nothing)
 end
+
+setdomain!(geotable::GeoTable, newdomain::Domain) = setfield!(geotable, :domain, newdomain)

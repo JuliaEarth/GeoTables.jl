@@ -35,6 +35,13 @@ of the elements of the domain.
 """
 values
 
+"""
+    setdomain!(geotable, newdomain)
+
+Sets the `geotable` domain to `newdomain`.
+"""
+function setdomain! end
+
 # ----------
 # FALLBACKS
 # ----------
@@ -110,6 +117,23 @@ function Base.parentindices(geotable::AbstractGeoTable)
   else
     1:nrow(geotable)
   end
+end
+
+setdomain!(geotable::AbstractGeoTable, geoms::AbstractVector{<:Geometry}) = setdomain!(geotable, GeometrySet(geoms))
+
+function Base.setproperty!(geotable::AbstractGeoTable, name::Symbol, value)
+  if name === :geometry
+    if !(value isa Domain || value isa AbstractVector{<:Geometry})
+      error("only domains and vectors of geometries are supported")
+    end
+    if length(value) ≠ nrow(geotable)
+      error("the new domain must have the same number of elements as the geotable")
+    end
+    setdomain!(geotable, value)
+  else
+    error("only the `geometry` column can be set in the current version")
+  end
+  value
 end
 
 # -----------
