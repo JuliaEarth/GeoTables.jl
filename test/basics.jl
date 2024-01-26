@@ -7,6 +7,27 @@
     @test domain(dat) == domain(tab)
     @test values(dat) == values(tab)
 
+    # mutability
+    dom = CartesianGrid(10, 10)
+    tab = (; a=rand(100))
+    dat = dummy(tab, dom)
+    # another domain
+    newdom = convert(SimpleMesh, dom)
+    dat.geometry = newdom
+    @test dat.geometry isa SimpleMesh
+    @test dat.geometry == newdom
+    # vector of geometries
+    pts = rand(Point2, 100)
+    dat.geometry = pts
+    @test dat.geometry isa PointSet
+    @test dat.geometry == PointSet(pts)
+    # error: only the "geometry" column can be set with this syntax currently
+    @test_throws ErrorException dat.a = 1:100
+    # error: only domains and vectors of geometries are supported as "geometry" column values
+    @test_throws ErrorException dat.geometry = 1:100
+    # error: the new domain must have the same number of elements as the geotable
+    @test_throws ErrorException dat.geometry = rand(Point2, 10)
+
     # equality of data sets
     data₁ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
     data₂ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))

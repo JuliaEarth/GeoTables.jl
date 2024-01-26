@@ -42,6 +42,17 @@ function Base.values(v::SubGeoTable, rank=nothing)
   end
 end
 
+function setdomain!(v::SubGeoTable, newdomain::Domain)
+  geotable = getgeotable(v)
+  inds = getinds(v)
+  olddomain = domain(geotable)
+  viewind = Dict(zip(inds, eachindex(inds)))
+  newgeoms = map(1:nrow(geotable)) do i
+    haskey(viewind, i) ? newdomain[viewind[i]] : olddomain[i]
+  end
+  setdomain!(geotable, GeometrySet(newgeoms))
+end
+
 # specialize methods for performance
 Base.:(==)(v₁::SubGeoTable, v₂::SubGeoTable) = getgeotable(v₁) == getgeotable(v₂) && getinds(v₁) == getinds(v₂)
 
