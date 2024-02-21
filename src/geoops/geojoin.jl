@@ -115,7 +115,7 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
       agg[var] = _defaultagg(v)
     end
   end
-  
+
   # rows to join
   nrows = nrow(gtb1)
   rows2 = Tables.rows(tab2)
