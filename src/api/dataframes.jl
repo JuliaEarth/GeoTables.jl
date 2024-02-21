@@ -38,11 +38,14 @@ end
 
 Base.getproperty(geotable::AbstractGeoTable, var::AbstractString) = getproperty(geotable, Symbol(var))
 
-const RowSelector = Union{Int,AbstractVector{Int},Colon}
+const RowSelector = Union{Int,AbstractVector{Int},AbstractVector{Bool},Colon}
 
 Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
 
 Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, ::Colon) = view(geotable, inds)
+
+Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Bool}, vars) =
+  getindex(geotable, (1:nrow(geotable))[inds], vars)
 
 Base.getindex(geotable::AbstractGeoTable, rows::RowSelector, vars) = _getindex(geotable, rows, selector(vars))
 
