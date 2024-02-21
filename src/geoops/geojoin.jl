@@ -115,41 +115,31 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
       agg[var] = _defaultagg(v)
     end
   end
-
-  # rows of gtb2 to join
+  
+  # rows to join
   nrows = nrow(gtb1)
-  types = [Tables.columntype(tab2, var) for var in vars2]
-  jrows = [[T[] for T in types] for _ in 1:nrows]
-
-  # join loop
   rows2 = Tables.rows(tab2)
-  Threads.@threads for i in 1:nrows
+  jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
     row1 = Tables.subset(tab1, i)
-    for (geom2, row2) in zip(dom2, rows2)
-      if pred(geom1, geom2) && onpred(row1, row2)
-        for (j, var) in enumerate(vars2)
-          v = Tables.getcolumn(row2, var)
-          push!(jrows[i][j], v)
-        end
-      end
-    end
+    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
   # generate joined column
-  function gencol(j, var)
+  function gencol(var)
     map(1:nrows) do i
-      vs = jrows[i][j]
-      if isempty(vs)
+      rows = jrows[i]
+      if isempty(rows)
         missing
       else
+        vs = _colvalues(rows, var)
         agg[var](vs)
       end
     end
   end
 
   pairs1 = (var => Tables.getcolumn(cols1, var) for var in vars1)
-  pairs2 = (var => gencol(j, var) for (j, var) in enumerate(vars2))
+  pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
   georef(newtab, dom1)
@@ -180,37 +170,23 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     end
   end
 
-  # rows of gtb2 to join
+  # rows to join
   nrows = nrow(gtb1)
-  types = [Tables.columntype(tab2, var) for var in vars2]
-  jrows = [[T[] for T in types] for _ in 1:nrows]
-  # row indices of gtb1 to preserve
-  inds = Int[]
-
-  # join loop
   rows2 = Tables.rows(tab2)
-  Threads.@threads for i in 1:nrows
+  jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
     row1 = Tables.subset(tab1, i)
-    for (geom2, row2) in zip(dom2, rows2)
-      if pred(geom1, geom2) && onpred(row1, row2)
-        push!(inds, i)
-        for (j, var) in enumerate(vars2)
-          v = Tables.getcolumn(row2, var)
-          push!(jrows[i][j], v)
-        end
-      end
-    end
+    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
-  # remove repeated row indexes and sort them
-  # sort is necessary because of multi-threading
-  sort!(unique!(inds))
+  # row indices of gtb1 to preserve
+  inds = findall(!isempty, jrows)
 
   # generate joined column
-  function gencol(j, var)
+  function gencol(var)
     map(inds) do i
-      vs = jrows[i][j]
+      rows = jrows[i]
+      vs = _colvalues(rows, var)
       agg[var](vs)
     end
   end
@@ -218,7 +194,7 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   sub = Tables.subset(tab1, inds)
   cols = Tables.columns(sub)
   pairs1 = (var => Tables.getcolumn(cols, var) for var in vars1)
-  pairs2 = (var => gencol(j, var) for (j, var) in enumerate(vars2))
+  pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
   newdom = view(dom1, inds)
@@ -239,3 +215,13 @@ function _onpred(onvars)
 end
 
 _isvarequal(row1, row2, var) = isequal(Tables.getcolumn(row1, var), Tables.getcolumn(row2, var))
+
+_colvalues(rows, var) = [Tables.getcolumn(row, var) for row in rows]
+
+function _tmap(f, itr)
+  chunks = Iterators.partition(itr, cld(length(itr), Threads.nthreads()))
+  tasks = map(chunks) do chunk
+    Threads.@spawn map(f, chunk)
+  end
+  mapreduce(fetch, vcat, tasks)
+end
