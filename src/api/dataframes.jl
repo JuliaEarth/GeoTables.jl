@@ -44,10 +44,10 @@ Base.getindex(geotable::AbstractGeoTable, ::Colon, ::Colon) = geotable
 
 Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, ::Colon) = view(geotable, inds)
 
-Base.getindex(geotable::AbstractGeoTable, rows::RowSelector, vars) = _getindex(geotable, rows, selector(vars))
+Base.getindex(geotable::AbstractGeoTable, inds::AbstractVector{Bool}, vars) =
+  getindex(geotable, (1:nrow(geotable))[inds], vars)
 
-_getindex(geotable::AbstractGeoTable, inds::AbstractVector{Bool}, selector::ColumnSelector) =
-  _getindex(geotable, (1:nrow(geotable))[inds], selector)
+Base.getindex(geotable::AbstractGeoTable, rows::RowSelector, vars) = _getindex(geotable, rows, selector(vars))
 
 function _getindex(geotable::AbstractGeoTable, rows::RowSelector, selector::ColumnSelector)
   svars = selector(propertynames(geotable))
