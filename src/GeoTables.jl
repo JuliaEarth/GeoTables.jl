@@ -22,6 +22,7 @@ import DataAPI: nrow, ncol
 import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
+import TransformsBase: apply, revert, reapply
 
 # abstract type
 include("abstractgeotable.jl")
@@ -46,6 +47,9 @@ include("indices.jl")
 
 # georeferencing
 include("georef.jl")
+
+# geometric transforms
+include("geotransforms.jl")
 
 # plotting
 include("viewer.jl")
