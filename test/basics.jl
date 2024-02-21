@@ -249,7 +249,7 @@
     @test vdata.b == [data₁.b; data₂.b; data₃.b]
     @test vdata.geometry == PointSet([collect(data₁.geometry); collect(data₂.geometry); collect(data₃.geometry)])
     vdata = vcat(data₁[6:10, :], data₁[1:5, :])
-    @test vdata.geometry isa Meshes.SubDomain
+    @test vdata.geometry isa SubDomain
     @test parentindices(vdata.geometry) == [6:10; 1:5]
 
     # union (default)

@@ -84,7 +84,7 @@ Base.view(geotable::AbstractGeoTable, geometry::Geometry) = SubGeoTable(geotable
 
 function Base.parent(geotable::AbstractGeoTable)
   dom = domain(geotable)
-  if dom isa Meshes.SubDomain
+  if dom isa SubDomain
     pdom = parent(dom)
 
     tab = values(geotable)
@@ -112,7 +112,7 @@ end
 
 function Base.parentindices(geotable::AbstractGeoTable)
   dom = domain(geotable)
-  if dom isa Meshes.SubDomain
+  if dom isa SubDomain
     parentindices(dom)
   else
     1:nrow(geotable)
