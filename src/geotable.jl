@@ -69,4 +69,13 @@ function Base.values(geotable::GeoTable, rank=nothing)
   get(values, r, nothing)
 end
 
-setdomain!(geotable::GeoTable, newdomain::Domain) = setfield!(geotable, :domain, newdomain)
+function setdomain!(geotable::GeoTable, newdomain::Domain)
+  newrank = paramdim(newdomain)
+  oldrank = paramdim(getdomain(geotable))
+  if newrank ≠ oldrank
+    values = getvalues(geotable)
+    values[newrank] = values[oldrank]
+    delete!(values, oldrank)
+  end
+  setfield!(geotable, :domain, newdomain)
+end
