@@ -16,11 +16,13 @@
     dat.geometry = newdom
     @test dat.geometry isa SimpleMesh
     @test dat.geometry == newdom
+    @test values(dat) == tab
     # vector of geometries
     pts = rand(Point2, 100)
     dat.geometry = pts
     @test dat.geometry isa PointSet
     @test dat.geometry == PointSet(pts)
+    @test values(dat) == tab
     # error: only the "geometry" column can be set with this syntax currently
     @test_throws ErrorException dat.a = 1:100
     # error: only domains and vectors of geometries are supported as "geometry" column values
