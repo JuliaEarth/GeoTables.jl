@@ -53,7 +53,7 @@ georef(table, coords::AbstractVecOrMat) = georef(table, PointSet(coords))
 """
     georef(table, names)
 
-Georeference `table` using column `names`.
+Georeference `table` using coordinate column `names`.
 
 ## Examples
 
@@ -67,10 +67,12 @@ georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"])
 function georef(table, names::AbstractVector{Symbol})
   cols = Tables.columns(table)
   tnames = Tables.columnnames(cols)
-  @assert names ⊆ tnames "invalid column names for table"
+  if names ⊈ tnames
+    throw(ArgumentError("coordinate columns not found in the table"))
+  end
   vars = setdiff(tnames, names)
   points = map(Point, (Tables.getcolumn(cols, nm) for nm in names)...)
-  etable = (; (nm => Tables.getcolumn(cols, nm) for nm in vars)...)
+  etable = isempty(vars) ? nothing : (; (nm => Tables.getcolumn(cols, nm) for nm in vars)...)
   domain = PointSet(points)
   GeoTable(domain; etable)
 end
@@ -95,7 +97,9 @@ julia> georef((a=rand(10, 10, 10), b=rand(10, 10, 10))) # 3D grid
 function georef(tuple::NamedTuple{NM,<:NTuple{N,AbstractArray}}) where {NM,N}
   dims = size(first(tuple))
   for i in 2:length(tuple)
-    @assert size(tuple[i]) == dims "all arrays must have the same dimensions"
+    if size(tuple[i]) ≠ dims
+      throw(ArgumentError("all arrays must have the same dimensions"))
+    end
   end
   table = (; (nm => reshape(x, prod(dims)) for (nm, x) in pairs(tuple))...)
   georef(table, CartesianGrid(dims))
