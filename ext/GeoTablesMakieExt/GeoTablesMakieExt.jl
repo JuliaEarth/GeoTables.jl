@@ -36,18 +36,18 @@ include("viewer.jl")
 
 viz(::AbstractGeoTable, args...; kwargs...) = vizmistake()
 viz!(::AbstractGeoTable, args...; kwargs...) = vizmistake()
-vizmistake() = throw(ArgumentError(
-  """
+function vizmistake()
+  throw(ArgumentError("""
   Expected a `Geometry`, `Domain` or vector of these types. Got a `GeoTable` instead.
   Use the `viewer` to visualize all the columns of the `GeoTable` over its domain.
-  """
-))
+  """))
+end
 
 viewer(args...; kwargs...) = viewermistake()
-viewermistake() = throw(ArgumentError(
-  """
+function viewermistake()
+  throw(ArgumentError("""
   Expected a `GeoTable`. Use `viz` to visualize a `Geometry`, `Domain` or vector of these types.
-  """
-))
+  """))
+end
 
 end
