@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function viewer(data::AbstractGeoTable; kwargs...)
+function viewer(data::AbstractGeoTable; colorrange=nothing, kwargs...)
   # retrieve domain and element table
   dom, tab = domain(data), values(data)
 
@@ -64,8 +64,8 @@ function viewer(data::AbstractGeoTable; kwargs...)
 
   function setdefaults()
     cmap[] = defaultscheme(vals[])
-    lims[] = defaultlimits(vals[])
-    ticks[] = defaultticks(vals[])
+    lims[] = defaultlimits(vals[], obsvalue(colorrange))
+    ticks[] = defaultticks(vals[], lims[])
     format[] = defaultformat(vals[])
   end
 
@@ -78,7 +78,7 @@ function viewer(data::AbstractGeoTable; kwargs...)
   setvals(var)
 
   # initialize visualization
-  Makie.plot(fig[2, 1:2], dom; color=vals, kwargs...)
+  Makie.plot(fig[2, 1:2], dom; color=vals, colorrange, kwargs...)
 
   # initialize colorbar if necessary
   cbar = if !isconst[var]
@@ -112,13 +112,13 @@ function viewer(data::AbstractGeoTable; kwargs...)
   fig
 end
 
-defaultlimits(vals) = defaultlimits(elscitype(vals), vals)
+defaultlimits(vals, colorrange) = isnothing(colorrange) ? defaultlimits(elscitype(vals), vals) : colorrange
 defaultlimits(::Type, vals) = asfloat.(extrema(skipinvalid(vals)))
 defaultlimits(::Type{Distributional}, vals) = extrema(location.(skipinvalid(vals)))
-defaultlimits(vals::CategArray) = (0.0, asfloat(length(levels(vals))))
+defaultlimits(vals::CategArray, colorrange) = (0.0, asfloat(length(levels(vals))))
 
-defaultticks(vals) = range(defaultlimits(vals)..., 5)
-defaultticks(vals::CategArray) = 0:length(levels(vals))
+defaultticks(vals, limits) = range(limits..., 5)
+defaultticks(vals::CategArray, limits) = 0:length(levels(vals))
 
 defaultformat(vals::CategArray) = ticks -> map(t -> tick2level(t, levels(vals)), ticks)
 function defaultformat(vals)
@@ -147,6 +147,9 @@ function tick2level(tick, levels)
 end
 
 asstring(x) = sprint(print, x, context=:compact => true)
+
+obsvalue(x) = x
+obsvalue(x::Makie.Observable) = x[]
 
 isinvalid(v) = ismissing(v) || (v isa Number && isnan(v))
 skipinvalid(vals) = (v for v in vals if !isinvalid(v))

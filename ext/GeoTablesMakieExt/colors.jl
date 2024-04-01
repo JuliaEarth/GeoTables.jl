@@ -5,8 +5,8 @@
 # type alias to reduce typing
 const V{T} = AbstractVector{<:T}
 
-function ascolors(values::V{Distribution}, scheme)
-  colors = ascolors(location.(values), scheme)
+function ascolors(values::V{Distribution}, scheme, colorrange)
+  colors = ascolors(location.(values), scheme, colorrange)
   alphas = let
     s = scale.(values)
     a, b = extrema(s)
@@ -19,13 +19,13 @@ function ascolors(values::V{Distribution}, scheme)
   coloralpha.(colors, alphas)
 end
 
-ascolors(values::V{CategoricalValue}, scheme) = scheme[levelcode.(values)]
+ascolors(values::V{CategoricalValue}, scheme, colorrange) = scheme[levelcode.(values)]
 
-ascolors(values::V{Quantity}, scheme) = ascolors(ustrip.(values), scheme)
+ascolors(values::V{Quantity}, scheme, colorrange) = ascolors(ustrip.(values), scheme, colorrange)
 
-ascolors(values::V{DateTime}, scheme) = ascolors(datetime2unix.(values), scheme)
+ascolors(values::V{DateTime}, scheme, colorrange) = ascolors(datetime2unix.(values), scheme, colorrange)
 
-ascolors(values::V{Date}, scheme) = ascolors(convert.(Ref(DateTime), values), scheme)
+ascolors(values::V{Date}, scheme, colorrange) = ascolors(convert.(Ref(DateTime), values), scheme, colorrange)
 
 function defaultscheme(values::CategArray)
   nlevels = length(levels(values))
