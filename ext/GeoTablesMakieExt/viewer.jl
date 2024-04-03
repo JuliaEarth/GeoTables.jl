@@ -63,7 +63,7 @@ function viewer(data::AbstractGeoTable; kwargs...)
   end
 
   function setdefaults()
-    cmap[] = defaultscheme(vals[])
+    cmap[] = Colorfy.defaultcolorscheme(vals[])
     lims[] = defaultlimits(vals[])
     ticks[] = defaultticks(vals[])
     format[] = defaultformat(vals[])

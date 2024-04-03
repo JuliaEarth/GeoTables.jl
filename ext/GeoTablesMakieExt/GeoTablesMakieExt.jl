@@ -8,11 +8,11 @@ using GeoTables
 
 using Dates
 using Tables
+using Colorfy
 using Unitful
 using Distributions
 using CategoricalArrays
 using DataScienceTraits
-using Makie: cgrad, coloralpha
 using Makie.Colors: Colorant, Gray
 using DataScienceTraits: Continuous
 using DataScienceTraits: Categorical
@@ -21,13 +21,10 @@ using DataScienceTraits: Unknown
 
 import Makie
 import Meshes: viz, viz!
-import Meshes: ascolors
-import Meshes: defaultscheme
 import GeoTables: viewer
 
 const CategArray{T,N} = Union{CategoricalArray{T,N},SubArray{T,N,<:CategoricalArray}}
 
-include("colors.jl")
 include("viewer.jl")
 
 # ----------------
