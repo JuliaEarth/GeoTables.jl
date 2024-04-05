@@ -88,13 +88,13 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   Makie.on(menu.selection) do opt
     var = varfrom[opt]
     setvals(var)
+    if !isnothing(varcbar)
+      Makie.delete!(varcbar)
+    end
     if !isconst[var]
-      if isnothing(varcbar)
-        varcbar = colorbar(vars[])
-      end
+      varcbar = colorbar(vals[])
     else
       if !isnothing(varcbar)
-        Makie.delete!(varcbar)
         Makie.trim!(fig.layout)
         varcbar = nothing
       end
