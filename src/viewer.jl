@@ -10,3 +10,5 @@ Basic scientific viewer for geospatial table `geotable`.
 Aesthetic options are forwarded via `kwargs` to the `Meshes.viz` recipe.
 """
 function viewer end
+
+function cbar end

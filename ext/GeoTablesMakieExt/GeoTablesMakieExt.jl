@@ -21,10 +21,11 @@ using DataScienceTraits: Unknown
 
 import Makie
 import Meshes: viz, viz!
-import GeoTables: viewer
+import GeoTables: viewer, cbar
 
 const CategArray{T,N} = Union{CategoricalArray{T,N},SubArray{T,N,<:CategoricalArray}}
 
+include("colorbar.jl")
 include("viewer.jl")
 
 # ----------------

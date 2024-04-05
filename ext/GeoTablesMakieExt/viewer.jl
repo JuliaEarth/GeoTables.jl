@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function viewer(data::AbstractGeoTable; kwargs...)
+function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorrange=nothing, kwargs...)
   # retrieve domain and element table
   dom, tab = domain(data), values(data)
 
@@ -53,23 +53,17 @@ function viewer(data::AbstractGeoTable; kwargs...)
 
   # initialize observables
   vals = Makie.Observable{Any}()
-  cmap = Makie.Observable{Any}()
-  lims = Makie.Observable{Any}()
-  ticks = Makie.Observable{Any}()
-  format = Makie.Observable{Any}()
 
   function setvals(var)
     vals[] = Tables.getcolumn(cols, var) |> asvalues
   end
 
-  function setdefaults()
-    cmap[] = Colorfy.defaultcolorscheme(vals[])
-    lims[] = defaultlimits(vals[])
-    ticks[] = defaultticks(vals[])
-    format[] = defaultformat(vals[])
+  function colorbar(vals)
+    valphas = isnothing(alpha) ? Colorfy.defaultalphas(vals) : alpha
+    vcolorscheme = isnothing(colormap) ? Colorfy.defaultcolorscheme(vals) : colormap
+    vcolorrange = isnothing(colorrange) ? Colorfy.defaultcolorrange(vals) : colorrange
+    cbar(fig[2, 3], vals, alphas=valphas, colorscheme=vcolorscheme, colorrange=vcolorrange)
   end
-
-  colorbar() = Makie.Colorbar(fig[2, 3], colormap=cmap, limits=lims, ticks=ticks, tickformat=format)
 
   # select first viewable variable
   var = first(viewable)
@@ -78,12 +72,11 @@ function viewer(data::AbstractGeoTable; kwargs...)
   setvals(var)
 
   # initialize visualization
-  Makie.plot(fig[2, 1:2], dom; color=vals, kwargs...)
+  Makie.plot(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
 
   # initialize colorbar if necessary
-  cbar = if !isconst[var]
-    setdefaults()
-    colorbar()
+  varcbar = if !isconst[var]
+    colorbar(vals[])
   else
     nothing
   end
@@ -96,39 +89,19 @@ function viewer(data::AbstractGeoTable; kwargs...)
     var = varfrom[opt]
     setvals(var)
     if !isconst[var]
-      setdefaults()
-      if isnothing(cbar)
-        cbar = colorbar()
+      if isnothing(varcbar)
+        varcbar = colorbar(vars[])
       end
     else
-      if !isnothing(cbar)
-        Makie.delete!(cbar)
+      if !isnothing(varcbar)
+        Makie.delete!(varcbar)
         Makie.trim!(fig.layout)
-        cbar = nothing
+        varcbar = nothing
       end
     end
   end
 
   fig
-end
-
-defaultlimits(vals) = defaultlimits(elscitype(vals), vals)
-defaultlimits(::Type, vals) = asfloat.(extrema(skipinvalid(vals)))
-defaultlimits(::Type{Distributional}, vals) = extrema(location.(skipinvalid(vals)))
-defaultlimits(vals::CategArray) = (0.0, asfloat(length(levels(vals))))
-
-defaultticks(vals) = range(defaultlimits(vals)..., 5)
-defaultticks(vals::CategArray) = 0:length(levels(vals))
-
-defaultformat(vals::CategArray) = ticks -> map(t -> tick2level(t, levels(vals)), ticks)
-function defaultformat(vals)
-  T = nonmissingtype(eltype(vals))
-  if T <: Quantity
-    u = unit(T)
-    ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
-  else
-    ticks -> map(asstring, ticks)
-  end
 end
 
 asvalues(x) = asvalues(nonmissingtype(eltype(x)), x)
@@ -138,18 +111,8 @@ asvalues(::Type{<:Colorant}, x) = map(c -> ismissing(c) ? missing : Float64(Gray
 ascateg(x) = categorical(x)
 ascateg(x::CategArray) = x
 
-asfloat(x) = float(x)
-asfloat(x::Quantity) = float(ustrip(x))
-
-function tick2level(tick, levels)
-  i = trunc(Int, tick)
-  isassigned(levels, i) ? asstring(levels[i]) : ""
-end
-
-asstring(x) = sprint(print, x, context=:compact => true)
-
-isinvalid(v) = ismissing(v) || (v isa Number && isnan(v))
-skipinvalid(vals) = (v for v in vals if !isinvalid(v))
+isinvalid(v) = ismissing(v) || (v isa Number && !isfinite(v))
+skipinvalid(vals) = Iterators.filter(!isinvalid, vals)
 
 isviewable(vals) = isviewable(elscitype(vals), vals)
 isviewable(::Type, vals) = false

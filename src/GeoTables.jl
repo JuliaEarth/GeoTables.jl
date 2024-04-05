@@ -73,6 +73,7 @@ export
   georef,
 
   # plotting
-  viewer
+  viewer,
+  cbar
 
 end
