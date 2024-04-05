@@ -8,30 +8,28 @@ function _cbar(fig, colorfier)
   values = Colorfy.values(colorfier)
   colorscheme = Colorfy.colorscheme(colorfier)
   colorrange = Colorfy.colorrange(colorfier)
-  colormap = defaultcolormap(values, colorscheme)
-  limits = defaultlimits(values, colorrange)
-  ticks = defaultticks(values, limits)
-  tickformat = defaultformat(values)
+  colormap = cbarcolormap(values, colorscheme)
+  limits = cbarlimits(values, colorrange)
+  ticks = cbarticks(values, limits)
+  tickformat = cbartickformat(values)
   Makie.Colorbar(fig; colormap, limits, ticks, tickformat)
 end
 
-defaultcolormap(vals, colorscheme) = colorscheme
-function defaultcolormap(vals::CategArray, colorscheme)
-  nlevels = length(levels(vals))
+cbarcolormap(values, colorscheme) = colorscheme
+function cbarcolormap(values::CategArray, colorscheme)
+  nlevels = length(levels(values))
   Makie.cgrad(colorscheme[1:nlevels], nlevels, categorical=true)
 end
 
-defaultlimits(vals, colorrange) = colorrange isa NTuple{2} ? colorrange : defaultlimits(elscitype(vals), vals)
-defaultlimits(::Type, vals) = asfloat.(extrema(skipinvalid(vals)))
-defaultlimits(::Type{Distributional}, vals) = extrema(location.(skipinvalid(vals)))
-defaultlimits(vals::CategArray, colorrange) = (0.0, asfloat(length(levels(vals))))
+cbarlimits(values, colorrange) = asfloat.(colorrange isa NTuple{2} ? colorrange : extrema(skipinvalid(values)))
+cbarlimits(values::CategArray, colorrange) = (0.0, asfloat(length(levels(values))))
 
-defaultticks(vals, limits) = range(limits..., 5)
-defaultticks(vals::CategArray, limits) = 0:length(levels(vals))
+cbarticks(values, limits) = range(limits..., 5)
+cbarticks(values::CategArray, limits) = 0:length(levels(values))
 
-defaultformat(vals::CategArray) = ticks -> map(t -> tick2level(t, levels(vals)), ticks)
-function defaultformat(vals)
-  T = nonmissingtype(eltype(vals))
+cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
+function cbartickformat(values)
+  T = nonmissingtype(eltype(values))
   if T <: Quantity
     u = unit(T)
     ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
@@ -47,5 +45,6 @@ end
 
 asfloat(x) = float(x)
 asfloat(x::Quantity) = float(ustrip(x))
+asfloat(x::Distribution) = float(location(x))
 
 asstring(x) = sprint(print, x, context=:compact => true)
