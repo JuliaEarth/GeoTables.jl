@@ -58,12 +58,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     vals[] = Tables.getcolumn(cols, var) |> asvalues
   end
 
-  function colorbar(vals)
-    valphas = isnothing(alpha) ? Colorfy.defaultalphas(vals) : alpha
-    vcolorscheme = isnothing(colormap) ? Colorfy.defaultcolorscheme(vals) : colormap
-    vcolorrange = isnothing(colorrange) ? Colorfy.defaultcolorrange(vals) : colorrange
-    cbar(fig[2, 3], vals, alphas=valphas, colorscheme=vcolorscheme, colorrange=vcolorrange)
-  end
+  colorbar(vals) = cbar(fig[2, 3], vals; alpha, colormap, colorrange)
 
   # select first viewable variable
   var = first(viewable)
@@ -110,9 +105,6 @@ asvalues(::Type{<:Colorant}, x) = map(c -> ismissing(c) ? missing : Float64(Gray
 
 ascateg(x) = categorical(x)
 ascateg(x::CategArray) = x
-
-isinvalid(v) = ismissing(v) || (v isa Number && !isfinite(v))
-skipinvalid(vals) = Iterators.filter(!isinvalid, vals)
 
 isviewable(vals) = isviewable(elscitype(vals), vals)
 isviewable(::Type, vals) = false

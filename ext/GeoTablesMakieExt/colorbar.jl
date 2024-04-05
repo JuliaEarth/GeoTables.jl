@@ -2,9 +2,22 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-cbar(fig, values; kwargs...) = _cbar(fig, Colorfier(values; kwargs...))
+function cbar(fig, values; alpha=nothing, colormap=nothing, colorrange=nothing)
+  alphas = asobservable(isnothing(alpha) ? Colorfy.defaultalphas(values) : alpha)
+  cscheme = asobservable(isnothing(colormap) ? Colorfy.defaultcolorscheme(values) : colormap)
+  crange = asobservable(isnothing(colorrange) ? Colorfy.defaultcolorrange(values) : colorrange)
+  colorfier = Makie.@lift Colorfier(values; alphas=$alphas, colorscheme=$cscheme, colorrange=$crange)
 
-function _cbar(fig, colorfier)
+  args = Makie.@lift cbarargs($colorfier)
+  cmap = Makie.@lift $args[1]
+  limits = Makie.@lift $args[2]
+  ticks = Makie.@lift $args[3]
+  tickformat = Makie.@lift $args[4]
+
+  Makie.Colorbar(fig; colormap=cmap, limits, ticks, tickformat)
+end
+
+function cbarargs(colorfier)
   values = Colorfy.values(colorfier)
   colorscheme = Colorfy.colorscheme(colorfier)
   colorrange = Colorfy.colorrange(colorfier)
@@ -12,7 +25,7 @@ function _cbar(fig, colorfier)
   limits = cbarlimits(values, colorrange)
   ticks = cbarticks(values, limits)
   tickformat = cbartickformat(values)
-  Makie.Colorbar(fig; colormap, limits, ticks, tickformat)
+  (colormap, limits, ticks, tickformat)
 end
 
 cbarcolormap(values, colorscheme) = colorscheme
@@ -38,6 +51,9 @@ function cbartickformat(values)
   end
 end
 
+isinvalid(v) = ismissing(v) || (v isa Number && !isfinite(v))
+skipinvalid(vals) = Iterators.filter(!isinvalid, vals)
+
 function tick2level(tick, levels)
   i = trunc(Int, tick)
   isassigned(levels, i) ? asstring(levels[i]) : ""
@@ -48,3 +64,6 @@ asfloat(x::Quantity) = float(ustrip(x))
 asfloat(x::Distribution) = float(location(x))
 
 asstring(x) = sprint(print, x, context=:compact => true)
+
+asobservable(x) = Makie.Observable(x)
+asobservable(x::Makie.Observable) = x
