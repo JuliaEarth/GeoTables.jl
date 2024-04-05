@@ -6,11 +6,18 @@ cbar(fig, values; kwargs...) = _cbar(fig, Colorfier(values; kwargs...))
 
 function _cbar(fig, colorfier)
   values = Colorfy.values(colorfier)
-  colormap = Colorfy.colorscheme(colorfier)
+  colorscheme = Colorfy.colorscheme(colorfier)
+  colormap = defaultcolormap(values, colorscheme)
   limits = defaultlimits(values)
   ticks = defaultticks(values)
   tickformat = defaultformat(values)
   Makie.Colorbar(fig; colormap, limits, ticks, tickformat)
+end
+
+defaultcolormap(_, colorscheme) = colorscheme
+function defaultcolormap(values::CategArray, colorscheme)
+  nlevels = length(levels(values))
+  Makie.cgrad(colorscheme[1:nlevels], nlevels, categorical=true)
 end
 
 defaultlimits(vals) = defaultlimits(elscitype(vals), vals)
