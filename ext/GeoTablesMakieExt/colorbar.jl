@@ -32,7 +32,7 @@ end
 cbarcolormap(values, colorscheme) = colorscheme
 function cbarcolormap(values::CategArray, colorscheme)
   nlevels = length(levels(values))
-  categcolors = colorscheme[range(0, 1, length=nlevels)]
+  categcolors = colorscheme[range(0, nlevels > 1 ? 1 : 0, length=nlevels)]
   Makie.cgrad(categcolors, nlevels, categorical=true)
 end
 
