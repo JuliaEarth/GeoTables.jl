@@ -3,10 +3,11 @@
 # ------------------------------------------------------------------
 
 function cbar(fig, values; alpha=nothing, colormap=nothing, colorrange=nothing)
-  alphas = asobservable(isnothing(alpha) ? Colorfy.defaultalphas(values) : alpha)
-  cscheme = asobservable(isnothing(colormap) ? Colorfy.defaultcolorscheme(values) : colormap)
-  crange = asobservable(isnothing(colorrange) ? Colorfy.defaultcolorrange(values) : colorrange)
-  colorfier = Makie.@lift Colorfier(values; alphas=$alphas, colorscheme=$cscheme, colorrange=$crange)
+  vals = Makie.to_value(values)
+  alphas = asobservable(isnothing(alpha) ? Colorfy.defaultalphas(vals) : alpha)
+  cscheme = asobservable(isnothing(colormap) ? Colorfy.defaultcolorscheme(vals) : colormap)
+  crange = asobservable(isnothing(colorrange) ? Colorfy.defaultcolorrange(vals) : colorrange)
+  colorfier = Makie.@lift Colorfier(vals; alphas=$alphas, colorscheme=$cscheme, colorrange=$crange)
 
   args = Makie.@lift cbarargs($colorfier)
   cmap = Makie.@lift $args[1]

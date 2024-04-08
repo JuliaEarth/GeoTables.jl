@@ -58,6 +58,8 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     vals[] = Tables.getcolumn(cols, var) |> asvalues
   end
 
+  plot(vals) = Makie.plot(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
+
   colorbar(vals) = cbar(fig[2, 3], vals; alpha, colormap, colorrange)
 
   # select first viewable variable
@@ -67,11 +69,11 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   setvals(var)
 
   # initialize visualization
-  Makie.plot(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
+  plot(vals)
 
   # initialize colorbar if necessary
   varcbar = if !isconst[var]
-    colorbar(vals[])
+    colorbar(vals)
   else
     nothing
   end
