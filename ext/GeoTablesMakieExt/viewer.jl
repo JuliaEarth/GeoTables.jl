@@ -89,7 +89,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
       Makie.delete!(varcbar)
     end
     if !isconst[var]
-      varcbar = colorbar(vals[])
+      varcbar = colorbar(vals)
     else
       if !isnothing(varcbar)
         Makie.trim!(fig.layout)
