@@ -2,14 +2,14 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-leftjoin(gtb::AbstractGeoTable, tb; kwargs...) = _tableleftjoin(gtb, tb, NoneSelector(), Function[]; kwargs...)
+leftjoin(gtb::AbstractGeoTable, tab; kwargs...) = _tableleftjoin(gtb, tab, NoneSelector(), Function[]; kwargs...)
 
-leftjoin(gtb::AbstractGeoTable, tb, pairs::Pair{C,<:Function}...; kwargs...) where {C<:Column} =
-  _tableleftjoin(gtb, tb, selector(first.(pairs)), collect(Function, last.(pairs)); kwargs...)
+leftjoin(gtb::AbstractGeoTable, tab, pairs::Pair{C,<:Function}...; kwargs...) where {C<:Column} =
+  _tableleftjoin(gtb, tab, selector(first.(pairs)), collect(Function, last.(pairs)); kwargs...)
 
-function _tableleftjoin(gtb::AbstractGeoTable, tb, selector::ColumnSelector, aggfuns::Vector{Function}; on)
+function _tableleftjoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfuns::Vector{Function}; on)
   vars1 = Tables.schema(values(gtb)).names
-  vars2 = Tables.schema(tb).names
+  vars2 = Tables.schema(tab).names
 
   # check "on" variables
   onvars = _onvars(on)
@@ -28,19 +28,19 @@ function _tableleftjoin(gtb::AbstractGeoTable, tb, selector::ColumnSelector, agg
       end
       var
     end
-    tb = _rename(tb, vars, newvars)
+    tab = _rename(tab, vars, newvars)
   end
 
   gtb = _adjustunits(gtb)
-  tb = _adjustunits(tb)
+  tab = _adjustunits(tab)
 
-  _tableleftjoin(gtb, tb, selector, aggfuns, onvars, onpred)
+  _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
 end
 
-function _tableleftjoin(gtb, tb, selector, aggfuns, onvars, onpred)
+function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   dom1 = domain(gtb)
   tab1 = values(gtb)
-  tab2 = tb
+  tab2 = tab
   cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
   vars1 = Tables.columnnames(cols1)
