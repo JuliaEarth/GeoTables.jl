@@ -18,7 +18,7 @@ using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
 using DataScienceTraits: Continuous
 
-import DataAPI: nrow, ncol
+import DataAPI: nrow, ncol, leftjoin
 import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
@@ -37,6 +37,7 @@ include("geoops/geojoin.jl")
 include("geoops/groupby.jl")
 include("geoops/transform.jl")
 include("geoops/combine.jl")
+include("geoops/tablejoin.jl")
 
 # concrete types
 include("geotable.jl")
@@ -68,6 +69,7 @@ export
   @groupby,
   @transform,
   @combine,
+  leftjoin,
 
   # georeferencing
   georef,
