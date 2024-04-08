@@ -29,7 +29,7 @@ GeoTablesTableTransformsExt = "TableTransforms"
 
 [compat]
 CategoricalArrays = "0.10"
-Colorfy = "0.1"
+Colorfy = "0.1.2"
 ColumnSelectors = "0.1"
 DataAPI = "1.15"
 DataScienceTraits = "0.2"

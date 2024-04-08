@@ -32,7 +32,8 @@ end
 cbarcolormap(values, colorscheme) = colorscheme
 function cbarcolormap(values::CategArray, colorscheme)
   nlevels = length(levels(values))
-  Makie.cgrad(colorscheme[1:nlevels], nlevels, categorical=true)
+  categcolors = colorscheme[range(0, nlevels > 1 ? 1 : 0, length=nlevels)]
+  Makie.cgrad(categcolors, nlevels, categorical=true)
 end
 
 cbarlimits(values, colorrange) = colorrange isa NTuple{2} ? asfloat.(colorrange) : extrema(asfloat, skipinvalid(values))
