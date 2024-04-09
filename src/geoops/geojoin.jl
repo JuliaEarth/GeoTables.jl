@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-const KINDS = [:left, :inner]
+const GEOJOINKINDS = [:left, :inner]
 
 """
     geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
@@ -33,6 +33,8 @@ geojoin(gtb1, gtb2, "a" => mean, pred=issubset)
 geojoin(gtb1, gtb2, on=:a)
 geojoin(gtb1, gtb2, kind=:inner, on=["a", "b"])
 ```
+
+See also [`tablejoin`](@ref).
 """
 geojoin(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; kwargs...) =
   _geojoin(gtb1, gtb2, NoneSelector(), Function[]; kwargs...)
@@ -49,8 +51,8 @@ function _geojoin(
   pred=intersects,
   on=nothing
 )
-  if kind ∉ KINDS
-    throw(ArgumentError("invalid kind of join, use one these $KINDS"))
+  if kind ∉ GEOJOINKINDS
+    throw(ArgumentError("invalid kind of join, use one these $GEOJOINKINDS"))
   end
 
   vars1 = Tables.schema(values(gtb1)).names
@@ -85,13 +87,13 @@ function _geojoin(
   gtb2 = _adjustunits(gtb2)
 
   if kind === :inner
-    _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+    _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   else
-    _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+    _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 end
 
-function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
@@ -107,14 +109,7 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 
   # aggregation functions
-  svars = selector(vars2)
-  agg = Dict(zip(svars, aggfuns))
-  for var in vars2
-    if !haskey(agg, var)
-      v = Tables.getcolumn(cols2, var)
-      agg[var] = _defaultagg(v)
-    end
-  end
+  agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # rows to join
   nrows = nrow(gtb1)
@@ -125,6 +120,10 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
+  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+end
+
+function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
   # generate joined column
   function gencol(var)
     map(1:nrows) do i
@@ -145,7 +144,7 @@ function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   georef(newtab, dom1)
 end
 
-function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
@@ -161,14 +160,7 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 
   # aggregation functions
-  svars = selector(vars2)
-  agg = Dict(zip(svars, aggfuns))
-  for var in vars2
-    if !haskey(agg, var)
-      v = Tables.getcolumn(cols2, var)
-      agg[var] = _defaultagg(v)
-    end
-  end
+  agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # rows to join
   nrows = nrow(gtb1)
@@ -179,6 +171,10 @@ function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
+  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+end
+
+function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
   # row indices of gtb1 to preserve
   inds = findall(!isempty, jrows)
 
@@ -217,6 +213,18 @@ end
 _isvarequal(row1, row2, var) = isequal(Tables.getcolumn(row1, var), Tables.getcolumn(row2, var))
 
 _colvalues(rows, var) = [Tables.getcolumn(row, var) for row in rows]
+
+function _aggdict(selector, aggfuns, cols, vars)
+  svars = selector(vars)
+  agg = Dict(zip(svars, aggfuns))
+  for var in vars
+    if !haskey(agg, var)
+      v = Tables.getcolumn(cols, var)
+      agg[var] = _defaultagg(v)
+    end
+  end
+  agg
+end
 
 function _tmap(f, itr)
   chunks = Iterators.partition(itr, cld(length(itr), Threads.nthreads()))

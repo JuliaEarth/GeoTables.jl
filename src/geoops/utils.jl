@@ -5,14 +5,16 @@
 function _rename(geotable::AbstractGeoTable, oldnms, newnms)
   dom = domain(geotable)
   tab = values(geotable)
+  newtab = _rename(tab, oldnms, newnms)
+  georef(newtab, dom)
+end
+
+function _rename(tab, oldnms, newnms)
   cols = Tables.columns(tab)
   names = Tables.columnnames(cols)
-
   nmdict = Dict(zip(oldnms, newnms))
   pairs = (get(nmdict, nm, nm) => Tables.getcolumn(cols, nm) for nm in names)
-  newtab = (; pairs...) |> Tables.materializer(tab)
-
-  georef(newtab, dom)
+  (; pairs...) |> Tables.materializer(tab)
 end
 
 #-------------
@@ -37,13 +39,15 @@ end
 function _adjustunits(geotable::AbstractGeoTable)
   dom = domain(geotable)
   tab = values(geotable)
+  newtab = _adjustunits(tab)
+  georef(newtab, dom)
+end
+
+function _adjustunits(tab)
   cols = Tables.columns(tab)
   vars = Tables.columnnames(cols)
-
   pairs = (var => _absunit(Tables.getcolumn(cols, var)) for var in vars)
-  newtab = (; pairs...) |> Tables.materializer(tab)
-
-  georef(newtab, dom)
+  (; pairs...) |> Tables.materializer(tab)
 end
 
 _absunit(x) = _absunit(nonmissingtype(eltype(x)), x)

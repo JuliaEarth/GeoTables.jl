@@ -34,6 +34,7 @@ include("api/geotables.jl")
 include("geoops/utils.jl")
 include("geoops/macros.jl")
 include("geoops/geojoin.jl")
+include("geoops/tablejoin.jl")
 include("geoops/groupby.jl")
 include("geoops/transform.jl")
 include("geoops/combine.jl")
@@ -65,6 +66,7 @@ export
 
   # geometric operations
   geojoin,
+  tablejoin,
   @groupby,
   @transform,
   @combine,
