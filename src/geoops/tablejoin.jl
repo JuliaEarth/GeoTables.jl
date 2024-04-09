@@ -2,12 +2,22 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-leftjoin(gtb::AbstractGeoTable, tab; kwargs...) = _tableleftjoin(gtb, tab, NoneSelector(), Function[]; kwargs...)
+const TABLEJOINKINDS = [:left, :inner]
 
-leftjoin(gtb::AbstractGeoTable, tab, pairs::Pair{C,<:Function}...; kwargs...) where {C<:Column} =
-  _tableleftjoin(gtb, tab, selector(first.(pairs)), collect(Function, last.(pairs)); kwargs...)
+leftjoin(gtb::AbstractGeoTable, tab, args...; kwargs...) = tablejoin(gtb, tab, args...; kind=:left, kwargs...)
 
-function _tableleftjoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfuns::Vector{Function}; on)
+innerjoin(gtb::AbstractGeoTable, tab, args...; kwargs...) = tablejoin(gtb, tab, args...; kind=:inner, kwargs...)
+
+tablejoin(gtb::AbstractGeoTable, tab; kwargs...) = _tablejoin(gtb, tab, NoneSelector(), Function[]; kwargs...)
+
+tablejoin(gtb::AbstractGeoTable, tab, pairs::Pair{C,<:Function}...; kwargs...) where {C<:Column} =
+  _tablejoin(gtb, tab, selector(first.(pairs)), collect(Function, last.(pairs)); kwargs...)
+
+function _tablejoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfuns::Vector{Function}; kind, on)
+  if kind ∉ TABLEJOINKINDS
+    throw(ArgumentError("invalid kind of join, use one these $TABLEJOINKINDS"))
+  end
+
   vars1 = Tables.schema(values(gtb)).names
   vars2 = Tables.schema(tab).names
 
@@ -15,7 +25,7 @@ function _tableleftjoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, ag
   onvars = _onvars(on)
   onpred = _onpred(onvars)
   if onvars ⊈ vars1 || onvars ⊈ vars2
-    throw(ArgumentError("all variables in `on` kwarg must exist in geotables and table"))
+    throw(ArgumentError("all variables in `on` kwarg must exist in geotable and table"))
   end
 
   # make variable names unique
@@ -34,7 +44,11 @@ function _tableleftjoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, ag
   gtb = _adjustunits(gtb)
   tab = _adjustunits(tab)
 
-  _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
+  if kind === :inner
+    _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
+  else
+    _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
+  end
 end
 
 function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
@@ -50,14 +64,7 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   vars2 = setdiff(vars2, onvars)
 
   # aggregation functions
-  svars = selector(vars2)
-  agg = Dict(zip(svars, aggfuns))
-  for var in vars2
-    if !haskey(agg, var)
-      v = Tables.getcolumn(cols2, var)
-      agg[var] = _defaultagg(v)
-    end
-  end
+  agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # rows to join
   nrows = nrow(gtb)
@@ -67,22 +74,31 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  # generate joined column
-  function gencol(var)
-    map(1:nrows) do i
-      rows = jrows[i]
-      if isempty(rows)
-        missing
-      else
-        vs = _colvalues(rows, var)
-        agg[var](vs)
-      end
-    end
+  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+end
+
+function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
+  dom1 = domain(gtb)
+  tab1 = values(gtb)
+  tab2 = tab
+  cols1 = Tables.columns(tab1)
+  cols2 = Tables.columns(tab2)
+  vars1 = Tables.columnnames(cols1)
+  vars2 = Tables.columnnames(cols2)
+
+  # remove "on" variables from gtb2
+  vars2 = setdiff(vars2, onvars)
+
+  # aggregation functions
+  agg = _aggdict(selector, aggfuns, cols2, vars2)
+
+  # rows to join
+  nrows = nrow(gtb)
+  rows2 = Tables.rows(tab2)
+  jrows = _tmap(1:nrows) do i
+    row1 = Tables.subset(tab1, i)
+    [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  pairs1 = (var => Tables.getcolumn(cols1, var) for var in vars1)
-  pairs2 = (var => gencol(var) for var in vars2)
-  newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
-
-  georef(newtab, dom1)
+  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
 end

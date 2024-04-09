@@ -18,7 +18,7 @@ using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
 using DataScienceTraits: Continuous
 
-import DataAPI: nrow, ncol, leftjoin
+import DataAPI: nrow, ncol, leftjoin, innerjoin
 import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
@@ -70,6 +70,7 @@ export
   @transform,
   @combine,
   leftjoin,
+  innerjoin,
 
   # georeferencing
   georef,
