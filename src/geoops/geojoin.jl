@@ -34,7 +34,7 @@ geojoin(gtb1, gtb2, on=:a)
 geojoin(gtb1, gtb2, kind=:inner, on=["a", "b"])
 ```
 
-See also [tablejoin](@ref).
+See also [`tablejoin`](@ref).
 """
 geojoin(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; kwargs...) =
   _geojoin(gtb1, gtb2, NoneSelector(), Function[]; kwargs...)
