@@ -85,13 +85,13 @@ function _geojoin(
   gtb2 = _adjustunits(gtb2)
 
   if kind === :inner
-    _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+    _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   else
-    _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+    _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 end
 
-function _leftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
@@ -142,7 +142,7 @@ function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
   georef(newtab, dom1)
 end
 
-function _innerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)

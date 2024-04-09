@@ -18,7 +18,7 @@ using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
 using DataScienceTraits: Continuous
 
-import DataAPI: nrow, ncol, leftjoin, innerjoin
+import DataAPI: nrow, ncol
 import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
@@ -34,10 +34,10 @@ include("api/geotables.jl")
 include("geoops/utils.jl")
 include("geoops/macros.jl")
 include("geoops/geojoin.jl")
+include("geoops/tablejoin.jl")
 include("geoops/groupby.jl")
 include("geoops/transform.jl")
 include("geoops/combine.jl")
-include("geoops/tablejoin.jl")
 
 # concrete types
 include("geotable.jl")
@@ -66,11 +66,10 @@ export
 
   # geometric operations
   geojoin,
+  tablejoin,
   @groupby,
   @transform,
   @combine,
-  leftjoin,
-  innerjoin,
 
   # georeferencing
   georef,
