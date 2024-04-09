@@ -30,6 +30,8 @@ tablejoin(gtb, tab, :a => mean, :b => std, on=:a)
 tablejoin(gtb, tab, "a" => mean, on=[:a, :b])
 tablejoin(gtb, tab, kind=:inner, on=["a", "b"])
 ```
+
+See also [geojoin](@ref).
 """
 tablejoin(gtb::AbstractGeoTable, tab; kwargs...) = _tablejoin(gtb, tab, NoneSelector(), Function[]; kwargs...)
 
