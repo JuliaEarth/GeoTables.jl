@@ -49,6 +49,14 @@ end
 
 # --------------------------------------------------
 
+function applymeta(::DropNaN, dom::Domain, prep)
+  ftrans, fprep = prep
+  newmeta, _ = applymeta(ftrans, dom, fprep)
+  newmeta, nothing
+end
+
+# --------------------------------------------------
+
 function applymeta(::DropExtrema, dom::Domain, prep)
   ftrans, fprep = prep
   newmeta, _ = applymeta(ftrans, dom, fprep)
