@@ -12,6 +12,7 @@
     Sample(10),
     Filter(x -> true),
     DropMissing(),
+    DropNaN(),
     DropExtrema(:z),
     Map(:z => identity),
     Replace(1.0 => 2.0),
