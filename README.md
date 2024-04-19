@@ -2,11 +2,10 @@
 
 [![][build-img]][build-url] [![][codecov-img]][codecov-url]
 
-Geospatial tables compatible with the GeoStats.jl framework.
+Geospatial tables compatible with the [GeoStats.jl](https://github.com/JuliaEarth/GeoStats.jl) framework.
 
-## Asking for help
-
-If you have any questions, please [contact our community](https://juliaearth.github.io/GeoStats.jl/stable/about/community.html).
+Please check the [*Geospatial Data Science with Julia*](https://juliaearth.github.io/geospatial-data-science-with-julia)
+book for examples of usage.
 
 [build-img]: https://img.shields.io/github/actions/workflow/status/JuliaEarth/GeoTables.jl/CI.yml?branch=master&style=flat-square
 [build-url]: https://github.com/JuliaEarth/GeoTables.jl/actions
