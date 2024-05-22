@@ -4,7 +4,7 @@
   n, c = apply(p, d)
   dom = domain(n)
   cen = centroid.(dom)
-  xs = first.(coordinates.(cen))
+  xs = first.(to.(cen))
   @test dom isa CartesianGrid
-  @test all(x -> -0.5 ≤ x ≤ 0.5, xs)
+  @test all(x -> -0.5u"m" ≤ x ≤ 0.5u"m", xs)
 end

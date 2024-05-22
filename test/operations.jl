@@ -144,7 +144,7 @@
     # quantity aggregation
     box1 = Box((0, 0), (1, 1))
     box2 = Box((1, 1), (2, 2))
-    pts = Point2[(0.5, 0.5), (1.2, 1.2), (1.8, 1.8)]
+    pts = [(0.5, 0.5), (1.2, 1.2), (1.8, 1.8)]
     gtb1 = georef((; a=rand(2)), [box1, box2])
     gtb2 = georef((; b=[1, 2, 3] * u"K"), pts)
     gtb3 = georef((; c=[1.0, 2.0, 3.0] * u"K"), pts)
@@ -226,7 +226,7 @@
   @testset "tablejoin" begin
     tab1 = (a=1:4, b=["a", "b", "c", "d"])
     tab2 = (a=[1, 1, 0, 0, 0, 3, 3, 0, 0], b=["a", "z", "z", "z", "z", "z", "c", "z", "z"], c=rand(9))
-    gtb1 = georef(tab1, rand(Point2, 4))
+    gtb1 = georef(tab1, randpoint2(4))
 
     # left join
     jgtb = tablejoin(gtb1, tab2, on=:a)
@@ -421,12 +421,12 @@
     @test ndata.cosy == cos.(sdata.y)
 
     # user defined functions & :geometry
-    dist(point) = norm(coordinates(point))
+    dist(point) = norm(to(point))
     ndata = @transform(sdata, :dist_to_origin = dist(:geometry))
     @test ndata.dist_to_origin == dist.(domain(sdata))
 
     # replace :geometry column
-    testfunc(point) = Point(coordinates(point) .+ 1)
+    testfunc(point) = Point(coords(to(point) .+ 1u"m"))
     ndata = @transform(sdata, :geometry = testfunc(:geometry))
     @test domain(ndata) == GeometrySet(testfunc.(domain(sdata)))
 

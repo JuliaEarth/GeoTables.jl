@@ -13,7 +13,7 @@
     PlanePartition(Vec(1, 1)),
     DirectionPartition(Vec(1, 1)),
     PredicatePartition((i, j) -> iseven(i + j)),
-    SpatialPredicatePartition((x, y) -> norm(x + y) < 5),
+    SpatialPredicatePartition((x, y) -> norm(x + y) < 5u"m"),
     ProductPartition(UniformPartition(2), UniformPartition(2)),
     HierarchicalPartition(UniformPartition(2), UniformPartition(2))
   ]

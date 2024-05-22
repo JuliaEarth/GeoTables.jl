@@ -15,6 +15,8 @@ using DataScienceTraits: Continuous
 
 include("dummy.jl")
 
+randpoint2(n) = [rand(Point{2}) for _ in 1:n]
+
 # list of tests
 testfiles = [
   "basics.jl",
