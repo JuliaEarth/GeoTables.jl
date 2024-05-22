@@ -7,7 +7,7 @@
   rows = Tables.rows(gtb)
   sch = Tables.schema(rows)
   @test sch.names == (:geometry,)
-  @test sch.types == (Point2,)
+  @test sch.types == (eltype(pset),)
   row, state = iterate(rows)
   @test Tables.columnnames(row) == (:geometry,)
   @test Tables.getcolumn(row, :geometry) == pset[1]
