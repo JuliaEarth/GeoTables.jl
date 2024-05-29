@@ -226,7 +226,7 @@
   @testset "tablejoin" begin
     tab1 = (a=1:4, b=["a", "b", "c", "d"])
     tab2 = (a=[1, 1, 0, 0, 0, 3, 3, 0, 0], b=["a", "z", "z", "z", "z", "z", "c", "z", "z"], c=rand(9))
-    gtb1 = georef(tab1, randpoint2(4))
+    gtb1 = georef(tab1, rand(Point{2}, 4))
 
     # left join
     jgtb = tablejoin(gtb1, tab2, on=:a)

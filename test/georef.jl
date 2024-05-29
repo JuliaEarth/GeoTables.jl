@@ -13,9 +13,9 @@
   @test domain(gtb) isa CartesianGrid
 
   # vectors of geometries
-  gtb = georef(table, randpoint2(3))
+  gtb = georef(table, rand(Point{2}, 3))
   @test domain(gtb) isa PointSet
-  gtb = georef(tuple, randpoint2(3))
+  gtb = georef(tuple, rand(Point{2}, 3))
   @test domain(gtb) isa PointSet
   gtb = georef(table, collect(CartesianGrid(3)))
   @test domain(gtb) isa GeometrySet

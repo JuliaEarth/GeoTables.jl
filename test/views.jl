@@ -14,7 +14,7 @@
     t = (a=1:100, b=1:100)
     d = dummy(t, g)
     v = view(d, 20:50)
-    pts = randpoint2(nrow(v))
+    pts = rand(Point{2}, nrow(v))
     v.geometry = pts
     @test collect(v.geometry) == pts
     @test d.geometry isa GeometrySet
