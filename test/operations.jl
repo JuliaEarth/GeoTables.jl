@@ -426,7 +426,7 @@
     @test ndata.dist_to_origin == dist.(domain(sdata))
 
     # replace :geometry column
-    testfunc(point) = Point(coords(to(point) .+ 1u"m"))
+    testfunc(point) = Point((to(point) .+ 1u"m")...)
     ndata = @transform(sdata, :geometry = testfunc(:geometry))
     @test domain(ndata) == GeometrySet(testfunc.(domain(sdata)))
 
