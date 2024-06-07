@@ -10,6 +10,7 @@ using Random
 using Unitful
 using Statistics
 using PrettyTables
+using CoordRefSystems
 using DataScienceTraits
 
 using Unitful: AbstractQuantity, AffineQuantity
