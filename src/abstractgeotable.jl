@@ -178,24 +178,27 @@ function _common_kwargs(geotable)
   tuples = map(names) do name
     if name === :geometry
       t = Meshes.prettyname(eltype(dom))
-      u = ""
+      C = Meshes.crs(dom)
+      cname = CoordRefSystems.prettyname(C)
+      dname = CoordRefSystems.rmmodule(datum(C))
+      ti = "🖈 $cname{$dname}"
     else
       cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
       if T <: Missing
         t = "Missing"
-        u = "[NoUnits]"
+        ti = "[NoUnits]"
       else
         S = nonmissingtype(T)
         t = string(nameof(scitype(S)))
-        u = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
+        ti = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
-    t, u
+    t, ti
   end
   types = first.(tuples)
-  units = last.(tuples)
+  typeinfo = last.(tuples)
 
-  (title=summary(geotable), header=(colnames, types, units), alignment=:c, vcrop_mode=:bottom)
+  (title=summary(geotable), header=(colnames, types, typeinfo), alignment=:c, vcrop_mode=:bottom)
 end
