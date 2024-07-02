@@ -17,3 +17,17 @@ function reapply(transform::GeometricTransform, geotable::AbstractGeoTable, cach
   newdom = reapply(transform, domain(geotable), cache)
   georef(values(geotable), newdom)
 end
+
+# ----------------
+# SPECIALIZATIONS
+# ----------------
+
+function apply(transform::Overlaps, geotable::AbstractGeoTable)
+  dom = domain(geotable)
+  tab = values(geotable)
+  inds = preprocess(transform, dom)
+  newdom = view(dom, inds)
+  newtab = Tables.subset(tab, inds, viewhint=true) |> Tables.materializer(tab)
+  newgeotable = georef(newtab, newdom)
+  newgeotable, nothing
+end
