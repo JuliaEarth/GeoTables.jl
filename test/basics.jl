@@ -90,6 +90,21 @@
     @test Tables.subset(dat, 1, viewhint=true) isa NamedTuple
     @test Tables.subset(dat, 1, viewhint=false) isa NamedTuple
 
+    # TableTraits interface
+    dom = CartesianGrid(2, 2)
+    dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
+    @test TableTraits.isiterabletable(dat) == true
+    @test IteratorInterfaceExtensions.isiterable(dat) == true
+    iter = IteratorInterfaceExtensions.getiterator(dat)
+    @test length(iter) == 4
+    @test eltype(iter) <: NamedTuple
+    @test collect(iter) == [
+      (a=1, b=5, geometry=dom[1]),
+      (a=2, b=6, geometry=dom[2]),
+      (a=3, b=7, geometry=dom[3]),
+      (a=4, b=8, geometry=dom[4])
+    ]
+
     # dataframe interface
     grid = CartesianGrid(2, 2)
     data = dummy((a=[1, 2, 3, 4], b=[5, missing, 7, 8]), grid)
