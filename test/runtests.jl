@@ -13,6 +13,9 @@ using Test
 
 using DataScienceTraits: Continuous
 
+import TableTraits
+import IteratorInterfaceExtensions
+
 include("dummy.jl")
 
 # list of tests

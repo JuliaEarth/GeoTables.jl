@@ -26,6 +26,10 @@ import Meshes: sampleinds
 import Meshes: sortinds
 import TransformsBase: apply, revert, reapply
 
+# required for VSCode table viewer
+import TableTraits
+import IteratorInterfaceExtensions
+
 # abstract type
 include("abstractgeotable.jl")
 include("api/tables.jl")
