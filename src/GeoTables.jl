@@ -20,6 +20,7 @@ using ColumnSelectors: selector, selectsingle
 using DataScienceTraits: Continuous
 using TransformsBase: preprocess
 
+# required for VSCode table viewer
 import TableTraits
 import IteratorInterfaceExtensions
 
