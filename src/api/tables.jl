@@ -55,3 +55,10 @@ function Tables.schema(rows::GeoTableRows)
 end
 
 Tables.materializer(::Type{T}) where {T<:AbstractGeoTable} = T
+
+# TableTraits interface
+# required for VSCode table viewer
+
+TableTraits.isiterabletable(::AbstractGeoTable) = true
+IteratorInterfaceExtensions.isiterable(::AbstractGeoTable) = true
+IteratorInterfaceExtensions.getiterator(gtb::AbstractGeoTable) = Tables.datavaluerows(gtb)

@@ -20,6 +20,9 @@ using ColumnSelectors: selector, selectsingle
 using DataScienceTraits: Continuous
 using TransformsBase: preprocess
 
+import TableTraits
+import IteratorInterfaceExtensions
+
 import DataAPI: nrow, ncol
 import Meshes: partitioninds
 import Meshes: sampleinds
