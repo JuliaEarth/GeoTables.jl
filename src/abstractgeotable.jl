@@ -178,7 +178,7 @@ function _common_kwargs(geotable)
   tuples = map(names) do name
     if name === :geometry
       t = Meshes.prettyname(eltype(dom))
-      C = Meshes.crs(dom)
+      C = crs(dom)
       cname = CoordRefSystems.prettyname(C)
       dname = CoordRefSystems.rmmodule(datum(C))
       ti = "🖈 $cname{$dname}"

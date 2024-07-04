@@ -86,22 +86,22 @@
   # custom crs
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"), crs=Cartesian)
-  @test Meshes.crs(gtb.geometry) <: Cartesian
+  @test crs(gtb.geometry) <: Cartesian
   gtb = georef(table, ("x", "y"), crs=LatLon)
-  @test Meshes.crs(gtb.geometry) <: LatLon
+  @test crs(gtb.geometry) <: LatLon
 
   # crs heuristics
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"))
-  @test Meshes.crs(gtb.geometry) <: Cartesian
+  @test crs(gtb.geometry) <: Cartesian
   table = (a=rand(10), lat=rand(10), lon=rand(10))
   gtb = georef(table, ("lat", "lon"))
-  @test Meshes.crs(gtb.geometry) <: LatLon
+  @test crs(gtb.geometry) <: LatLon
 
   # fix latlon order
   table = (a=[1, 2, 3], lon=[1, 1, 1], lat=[2, 2, 2])
   gtb = georef(table, ("lon", "lat"))
-  @test Meshes.crs(gtb.geometry) <: LatLon
+  @test crs(gtb.geometry) <: LatLon
   @test coords(gtb.geometry[1]).lat == 2u"°"
   @test coords(gtb.geometry[1]).lon == 1u"°"
 end
