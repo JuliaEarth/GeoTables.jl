@@ -51,35 +51,47 @@ julia> georef((a=rand(10), b=rand(10)), rand(2, 10))
 georef(table, coords::AbstractVecOrMat) = georef(table, PointSet(coords))
 
 """
-    georef(table, names)
+    georef(table, names; [crs])
 
-Georeference `table` using coordinate column `names`.
+Georeference `table` using coordinates stored in given column `names`.
+
+Optionally, specify the coordinate reference system `crs`, which is
+set by default based on heuristics.
 
 ## Examples
 
 ```julia
-georef((a=rand(10), x=rand(10), y=rand(10)), (:x, :y))
-georef((a=rand(10), x=rand(10), y=rand(10)), [:x, :y])
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"))
 georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"])
+georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"], crs=Cartesian)
+georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"], crs=LatLon)
 ```
 """
-function georef(table, names::AbstractVector{Symbol})
+function georef(table, names::AbstractVector{Symbol}; crs=nothing)
   cols = Tables.columns(table)
   tnames = Tables.columnnames(cols)
   if names ⊈ tnames
     throw(ArgumentError("coordinate columns not found in the table"))
   end
-  vars = setdiff(tnames, names)
-  points = map(Point, (Tables.getcolumn(cols, nm) for nm in names)...)
-  etable = isempty(vars) ? nothing : (; (nm => Tables.getcolumn(cols, nm) for nm in vars)...)
+
+  # guess crs if necessary
+  gcrs, cnames = isnothing(crs) ? guesscrs(cols, names) : (crs, names)
+
+  # build point set with coordinates
+  point(xyz...) = Point(gcrs(xyz...))
+  points = map(point, (Tables.getcolumn(cols, nm) for nm in cnames)...)
   domain = PointSet(points)
+
+  # build table with values
+  vnames = setdiff(tnames, names)
+  etable = isempty(vnames) ? nothing : (; (nm => Tables.getcolumn(cols, nm) for nm in vnames)...)
+
   GeoTable(domain; etable)
 end
 
-georef(table, names::AbstractVector{<:AbstractString}) = georef(table, Symbol.(names))
-georef(table, names::NTuple{N,Symbol}) where {N} = georef(table, collect(names))
-georef(table, names::NTuple{N,<:AbstractString}) where {N} = georef(table, collect(Symbol.(names)))
+georef(table, names::AbstractVector{<:AbstractString}; crs=nothing) = georef(table, Symbol.(names); crs)
+georef(table, names::NTuple{N,Symbol}; crs=nothing) where {N} = georef(table, collect(names); crs)
+georef(table, names::NTuple{N,<:AbstractString}; crs=nothing) where {N} = georef(table, collect(Symbol.(names)); crs)
 
 """
     georef(tuple)
@@ -104,3 +116,30 @@ function georef(tuple::NamedTuple{NM,<:NTuple{N,AbstractArray}}) where {NM,N}
   table = (; (nm => reshape(x, prod(dims)) for (nm, x) in pairs(tuple))...)
   georef(table, CartesianGrid(dims))
 end
+
+# guess crs based on column values and coordinate names
+# return guessed crs and columns names in correct order
+function guesscrs(cols, names)
+  snames = string.(names)
+  ncoord = length(snames)
+
+  # variants of latlon names
+  latnames = variants(["lat", "latitude"])
+  lonnames = variants(["lon", "longitude"])
+  latselect = findfirst(∈(latnames), snames)
+  lonselect = findfirst(∈(lonnames), snames)
+
+  if ncoord == 2 && !isnothing(latselect) && !isnothing(lonselect)
+    # geodetic latitude and longitude
+    crs = LatLon
+    cnames = Symbol.(snames[[latselect, lonselect]])
+  else
+    crs = Cartesian
+    cnames = names
+  end
+
+  crs, cnames
+end
+
+# variants of given names with uppercase, etc.
+variants(names) = [names; uppercase.(names); uppercasefirst.(names)]
