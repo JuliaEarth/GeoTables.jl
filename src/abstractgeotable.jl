@@ -172,33 +172,32 @@ function _common_kwargs(geotable)
   names = propertynames(geotable)
 
   # header
-  colnames = string.(names)
+  header = string.(names)
 
   # subheaders
   tuples = map(names) do name
     if name === :geometry
-      t = Meshes.prettyname(eltype(dom))
-      C = Meshes.crs(dom)
-      cname = CoordRefSystems.prettyname(C)
-      dname = CoordRefSystems.rmmodule(datum(C))
-      ti = "🖈 $cname{$dname}"
+      cname = CoordRefSystems.prettyname(crs(dom))
+      dname = CoordRefSystems.rmmodule(datum(crs(dom)))
+      header₁ = Meshes.prettyname(eltype(dom))
+      header₂ = "🖈 $cname{$dname}"
     else
       cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
       if T <: Missing
-        t = "Missing"
-        ti = "[NoUnits]"
+        header₁ = "Missing"
+        header₂ = "[NoUnits]"
       else
         S = nonmissingtype(T)
-        t = string(nameof(scitype(S)))
-        ti = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
+        header₁ = string(nameof(scitype(S)))
+        header₂ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
-    t, ti
+    header₁, header₂
   end
-  types = first.(tuples)
-  typeinfo = last.(tuples)
+  subheader₁ = first.(tuples)
+  subheader₂ = last.(tuples)
 
-  (title=summary(geotable), header=(colnames, types, typeinfo), alignment=:c, vcrop_mode=:bottom)
+  (title=summary(geotable), header=(header, subheader₁, subheader₂), alignment=:c, vcrop_mode=:bottom)
 end
