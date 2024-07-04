@@ -99,7 +99,7 @@
   @test Meshes.crs(gtb.geometry) <: LatLon
 
   # fix latlon order
-  table = (a=[1,2,3], lon=[1,1,1], lat=[2,2,2])
+  table = (a=[1, 2, 3], lon=[1, 1, 1], lat=[2, 2, 2])
   gtb = georef(table, ("lon", "lat"))
   @test Meshes.crs(gtb.geometry) <: LatLon
   @test coords(gtb.geometry[1]).lat == 2u"°"
