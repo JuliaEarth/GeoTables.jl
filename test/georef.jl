@@ -23,9 +23,9 @@
   @test domain(gtb) isa GeometrySet
 
   # coordinates of point set
-  gtb = georef(table, rand(2, 3))
+  gtb = georef(table, [(rand(), rand()) for i in 1:3])
   @test domain(gtb) isa PointSet
-  gtb = georef(tuple, rand(2, 3))
+  gtb = georef(tuple, [(rand(), rand()) for i in 1:3])
   @test domain(gtb) isa PointSet
 
   # coordinates names in table

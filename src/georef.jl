@@ -32,7 +32,7 @@ interface (e.g., `Point`, `Quadrangle`, `Hexahedron`).
 ## Examples
 
 ```julia
-julia> georef((a=rand(10), b=rand(10)), rand(Point2, 10))
+julia> georef((a=rand(10), b=rand(10)), rand(Point{2}, 10))
 ```
 """
 georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geoms))
@@ -40,15 +40,15 @@ georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geo
 """
     georef(table, coords)
 
-Georeference `table` on `PointSet(coords)`.
+Georeference `table` on `PointSet(coords)` using Cartesian `coords`.
 
 ## Examples
 
 ```julia
-julia> georef((a=rand(10), b=rand(10)), rand(2, 10))
+julia> georef((a=rand(10), b=rand(10)), [(rand(), rand()) for i in 1:10])
 ```
 """
-georef(table, coords::AbstractVecOrMat) = georef(table, PointSet(coords))
+georef(table, coords::AbstractVector) = georef(table, PointSet(coords))
 
 """
     georef(table, names; [crs])
