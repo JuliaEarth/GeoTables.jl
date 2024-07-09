@@ -39,8 +39,9 @@
     @test data₂ != data₃
 
     # equality with missing data
-    data₁ = dummy((a=[1, missing, 3], b=[3, 2, 1]), PointSet([1 2 3; 4 5 6]))
-    data₂ = dummy((a=[1, missing, 3], b=[3, 2, 1]), PointSet([1 2 3; 4 5 6]))
+    pts = [(1, 4), (2, 5), (3, 6)]
+    data₁ = dummy((a=[1, missing, 3], b=[3, 2, 1]), PointSet(pts))
+    data₂ = dummy((a=[1, missing, 3], b=[3, 2, 1]), PointSet(pts))
     @test data₁ == data₂
 
     # parent and parentindices
