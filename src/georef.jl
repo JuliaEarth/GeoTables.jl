@@ -32,7 +32,7 @@ interface (e.g., `Point`, `Quadrangle`, `Hexahedron`).
 ## Examples
 
 ```julia
-julia> georef((a=rand(10), b=rand(10)), rand(Point{2}, 10))
+julia> georef((a=rand(10), b=rand(10)), rand(Point, 10))
 ```
 """
 georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geoms))

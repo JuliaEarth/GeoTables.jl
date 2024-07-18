@@ -18,7 +18,7 @@
     @test dat.geometry == newdom
     @test values(dat) == tab
     # vector of geometries
-    pts = rand(Point{2}, 100)
+    pts = rand(Point, 100)
     dat.geometry = pts
     @test dat.geometry isa PointSet
     @test dat.geometry == PointSet(pts)
@@ -28,12 +28,12 @@
     # error: only domains and vectors of geometries are supported as "geometry" column values
     @test_throws ErrorException dat.geometry = 1:100
     # error: the new domain must have the same number of elements as the geotable
-    @test_throws ErrorException dat.geometry = rand(Point{2}, 10)
+    @test_throws ErrorException dat.geometry = rand(Point, 10)
 
     # equality of data sets
     data₁ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
     data₂ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
-    data₃ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point{2}, 4)))
+    data₃ = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point, 4)))
     @test data₁ == data₂
     @test data₁ != data₃
     @test data₂ != data₃
@@ -183,14 +183,14 @@
     @test domain(gtb[(1:3, :), :]) isa CartesianGrid
 
     # error: cartesian indexing only works with grids
-    gtb = dummy((; a=rand(4)), PointSet(rand(Point{2}, 4)))
+    gtb = dummy((; a=rand(4)), PointSet(rand(Point, 4)))
     @test_throws ArgumentError gtb[(1, 1), :a]
     # error: invalid cartesian indexing
     gtb = dummy((; a=rand(8)), CartesianGrid(2, 2))
     @test_throws ArgumentError gtb[(1, 1, 1), :a]
 
     # hcat
-    dom = PointSet(rand(Point{2}, 10))
+    dom = PointSet(rand(Point, 10))
     data₁ = dummy((a=rand(10), b=rand(10)), dom)
     data₂ = dummy((c=rand(10), d=rand(10)), dom)
     data₃ = dummy((e=rand(10), f=rand(10)), dom)
@@ -250,14 +250,14 @@
     @test hdata.geometry == dom
 
     # error: different domains
-    data₁ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point{2}, 10)))
-    data₂ = dummy((c=rand(10), d=rand(10)), PointSet(rand(Point{2}, 10)))
+    data₁ = dummy((a=rand(10), b=rand(10)), PointSet(rand(Point, 10)))
+    data₂ = dummy((c=rand(10), d=rand(10)), PointSet(rand(Point, 10)))
     @test_throws ArgumentError hcat(data₁, data₂)
 
     # vcat
-    pset₁ = PointSet(rand(Point{2}, 10))
-    pset₂ = PointSet(rand(Point{2}, 10))
-    pset₃ = PointSet(rand(Point{2}, 10))
+    pset₁ = PointSet(rand(Point, 10))
+    pset₂ = PointSet(rand(Point, 10))
+    pset₃ = PointSet(rand(Point, 10))
     data₁ = dummy((a=rand(10), b=rand(10)), pset₁)
     data₂ = dummy((a=rand(10), b=rand(10)), pset₂)
     data₃ = dummy((a=rand(10), b=rand(10)), pset₃)
@@ -333,7 +333,7 @@
     @test_throws ArgumentError vcat(data₁, data₂, kind=:intersect)
 
     # variables interface
-    data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point{2}, 4)))
+    data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point, 4)))
     @test asarray(data, :a) == asarray(data, "a") == [1, 2, 3, 4]
     @test asarray(data, :b) == asarray(data, "b") == [5, 6, 7, 8]
     data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
