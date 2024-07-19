@@ -10,8 +10,8 @@
     @test parentindices(view(v, 1:10)) == 20:29
 
     # mutability
-    g = CartesianGrid(10, 10)
-    t = (a=1:100, b=1:100)
+    g = CartesianGrid(5, 5, 5)
+    t = (a=1:125, b=1:125)
     d = dummy(t, g)
     v = view(d, 20:50)
     pts = rand(Point, nrow(v))
@@ -20,7 +20,7 @@
     @test d.geometry isa GeometrySet
     @test d.geometry[1:19] == g[1:19]
     @test d.geometry[20:50] == pts
-    @test d.geometry[51:100] == g[51:100]
+    @test d.geometry[51:125] == g[51:125]
 
     g = CartesianGrid(10, 10)
     t = (a=1:100, b=1:100)
