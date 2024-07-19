@@ -3,9 +3,9 @@
   tuple = (x=rand(3), y=[1, 2, 3], z=["a", "b", "c"])
 
   # explicit domain types
-  gtb = georef(table, PointSet(rand(Point{2}, 3)))
+  gtb = georef(table, PointSet(rand(Point, 3)))
   @test domain(gtb) isa PointSet
-  gtb = georef(tuple, PointSet(rand(Point{2}, 3)))
+  gtb = georef(tuple, PointSet(rand(Point, 3)))
   @test domain(gtb) isa PointSet
   gtb = georef(table, CartesianGrid(3))
   @test domain(gtb) isa CartesianGrid
@@ -13,9 +13,9 @@
   @test domain(gtb) isa CartesianGrid
 
   # vectors of geometries
-  gtb = georef(table, rand(Point{2}, 3))
+  gtb = georef(table, rand(Point, 3))
   @test domain(gtb) isa PointSet
-  gtb = georef(tuple, rand(Point{2}, 3))
+  gtb = georef(tuple, rand(Point, 3))
   @test domain(gtb) isa PointSet
   gtb = georef(table, collect(CartesianGrid(3)))
   @test domain(gtb) isa GeometrySet

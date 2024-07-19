@@ -226,7 +226,7 @@
   @testset "tablejoin" begin
     tab1 = (a=1:4, b=["a", "b", "c", "d"])
     tab2 = (a=[1, 1, 0, 0, 0, 3, 3, 0, 0], b=["a", "z", "z", "z", "z", "z", "c", "z", "z"], c=rand(9))
-    gtb1 = georef(tab1, rand(Point{2}, 4))
+    gtb1 = georef(tab1, rand(Point, 4))
 
     # left join
     jgtb = tablejoin(gtb1, tab2, on=:a)
@@ -281,7 +281,7 @@
   end
 
   @testset "@groupby" begin
-    d = georef((z=[1, 2, 3], x=[4, 5, 6]), rand(Point{2}, 3))
+    d = georef((z=[1, 2, 3], x=[4, 5, 6]), rand(Point, 3))
     g = @groupby(d, :z)
     @test all(nrow.(g) .== 1)
     rows = [[1 4], [2 5], [3 6]]
@@ -305,7 +305,7 @@
     y = [1, 1, 2, 2, 3, 3, 4, 4]
     z = [1, 2, 3, 4, 5, 6, 7, 8]
     table = (; x, y, z)
-    sdata = georef(table, rand(Point{2}, 8))
+    sdata = georef(table, rand(Point, 8))
 
     # args...
     # integers
@@ -364,7 +364,7 @@
     y = [1, 1, 2, 2, 3, 3, missing, missing]
     z = [1, 2, 3, 4, 5, 6, 7, 8]
     table = (; x, y, z)
-    sdata = georef(table, rand(Point{2}, 8))
+    sdata = georef(table, rand(Point, 8))
 
     p = @groupby(sdata, :x)
     @test indices(p) == [[1, 2], [3, 4], [5, 6, 7, 8]]
@@ -376,7 +376,7 @@
     y = [1, 1, 2, 2, 3, 3, 4, 4]
     z = [1, 2, 3, 4, 5, 6, 7, 8]
     table = (; x, y, z)
-    sdata = georef(table, rand(Point{2}, 8))
+    sdata = georef(table, rand(Point, 8))
 
     p = @groupby(sdata, :x)
     @test indices(p) == [[1, 2, 3], [4], [5, 6, 7, 8]]
@@ -407,7 +407,7 @@
 
   @testset "@transform" begin
     table = (x=rand(10), y=rand(10))
-    sdata = georef(table, rand(Point{2}, 10))
+    sdata = georef(table, rand(Point, 10))
 
     ndata = @transform(sdata, :z = :x - 2 * :y)
     @test ndata.z == sdata.x .- 2 .* sdata.y
@@ -463,7 +463,7 @@
 
     # column replacement
     table = (x=rand(10), y=rand(10), z=rand(10))
-    sdata = georef(table, rand(Point{2}, 10))
+    sdata = georef(table, rand(Point, 10))
 
     ndata = @transform(sdata, :z = :x + :y, :w = :x - :y)
     @test ndata.z == sdata.x .+ sdata.y
@@ -480,7 +480,7 @@
     x = [1, 1, missing, missing, 2, 2, 2, 2]
     y = [1, 1, 2, 2, 3, 3, missing, missing]
     table = (; x, y)
-    sdata = georef(table, rand(Point{2}, 8))
+    sdata = georef(table, rand(Point, 8))
 
     ndata = @transform(sdata, :z = :x * :y, :w = :x / :y)
     @test isequal(ndata.z, sdata.x .* sdata.y)
@@ -491,7 +491,7 @@
     y = [1, 1, 2, 2, 3, 3, 4, 4]
     z = [1, 2, 3, 4, 5, 6, 7, 8]
     table = (; x, y, z)
-    sdata = georef(table, rand(Point{2}, 8))
+    sdata = georef(table, rand(Point, 8))
 
     p = @groupby(sdata, :x, :y)
     np = @transform(p, :z = 2 * :x + :y)
