@@ -22,7 +22,7 @@ end
 # SPECIALIZATIONS
 # ----------------
 
-function apply(transform::Overlaps, geotable::AbstractGeoTable)
+function apply(transform::Within, geotable::AbstractGeoTable)
   dom = domain(geotable)
   tab = values(geotable)
   inds = preprocess(transform, dom)
