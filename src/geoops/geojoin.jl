@@ -200,16 +200,6 @@ function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
   georef(newtab, newdom)
 end
 
-function _adjustcrs(gtb1, gtb2)
-  CRS1 = CoordRefSystems.constructor(crs(domain(gtb1)))
-  CRS2 = CoordRefSystems.constructor(crs(domain(gtb2)))
-  if CRS1 !== CRS2
-    gtb2 |> Proj(CRS1)
-  else
-    gtb2
-  end
-end
-
 _onvars(::Nothing) = nothing
 _onvars(var::Symbol) = [var]
 _onvars(var::AbstractString) = [Symbol(var)]
@@ -220,6 +210,16 @@ function _onpred(onvars)
     (_, _) -> true
   else
     (row1, row2) -> all(_isvarequal(row1, row2, var) for var in onvars)
+  end
+end
+
+function _adjustcrs(gtb1, gtb2)
+  CRS1 = CoordRefSystems.constructor(crs(domain(gtb1)))
+  CRS2 = CoordRefSystems.constructor(crs(domain(gtb2)))
+  if CRS1 !== CRS2
+    gtb2 |> Proj(CRS1)
+  else
+    gtb2
   end
 end
 
