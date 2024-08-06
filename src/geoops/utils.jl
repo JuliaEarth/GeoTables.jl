@@ -52,6 +52,7 @@ end
 
 _absunit(x) = _absunit(nonmissingtype(eltype(x)), x)
 _absunit(::Type, x) = x
+_absunit(::Type{Union{}}, x) = x
 function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
