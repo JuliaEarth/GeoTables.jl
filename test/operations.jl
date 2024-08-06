@@ -165,6 +165,23 @@
     @test jgtb.c[1] == mean(gtb3.c[[1]])
     @test jgtb.c[2] == mean(gtb3.c[[2, 3]])
 
+    # missing columns
+    gtb1 = georef((; a=fill(missing, 4)), gset)
+    gtb2 = georef((; b=rand(9)), pset)
+    jgtb = geojoin(gtb1, gtb2)
+    @test propertynames(jgtb) == [:a, :b, :geometry]
+    @test jgtb.geometry == gtb1.geometry
+    @test isequal(jgtb.a, gtb1.a)
+    @test jgtb.b[1] == mean(gtb2.b[[1, 2]])
+    @test jgtb.b[2] == mean(gtb2.b[[3, 4]])
+    @test jgtb.b[3] == mean(gtb2.b[[6, 7]])
+    @test jgtb.b[4] == mean(gtb2.b[[8, 9]])
+    jgtb = geojoin(gtb2, gtb1)
+    @test propertynames(jgtb) == [:b, :a, :geometry]
+    @test jgtb.geometry == gtb2.geometry
+    @test isequal(jgtb.a, fill(missing, 9))
+    @test jgtb.b == gtb2.b
+
     # "on" kwarg
     tab1 = (a=1:4, b=["a", "b", "c", "d"])
     tab2 = (a=[1, 1, 0, 0, 0, 3, 3, 0, 0], b=["a", "z", "z", "z", "z", "z", "c", "z", "z"], c=rand(9))
