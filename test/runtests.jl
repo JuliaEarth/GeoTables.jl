@@ -12,7 +12,7 @@ using Random
 using Test
 
 using DataScienceTraits: Continuous
-using CoordRefSystems: Cartesian, LatLon, Mercator
+using CoordRefSystems: Cartesian, LatLon, Mercator, WGS84Latest
 
 import TableTraits
 import IteratorInterfaceExtensions
