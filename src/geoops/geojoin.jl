@@ -55,6 +55,10 @@ function _geojoin(
     throw(ArgumentError("invalid kind of join, use one these $GEOJOINKINDS"))
   end
 
+  # fix CRS of the second geotable
+  CRS = CoordRefSystems.constructor(crs(domain(gtb1)))
+  gtb2 = gtb2 |> Proj(CRS)
+
   vars1 = Tables.schema(values(gtb1)).names
   vars2 = Tables.schema(values(gtb2)).names
 
