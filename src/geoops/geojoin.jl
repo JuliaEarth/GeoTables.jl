@@ -67,6 +67,9 @@ function _geojoin(
     end
   end
 
+  # adjust CRS of the second geotable if necessary
+  gtb2 = _adjustcrs(gtb1, gtb2)
+
   # make variable names unique
   if !isdisjoint(vars1, vars2)
     # repeated variable names
@@ -207,6 +210,16 @@ function _onpred(onvars)
     (_, _) -> true
   else
     (row1, row2) -> all(_isvarequal(row1, row2, var) for var in onvars)
+  end
+end
+
+function _adjustcrs(gtb1, gtb2)
+  CRS1 = CoordRefSystems.constructor(crs(domain(gtb1)))
+  CRS2 = CoordRefSystems.constructor(crs(domain(gtb2)))
+  if CRS1 !== CRS2
+    gtb2 |> Proj(CRS1)
+  else
+    gtb2
   end
 end
 
