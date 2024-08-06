@@ -55,10 +55,6 @@ function _geojoin(
     throw(ArgumentError("invalid kind of join, use one these $GEOJOINKINDS"))
   end
 
-  # fix CRS of the second geotable
-  CRS = CoordRefSystems.constructor(crs(domain(gtb1)))
-  gtb2 = gtb2 |> Proj(CRS)
-
   vars1 = Tables.schema(values(gtb1)).names
   vars2 = Tables.schema(values(gtb2)).names
 
@@ -70,6 +66,9 @@ function _geojoin(
       throw(ArgumentError("all variables in `on` kwarg must exist in both geotables"))
     end
   end
+
+  # adjust CRS of the second geotable if necessary
+  gtb2 = _adjustcrs(gtb1, gtb2)
 
   # make variable names unique
   if !isdisjoint(vars1, vars2)
@@ -199,6 +198,16 @@ function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
 
   newdom = view(dom1, inds)
   georef(newtab, newdom)
+end
+
+function _adjustcrs(gtb1, gtb2)
+  CRS1 = CoordRefSystems.constructor(crs(domain(gtb1)))
+  CRS2 = CoordRefSystems.constructor(crs(domain(gtb2)))
+  if CRS1 !== CRS2
+    gtb2 |> Proj(CRS1)
+  else
+    gtb2
+  end
 end
 
 _onvars(::Nothing) = nothing
