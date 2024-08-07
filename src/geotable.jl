@@ -18,8 +18,8 @@ GeoTable(CartesianGrid(10,10),
 )
 ```
 """
-mutable struct GeoTable{T} <: AbstractGeoTable
-  domain::Domain
+struct GeoTable{D<:Domain,T} <: AbstractGeoTable
+  domain::D
   values::Dict{Int,T}
 end
 
@@ -67,15 +67,4 @@ function Base.values(geotable::GeoTable, rank=nothing)
   values = getvalues(geotable)
   r = isnothing(rank) ? paramdim(domain) : rank
   get(values, r, nothing)
-end
-
-function setdomain!(geotable::GeoTable, newdomain::Domain)
-  newrank = paramdim(newdomain)
-  oldrank = paramdim(getdomain(geotable))
-  if newrank ≠ oldrank
-    values = getvalues(geotable)
-    values[newrank] = values[oldrank]
-    delete!(values, oldrank)
-  end
-  setfield!(geotable, :domain, newdomain)
 end
