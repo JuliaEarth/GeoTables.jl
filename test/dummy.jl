@@ -13,15 +13,4 @@ function GeoTables.values(data::DummyGeoTable, rank=nothing)
   get(values, r, nothing)
 end
 
-function GeoTables.setdomain!(data::DummyGeoTable, newdomain::Domain)
-  newrank = paramdim(newdomain)
-  oldrank = paramdim(getfield(data, :domain))
-  if newrank ≠ oldrank
-    values = getfield(data, :values)
-    values[newrank] = values[oldrank]
-    delete!(values, oldrank)
-  end
-  setfield!(data, :domain, newdomain)
-end
-
 dummygeoref(table, domain) = DummyGeoTable(domain, Dict(paramdim(domain) => table))
