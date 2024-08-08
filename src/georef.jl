@@ -5,13 +5,8 @@
 """
     georef(table, domain)
 
-Georeference `table` on `domain`.
-
-`table` must implement the [Tables.jl](https://github.com/JuliaData/Tables.jl)
-interface (e.g., `DataFrame`, `CSV.File`, `XLSX.Worksheet`).
-
-`domain` must implement the [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl)
-interface (e.g., `CartesianGrid`, `SimpleMesh`, `GeometrySet`).
+Georeference `table` on `domain` from
+[Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl)
 
 ## Examples
 
@@ -24,10 +19,8 @@ georef(table, domain::Domain) = GeoTable(domain, etable=table)
 """
     georef(table, geoms)
 
-Georeference `table` on vector of geometries `geoms`.
-
-`geoms` must implement the [Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl)
-interface (e.g., `Point`, `Quadrangle`, `Hexahedron`).
+Georeference `table` on vector of geometries `geoms` from
+[Meshes.jl](https://github.com/JuliaGeometry/Meshes.jl)
 
 ## Examples
 
@@ -40,15 +33,19 @@ georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geo
 """
     georef(table, coords; [crs])
 
-Georeference `table` on `PointSet(coords)` using Cartesian `coords`.
+Georeference `table` using coordinates `coords` of points.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics.
+set by default based on heuristics. Any `CRS` or `EPSG`/`ESRI` code
+from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
+is supported.
 
 ## Examples
 
 ```julia
-julia> georef((a=rand(10), b=rand(10)), [(rand(), rand()) for i in 1:10])
+julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)])
+julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], crs=LatLon)
+julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], crs=EPSG{4326})
 ```
 """
 function georef(table, coords::AbstractVector; crs=nothing)
@@ -62,18 +59,19 @@ end
 """
     georef(table, names; [crs])
 
-Georeference `table` using coordinates stored in given column `names`.
+Georeference `table` using coordinates of points stored in column `names`.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics.
+set by default based on heuristics. Any `CRS` or `EPSG`/`ESRI` code
+from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
+is supported.
 
 ## Examples
 
 ```julia
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"))
-georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"])
-georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"], crs=Cartesian)
-georef((a=rand(10), x=rand(10), y=rand(10)), ["x", "y"], crs=LatLon)
+georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), crs=LatLon)
+georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), crs=EPSG{4326})
 ```
 """
 function georef(table, names::AbstractVector{Symbol}; crs=nothing)
@@ -105,7 +103,7 @@ georef(table, names::NTuple{N,<:AbstractString}; crs=nothing) where {N} = georef
     georef(tuple)
 
 Georeference a named `tuple` on `CartesianGrid(dims)`,
-with `dims` being the dimensions of the `tuple` arrays.
+with `dims` obtained from the arrays stored in the tuple.
 
 ## Examples
 
