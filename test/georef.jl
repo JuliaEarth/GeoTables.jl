@@ -84,6 +84,9 @@
   @test_throws ArgumentError georef(tuple2D)
 
   # custom crs
+  table = (a=rand(3), b=rand(3))
+  gtb = georef(table, [(0, 0), (1, 1), (2, 2)], crs=Mercator)
+  @test crs(gtb.geometry) <: Mercator
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"), crs=Cartesian)
   @test crs(gtb.geometry) <: Cartesian
@@ -104,4 +107,12 @@
   @test crs(gtb.geometry) <: LatLon
   @test coords(gtb.geometry[1]).lat == 2u"°"
   @test coords(gtb.geometry[1]).lon == 1u"°"
+
+  # epsg/esri code
+  table = (a=rand(10), x=rand(10), y=rand(10))
+  gtb = georef(table, ("x", "y"), crs=EPSG{3395})
+  @test crs(gtb.geometry) <: Mercator
+  table = (a=rand(10), x=rand(10), y=rand(10))
+  gtb = georef(table, ("x", "y"), crs=ESRI{54034})
+  @test crs(gtb.geometry) <: Lambert
 end

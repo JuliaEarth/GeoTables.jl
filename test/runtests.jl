@@ -2,6 +2,8 @@ using GeoTables
 using TypedTables
 using TableTransforms
 using CategoricalArrays
+using DataScienceTraits
+using CoordRefSystems
 using Unitful
 using Tables
 using Meshes
@@ -10,9 +12,6 @@ using LinearAlgebra
 using Statistics
 using Random
 using Test
-
-using DataScienceTraits: Continuous
-using CoordRefSystems: Cartesian, LatLon, Mercator, WGS84Latest
 
 import TableTraits
 import IteratorInterfaceExtensions
