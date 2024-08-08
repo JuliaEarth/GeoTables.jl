@@ -38,9 +38,12 @@ julia> georef((a=rand(10), b=rand(10)), rand(Point, 10))
 georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geoms))
 
 """
-    georef(table, coords)
+    georef(table, coords; [crs])
 
 Georeference `table` on `PointSet(coords)` using Cartesian `coords`.
+
+Optionally, specify the coordinate reference system `crs`, which is
+set by default based on heuristics.
 
 ## Examples
 
@@ -48,7 +51,13 @@ Georeference `table` on `PointSet(coords)` using Cartesian `coords`.
 julia> georef((a=rand(10), b=rand(10)), [(rand(), rand()) for i in 1:10])
 ```
 """
-georef(table, coords::AbstractVector) = georef(table, PointSet(coords))
+function georef(table, coords::AbstractVector; crs=nothing)
+  clen = length(first(coords))
+  ccrs = isnothing(crs) ? Cartesian{NoDatum,clen} : validcrs(crs)
+  point(xyz...) = Point(ccrs(xyz...))
+  points = [point(xyz...) for xyz in coords]
+  georef(table, points)
+end
 
 """
     georef(table, names; [crs])
@@ -75,18 +84,17 @@ function georef(table, names::AbstractVector{Symbol}; crs=nothing)
   end
 
   # guess crs if necessary
-  gcrs, cnames = isnothing(crs) ? guesscrs(cols, names) : (crs, names)
+  ccrs, cnames = isnothing(crs) ? guesscrs(cols, names) : (validcrs(crs), names)
 
-  # build point set with coordinates
-  point(xyz...) = Point(gcrs(xyz...))
+  # build points with coordinates
+  point(xyz...) = Point(ccrs(xyz...))
   points = map(point, (Tables.getcolumn(cols, nm) for nm in cnames)...)
-  domain = PointSet(points)
 
   # build table with values
   vnames = setdiff(tnames, names)
   etable = isempty(vnames) ? nothing : (; (nm => Tables.getcolumn(cols, nm) for nm in vnames)...)
 
-  GeoTable(domain; etable)
+  georef(etable, points)
 end
 
 georef(table, names::AbstractVector{<:AbstractString}; crs=nothing) = georef(table, Symbol.(names); crs)
@@ -117,6 +125,10 @@ function georef(tuple::NamedTuple{NM,<:NTuple{N,AbstractArray}}) where {NM,N}
   georef(table, CartesianGrid(dims))
 end
 
+# --------
+# HELPERS
+# --------
+
 # guess crs based on column values and coordinate names
 # return guessed crs and columns names in correct order
 function guesscrs(cols, names)
@@ -143,3 +155,8 @@ end
 
 # variants of given names with uppercase, etc.
 variants(names) = [names; uppercase.(names); uppercasefirst.(names)]
+
+# validate crs/code provided by user
+validcrs(crs::Type{<:CRS}) = crs
+validcrs(code::Type{<:EPSG}) = CoordRefSystems.get(code)
+validcrs(code::Type{<:ESRI}) = CoordRefSystems.get(code)
