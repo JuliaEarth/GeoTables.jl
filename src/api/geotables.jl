@@ -88,7 +88,7 @@ function _checkargs(geotable, Dim)
   if !(grid isa Grid)
     throw(ArgumentError("cartesian indexing only works with grids"))
   end
-  if embeddim(grid) ≠ Dim
+  if paramdim(grid) ≠ Dim
     throw(ArgumentError("invalid cartesian indexing"))
   end
 end
