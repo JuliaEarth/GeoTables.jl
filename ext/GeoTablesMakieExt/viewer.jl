@@ -31,6 +31,9 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   # distributional variables
   isdist = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Distributional for var in viewable)
 
+  # colorful variables
+  iscolor = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Colorful for var in viewable)
+
   # list of menu options
   options = map(viewable) do var
     opt = if isconst[var]
@@ -60,6 +63,8 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
 
   plot(vals) = Makie.plot(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
 
+  needcbar(var) = !isconst[var] && !iscolor[var]
+
   colorbar(vals) = cbar(fig[2, 3], vals; alpha, colormap, colorrange)
 
   # select first viewable variable
@@ -72,7 +77,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   plot(vals)
 
   # initialize colorbar if necessary
-  varcbar = if !isconst[var]
+  varcbar = if needcbar(var)
     colorbar(vals)
   else
     nothing
@@ -88,7 +93,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     if !isnothing(varcbar)
       Makie.delete!(varcbar)
     end
-    if !isconst[var]
+    if needcbar(var)
       varcbar = colorbar(vals)
     else
       if !isnothing(varcbar)
@@ -101,21 +106,14 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   fig
 end
 
-asvalues(x) = asvalues(nonmissingtype(eltype(x)), x)
-asvalues(::Type, x) = elscitype(x) <: Categorical ? ascateg(x) : x
-asvalues(::Type{<:Colorant}, x) = map(c -> ismissing(c) ? missing : Float64(Gray(c)), x)
+asvalues(x) = elscitype(x) <: Categorical ? ascateg(x) : x
 
 ascateg(x) = categorical(x)
 ascateg(x::CategArray) = x
 
 isviewable(vals) = isviewable(elscitype(vals), vals)
 isviewable(::Type, vals) = false
-isviewable(::Type{Unknown}, vals) = iscolor(vals)
+isviewable(::Type{Colorful}, vals) = true
 isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
 isviewable(::Type{Categorical}, vals) = true
 isviewable(::Type{Distributional}, vals) = true
-
-iscolor(vals) = iscolor(nonmissingtype(eltype(vals)))
-iscolor(::Type) = false
-iscolor(::Type{Union{}}) = false
-iscolor(::Type{<:Colorant}) = true
