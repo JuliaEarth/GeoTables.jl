@@ -214,8 +214,8 @@ function _onpred(onvars)
 end
 
 function _adjustcrs(gtb1, gtb2)
-  CRS1 = CoordRefSystems.constructor(crs(domain(gtb1)))
-  CRS2 = CoordRefSystems.constructor(crs(domain(gtb2)))
+  CRS1 = crs(domain(gtb1))
+  CRS2 = crs(domain(gtb2))
   if CRS1 !== CRS2
     gtb2 |> Proj(CRS1)
   else
