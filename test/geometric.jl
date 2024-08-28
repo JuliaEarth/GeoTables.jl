@@ -10,7 +10,7 @@
 
   pset = PointSet([Point(1, 0), Point(2, 1), Point(3, 1), Point(4, 0)])
   d = georef((; a=[1, 2, 3, 4]), pset)
-  p = Within(x=(1.5, 3.5))
+  p = Crop(x=(1.5, 3.5))
   n, c = apply(p, d)
   @test n.geometry == PointSet([Point(2, 1), Point(3, 1)])
   @test n.a == [2, 3]
