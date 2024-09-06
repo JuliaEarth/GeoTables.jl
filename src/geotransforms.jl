@@ -22,12 +22,9 @@ end
 # SPECIALIZATIONS
 # ----------------
 
-function apply(transform::Crop, geotable::AbstractGeoTable)
-  dom = domain(geotable)
-  tab = values(geotable)
-  inds = preprocess(transform, dom)
-  newdom = view(dom, inds)
-  newtab = Tables.subset(tab, inds, viewhint=true) |> Tables.materializer(tab)
-  newgeotable = georef(newtab, newdom)
+function apply(transform::Slice, geotable::AbstractGeoTable)
+  grid = domain(geotable)
+  range = preprocess(transform, grid)
+  newgeotable = geotable[range, :]
   newgeotable, nothing
 end

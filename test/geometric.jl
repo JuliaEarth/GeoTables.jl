@@ -8,10 +8,10 @@
   @test dom isa CartesianGrid
   @test all(x -> -0.5u"m" ≤ x ≤ 0.5u"m", xs)
 
-  pset = PointSet([Point(1, 0), Point(2, 1), Point(3, 1), Point(4, 0)])
-  d = georef((; a=[1, 2, 3, 4]), pset)
-  p = Crop(x=(1.5, 3.5))
+  g = CartesianGrid(4, 4)
+  d = georef((; a=1:16), g)
+  p = Slice(x=(1.5, 3.5))
   n, c = apply(p, d)
-  @test n.geometry == PointSet([Point(2, 1), Point(3, 1)])
-  @test n.a == [2, 3]
+  @test n.geometry == CartesianGrid((1.0, 0.0), (4.0, 4.0), dims=(3, 4))
+  @test n.a == [2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15, 16]
 end
