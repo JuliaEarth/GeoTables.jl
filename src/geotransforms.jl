@@ -23,8 +23,6 @@ end
 # ----------------
 
 function apply(transform::Slice, geotable::AbstractGeoTable)
-  grid = domain(geotable)
-  range = preprocess(transform, grid)
-  newgeotable = geotable[range, :]
-  newgeotable, nothing
+  inds = preprocess(transform, domain(geotable))
+  geotable[inds, :], nothing
 end
