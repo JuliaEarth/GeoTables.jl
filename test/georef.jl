@@ -123,6 +123,10 @@
   @test crs(gtb.geometry) <: Lambert
 
   # lenunit
+  table = (a=rand(3), b=rand(3))
+  gtb = georef(table, [(0, 0), (1, 1), (2, 2)], lenunit=u"mm")
+  @test crs(gtb.geometry) <: Cartesian
+  @test unit(Meshes.lentype(gtb.geometry)) == u"mm"
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"), lenunit=u"mm")
   @test crs(gtb.geometry) <: Cartesian
