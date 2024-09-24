@@ -31,13 +31,14 @@ julia> georef((a=rand(10), b=rand(10)), rand(Point, 10))
 georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geoms))
 
 """
-    georef(table, coords; [crs])
+    georef(table, coords; [crs], [lenunit])
 
 Georeference `table` using coordinates `coords` of points.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics. Any `CRS` or `EPSG`/`ESRI` code
-from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
+set by default based on heuristics, and the `lenunit` (default to meters)
+that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
+code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
 
 ## Examples
@@ -46,24 +47,26 @@ is supported.
 julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)])
 julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], crs=LatLon)
 julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], crs=EPSG{4326})
+julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], lenunit=u"cm")
 ```
 """
-function georef(table, coords::AbstractVector; crs=nothing)
+function georef(table, coords::AbstractVector; crs=nothing, lenunit=u"m")
   clen = length(first(coords))
   ccrs = isnothing(crs) ? Cartesian{NoDatum,clen} : validcrs(crs)
-  point(xyz...) = Point(ccrs(xyz...))
+  point = pointbuilder(ccrs, lenunit)
   points = [point(xyz...) for xyz in coords]
   georef(table, points)
 end
 
 """
-    georef(table, names; [crs])
+    georef(table, names; [crs], [lenunit])
 
 Georeference `table` using coordinates of points stored in column `names`.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics. Any `CRS` or `EPSG`/`ESRI` code
-from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
+set by default based on heuristics, and the `lenunit` (default to meter)
+that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
+code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
 
 ## Examples
@@ -72,9 +75,10 @@ is supported.
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"))
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), crs=LatLon)
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), crs=EPSG{4326})
+georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), lenunit=u"cm")
 ```
 """
-function georef(table, names::AbstractVector{Symbol}; crs=nothing)
+function georef(table, names::AbstractVector{Symbol}; crs=nothing, lenunit=u"m")
   cols = Tables.columns(table)
   tnames = Tables.columnnames(cols)
   if names ⊈ tnames
@@ -85,7 +89,7 @@ function georef(table, names::AbstractVector{Symbol}; crs=nothing)
   ccrs, cnames = isnothing(crs) ? guesscrs(cols, names) : (validcrs(crs), names)
 
   # build points with coordinates
-  point(xyz...) = Point(ccrs(xyz...))
+  point = pointbuilder(ccrs, lenunit)
   points = map(point, (Tables.getcolumn(cols, nm) for nm in cnames)...)
 
   # build table with values
@@ -95,9 +99,10 @@ function georef(table, names::AbstractVector{Symbol}; crs=nothing)
   georef(etable, points)
 end
 
-georef(table, names::AbstractVector{<:AbstractString}; crs=nothing) = georef(table, Symbol.(names); crs)
-georef(table, names::NTuple{N,Symbol}; crs=nothing) where {N} = georef(table, collect(names); crs)
-georef(table, names::NTuple{N,<:AbstractString}; crs=nothing) where {N} = georef(table, collect(Symbol.(names)); crs)
+georef(table, names::AbstractVector{<:AbstractString}; kwargs...) = georef(table, Symbol.(names); kwargs...)
+georef(table, names::NTuple{N,Symbol}; kwargs...) where {N} = georef(table, collect(names); kwargs...)
+georef(table, names::NTuple{N,<:AbstractString}; kwargs...) where {N} =
+  georef(table, collect(Symbol.(names)); kwargs...)
 
 """
     georef(tuple)
@@ -135,7 +140,7 @@ function guesscrs(cols, names)
 
   # variants of latlon names
   latnames = variants(["lat", "latitude"])
-  lonnames = variants(["lon", "longitude"])
+  lonnames = variants(["lon", "long", "longitude"])
   latselect = findfirst(∈(latnames), snames)
   lonselect = findfirst(∈(lonnames), snames)
 
@@ -149,6 +154,21 @@ function guesscrs(cols, names)
   end
 
   crs, cnames
+end
+
+# point builder for given crs and lenunit
+function pointbuilder(crs, u)
+  if crs <: Cartesian
+    (xyz...) -> Point(crs((xyz .* u)...))
+  elseif crs <: Polar
+    (ρ, ϕ) -> Point(crs(ρ * u, ϕ * u"rad"))
+  elseif crs <: Cylindrical
+    (ρ, ϕ, z) -> Point(crs(ρ * u, ϕ * u"rad", z * u))
+  elseif crs <: Spherical
+    (r, θ, ϕ) -> Point(crs(r * u, θ * u"rad", ϕ * u"rad"))
+  else
+    (coords...) -> Point(crs(coords...))
+  end
 end
 
 # variants of given names with uppercase, etc.

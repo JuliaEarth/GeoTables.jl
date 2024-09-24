@@ -100,6 +100,12 @@
   table = (a=rand(10), lat=rand(10), lon=rand(10))
   gtb = georef(table, ("lat", "lon"))
   @test crs(gtb.geometry) <: LatLon
+  table = (a=rand(10), lat=rand(10), long=rand(10))
+  gtb = georef(table, ("lat", "long"))
+  @test crs(gtb.geometry) <: LatLon
+  table = (a=rand(10), latitude=rand(10), longitude=rand(10))
+  gtb = georef(table, ("latitude", "longitude"))
+  @test crs(gtb.geometry) <: LatLon
 
   # fix latlon order
   table = (a=[1, 2, 3], lon=[1, 1, 1], lat=[2, 2, 2])
@@ -115,4 +121,26 @@
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"), crs=ESRI{54034})
   @test crs(gtb.geometry) <: Lambert
+
+  # lenunit
+  table = (a=rand(3), b=rand(3))
+  gtb = georef(table, [(0, 0), (1, 1), (2, 2)], lenunit=u"mm")
+  @test crs(gtb.geometry) <: Cartesian
+  @test unit(Meshes.lentype(gtb.geometry)) == u"mm"
+  table = (a=rand(10), x=rand(10), y=rand(10))
+  gtb = georef(table, ("x", "y"), lenunit=u"mm")
+  @test crs(gtb.geometry) <: Cartesian
+  @test unit(Meshes.lentype(gtb.geometry)) == u"mm"
+  table = (a=rand(10), x=rand(10), y=rand(10))
+  gtb = georef(table, ("x", "y"), crs=Polar, lenunit=u"cm")
+  @test crs(gtb.geometry) <: Polar
+  @test unit(Meshes.lentype(gtb.geometry)) == u"cm"
+  table = (a=rand(10), x=rand(10), y=rand(10), z=rand(10))
+  gtb = georef(table, ("x", "y", "z"), crs=Cylindrical, lenunit=u"dm")
+  @test crs(gtb.geometry) <: Cylindrical
+  @test unit(Meshes.lentype(gtb.geometry)) == u"dm"
+  table = (a=rand(10), x=rand(10), y=rand(10), z=rand(10))
+  gtb = georef(table, ("x", "y", "z"), crs=Spherical, lenunit=u"km")
+  @test crs(gtb.geometry) <: Spherical
+  @test unit(Meshes.lentype(gtb.geometry)) == u"km"
 end
