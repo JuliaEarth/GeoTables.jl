@@ -154,7 +154,7 @@ function guesscrs(cols, names)
   crs, cnames
 end
 
-# point builder that adds the length unit to the right coordinates
+# point builder for given crs and lenunit
 function pointbuilder(crs, u)
   if crs <: Cartesian
     (xyz...) -> Point(crs((xyz .* u)...))
