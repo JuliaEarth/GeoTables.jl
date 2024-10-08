@@ -170,7 +170,7 @@ function pointbuilder(crs, u)
     elseif crs <: Spherical
       (r, θ, ϕ) -> Point(crs(withunit(r, u), withunit(θ, u"rad"), withunit(ϕ, u"rad")))
     else
-      throw(ArgumentError("the length unit of CRS `$crs` cannot be changed"))
+      throw(ArgumentError("the length unit of a `$crs` CRS cannot be changed"))
     end
   end
 end
