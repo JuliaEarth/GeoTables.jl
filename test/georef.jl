@@ -153,9 +153,7 @@
   gtb = georef(table, ("x", "y"), lenunit=u"m")
   @test crs(gtb.geometry) <: Cartesian
   @test unit(Meshes.lentype(gtb.geometry)) == u"m"
-  # `lenunit` option only affects Basic CRS
+  # error: the length unit of CRS `LatLon` cannot be changed
   table = (a=rand(10), lat=rand(10), lon=rand(10))
-  gtb = georef(table, ("lat", "lon"), crs=LatLon, lenunit=u"km")
-  @test crs(gtb.geometry) <: LatLon
-  @test unit(Meshes.lentype(gtb.geometry)) == u"m"
+  @test_throws ArgumentError georef(table, ("lat", "lon"), crs=LatLon, lenunit=u"km")
 end

@@ -37,7 +37,7 @@ Georeference `table` using coordinates `coords` of points.
 
 Optionally, specify the coordinate reference system `crs`, which is
 set by default based on heuristics, and the `lenunit` (default to meters for unitless values)
-that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
+that can only be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
 code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
 
@@ -65,7 +65,7 @@ Georeference `table` using coordinates of points stored in column `names`.
 
 Optionally, specify the coordinate reference system `crs`, which is
 set by default based on heuristics, and the `lenunit` (default to meters for unitless values)
-that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
+that can only be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
 code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
 
@@ -170,7 +170,7 @@ function pointbuilder(crs, u)
     elseif crs <: Spherical
       (r, θ, ϕ) -> Point(crs(withunit(r, u), withunit(θ, u"rad"), withunit(ϕ, u"rad")))
     else
-      (coords...) -> Point(crs(coords...))
+      throw(ArgumentError("the length unit of CRS `$crs` cannot be changed"))
     end
   end
 end
