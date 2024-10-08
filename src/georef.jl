@@ -36,7 +36,7 @@ georef(table, geoms::AbstractVector{<:Geometry}) = georef(table, GeometrySet(geo
 Georeference `table` using coordinates `coords` of points.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics, and the `lenunit` (default to meters)
+set by default based on heuristics, and the `lenunit` (default to meters for unitless values)
 that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
 code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
@@ -50,7 +50,7 @@ julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], crs=EPSG{4326
 julia> georef((a=[1, 2, 3], b=[4, 5, 6], [(0, 0), (1, 1), (2, 2)], lenunit=u"cm")
 ```
 """
-function georef(table, coords::AbstractVector; crs=nothing, lenunit=u"m")
+function georef(table, coords::AbstractVector; crs=nothing, lenunit=nothing)
   clen = length(first(coords))
   ccrs = isnothing(crs) ? Cartesian{NoDatum,clen} : validcrs(crs)
   point = pointbuilder(ccrs, lenunit)
@@ -64,7 +64,7 @@ end
 Georeference `table` using coordinates of points stored in column `names`.
 
 Optionally, specify the coordinate reference system `crs`, which is
-set by default based on heuristics, and the `lenunit` (default to meter)
+set by default based on heuristics, and the `lenunit` (default to meters for unitless values)
 that will be used in CRS types that allow this flexibility. Any `CRS` or `EPSG`/`ESRI` 
 code from [CoordRefSystems.jl](https://github.com/JuliaEarth/CoordRefSystems.jl)
 is supported.
@@ -78,7 +78,7 @@ georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), crs=EPSG{4326})
 georef((a=rand(10), x=rand(10), y=rand(10)), ("x", "y"), lenunit=u"cm")
 ```
 """
-function georef(table, names::AbstractVector{Symbol}; crs=nothing, lenunit=u"m")
+function georef(table, names::AbstractVector{Symbol}; crs=nothing, lenunit=nothing)
   cols = Tables.columns(table)
   tnames = Tables.columnnames(cols)
   if names ⊈ tnames
@@ -158,18 +158,26 @@ end
 
 # point builder for given crs and lenunit
 function pointbuilder(crs, u)
-  if crs <: Cartesian
-    (xyz...) -> Point(crs((xyz .* u)...))
-  elseif crs <: Polar
-    (ρ, ϕ) -> Point(crs(ρ * u, ϕ * u"rad"))
-  elseif crs <: Cylindrical
-    (ρ, ϕ, z) -> Point(crs(ρ * u, ϕ * u"rad", z * u))
-  elseif crs <: Spherical
-    (r, θ, ϕ) -> Point(crs(r * u, θ * u"rad", ϕ * u"rad"))
+  if !isnothing(u) 
+    if crs <: Cartesian
+      (xyz...) -> Point(crs(withunit.(xyz, u)...))
+    elseif crs <: Polar
+      (ρ, ϕ) -> Point(crs(withunit(ρ, u), withunit(ϕ, u"rad")))
+    elseif crs <: Cylindrical
+      (ρ, ϕ, z) -> Point(crs(withunit(ρ, u), withunit(ϕ, u"rad"), withunit(z, u)))
+    elseif crs <: Spherical
+      (r, θ, ϕ) -> Point(crs(withunit(r, u), withunit(θ, u"rad"), withunit(ϕ, u"rad")))
+    else
+      (coords...) -> Point(crs(coords...))
+    end
   else
     (coords...) -> Point(crs(coords...))
   end
 end
+
+# add unit or convert to chosen unit
+withunit(x::Number, u) = x * u
+withunit(x::Quantity, u) = uconvert(u, x)
 
 # variants of given names with uppercase, etc.
 variants(names) = [names; uppercase.(names); uppercasefirst.(names)]

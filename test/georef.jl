@@ -143,4 +143,19 @@
   gtb = georef(table, ("x", "y", "z"), crs=Spherical, lenunit=u"km")
   @test crs(gtb.geometry) <: Spherical
   @test unit(Meshes.lentype(gtb.geometry)) == u"km"
+  # retain the original units if `lenunit=nothing`
+  table = (a=rand(10), x=rand(10) * u"cm", y=rand(10) * u"cm")
+  gtb = georef(table, ("x", "y"))
+  @test crs(gtb.geometry) <: Cartesian
+  @test unit(Meshes.lentype(gtb.geometry)) == u"cm"
+  # convert the units if `lenunit` is passed
+  table = (a=rand(10), x=rand(10) * u"km", y=rand(10) * u"km")
+  gtb = georef(table, ("x", "y"), lenunit=u"m")
+  @test crs(gtb.geometry) <: Cartesian
+  @test unit(Meshes.lentype(gtb.geometry)) == u"m"
+  # `lenunit` option only affects Basic CRS
+  table = (a=rand(10), lat=rand(10), lon=rand(10))
+  gtb = georef(table, ("lat", "lon"), crs=LatLon, lenunit=u"km")
+  @test crs(gtb.geometry) <: LatLon
+  @test unit(Meshes.lentype(gtb.geometry)) == u"m"
 end
