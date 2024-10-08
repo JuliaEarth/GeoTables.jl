@@ -158,7 +158,7 @@ end
 
 # point builder for given crs and lenunit
 function pointbuilder(crs, u)
-  if isnothing(u) 
+  if isnothing(u)
     (coords...) -> Point(crs(coords...))
   else
     if crs <: Cartesian
