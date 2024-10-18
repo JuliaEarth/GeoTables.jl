@@ -17,7 +17,6 @@ using Unitful: AbstractQuantity, AffineQuantity
 using ColumnSelectors: ColumnSelector, SingleColumnSelector
 using ColumnSelectors: Column, NoneSelector
 using ColumnSelectors: selector, selectsingle
-using DataScienceTraits: Continuous
 using TransformsBase: preprocess
 
 import DataAPI: nrow, ncol

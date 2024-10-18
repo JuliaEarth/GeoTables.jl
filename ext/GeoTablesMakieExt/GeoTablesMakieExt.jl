@@ -14,11 +14,6 @@ using Distributions
 using CategoricalArrays
 using DataScienceTraits
 using Makie.Colors: Colorant, Gray
-using DataScienceTraits: Continuous
-using DataScienceTraits: Categorical
-using DataScienceTraits: Distributional
-using DataScienceTraits: Colorful
-using DataScienceTraits: Unknown
 
 import Makie
 import Meshes: viz, viz!

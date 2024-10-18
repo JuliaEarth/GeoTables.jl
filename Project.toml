@@ -1,7 +1,7 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
-version = "1.24.3"
+version = "1.24.4"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
@@ -36,7 +36,7 @@ Colorfy = "1.0"
 ColumnSelectors = "1.0"
 CoordRefSystems = "0.15"
 DataAPI = "1.15"
-DataScienceTraits = "0.4.3"
+DataScienceTraits = "1.0"
 Dates = "1.9"
 Distributions = "0.25"
 IteratorInterfaceExtensions = "1.0"
