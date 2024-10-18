@@ -10,9 +10,9 @@ using Dates
 using Tables
 using Colorfy
 using Unitful
-using Distributions
-using CategoricalArrays
 using DataScienceTraits
+using CategoricalArrays
+using Distributions: Distribution
 using Makie.Colors: Colorant, Gray
 
 import Makie
