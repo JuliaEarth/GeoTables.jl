@@ -32,5 +32,7 @@
   # --------
   # SORTING
   # --------
-  # TODO
+  t = georef((z=rand(50, 50),))
+  s = sort(t, DirectionSort((1.0, 0.0)))
+  @test nrow(s) == nrow(t)
 end
