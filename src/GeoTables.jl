@@ -23,6 +23,7 @@ import DataAPI: nrow, ncol
 import Meshes: partitioninds
 import Meshes: sampleinds
 import Meshes: sortinds
+import Meshes: crs
 import TransformsBase: apply, revert, reapply
 
 # required for VSCode table viewer

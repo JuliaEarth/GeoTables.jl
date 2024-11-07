@@ -112,6 +112,8 @@ function Base.parentindices(geotable::AbstractGeoTable)
   end
 end
 
+crs(geotable::AbstractGeoTable) = crs(domain(geotable))
+
 # -----------
 # IO METHODS
 # -----------

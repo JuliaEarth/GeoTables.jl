@@ -41,6 +41,11 @@
     @test parentindices(dat) == inds
     @test isnothing(values(pdat))
 
+    # coordinate reference system (crs)
+    dom = CartesianGrid(2, 2)
+    dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
+    @test crs(dat) == crs(dom)
+
     # Tables interface
     dom = CartesianGrid(2, 2)
     dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
