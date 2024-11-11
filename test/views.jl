@@ -18,7 +18,7 @@
     x = [collect(1:6); collect(11:16); collect(21:26); collect(31:36); collect(41:46); collect(51:56)]
     @test Tables.columntable(values(v)) == (a=x, b=x)
 
-    p = PointSet(collect(vertices(g)))
+    p = PointSet(vertices(g))
     d = dummy(t, p)
     v = view(d, b)
     dd = domain(v)
