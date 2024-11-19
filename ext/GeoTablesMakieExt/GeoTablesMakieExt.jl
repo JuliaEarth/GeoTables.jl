@@ -12,7 +12,7 @@ using Colorfy
 using Unitful
 using DataScienceTraits
 using CategoricalArrays
-using Distributions: Distribution
+using Distributions: Distribution, location
 using Makie.Colors: Colorant, Gray
 
 import Makie
