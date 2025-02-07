@@ -72,7 +72,7 @@ function _colnames(expr)
 end
 
 function _colargs!(colnames, expr)
-  if Meta.isexpr(expr, :.) # handle expressions of the form obj.field
+  if Meta.isexpr(expr, :., 2) && expr.args[2] isa QuoteNode # handle expressions of the form obj.field
     _colargs!(colnames, expr.args[1])
   else # descend on function/macro arguments
     start = Meta.isexpr(expr, [:call, :macrocall]) ? 2 : 1
