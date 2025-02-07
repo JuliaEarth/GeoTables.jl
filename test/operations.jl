@@ -491,6 +491,10 @@
     ndata = @transform(sdata, :x_str = join([:x, "test"]))
     @test ndata.x_str == [join([x, "test"]) for x in sdata.x]
 
+    # obj.field syntax
+    ndata = @transform(sdata, :cx = coords(:geometry).x)
+    @test ndata.cx == [coords(p).x for p in sdata.geometry]
+
     # column replacement
     table = (x=rand(10), y=rand(10), z=rand(10))
     sdata = georef(table, rand(Point, 10))

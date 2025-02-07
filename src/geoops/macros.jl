@@ -66,19 +66,23 @@ _getcolexpr(expr) = :(getproperty(geotable, $(_nameexpr(expr))))
 function _colnames(expr)
   colnames = []
   if expr isa Expr
-    _colargs!(expr, colnames)
+    _colargs!(colnames, expr)
   end
   colnames
 end
 
-function _colargs!(expr, colnames)
-  start = Meta.isexpr(expr, [:call, :macrocall]) ? 2 : 1
-  for i in start:length(expr.args)
-    arg = expr.args[i]
-    if _iscolname(arg)
-      push!(colnames, arg)
-    elseif arg isa Expr
-      _colargs!(arg, colnames)
+function _colargs!(colnames, expr)
+  if Meta.isexpr(expr, :., 2) && expr.args[2] isa QuoteNode # handle expressions of the form obj.field
+    _colargs!(colnames, expr.args[1])
+  else # descend on function/macro arguments
+    start = Meta.isexpr(expr, [:call, :macrocall]) ? 2 : 1
+    for i in start:length(expr.args)
+      arg = expr.args[i]
+      if _iscolname(arg)
+        push!(colnames, arg)
+      elseif arg isa Expr
+        _colargs!(colnames, arg)
+      end
     end
   end
 end
