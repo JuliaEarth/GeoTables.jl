@@ -9,11 +9,11 @@
     BlockPartition(2),
     BallPartition(2),
     BisectPointPartition(Vec(1, 1), Point(5, 5)),
-    BisectFractionPartition(Vec(1, 1), 0.5),
+    BisectFractionPartition(Vec(1, 1)),
     PlanePartition(Vec(1, 1)),
     DirectionPartition(Vec(1, 1)),
-    PredicatePartition((i, j) -> iseven(i + j)),
-    SpatialPredicatePartition((x, y) -> norm(x + y) < 5u"m"),
+    IndexPredicatePartition((i, j) -> iseven(i + j)),
+    PointPredicatePartition((pᵢ, pⱼ) -> norm(to(x) + to(y)) < 5u"m"),
     ProductPartition(UniformPartition(2), UniformPartition(2)),
     HierarchicalPartition(UniformPartition(2), UniformPartition(2))
   ]
