@@ -120,7 +120,7 @@
   @test crs(gtb.geometry) <: Mercator
   table = (a=rand(10), x=rand(10), y=rand(10))
   gtb = georef(table, ("x", "y"), crs=ESRI{54034})
-  @test crs(gtb.geometry) <: Lambert
+  @test crs(gtb.geometry) <: LambertCylindrical
 
   # lenunit
   table = (a=rand(3), b=rand(3))
