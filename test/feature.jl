@@ -71,7 +71,7 @@
   # performance tests
   sz = (100, 100)
   n = prod(sz)
-  rng = MersenneTwister(2)
+  rng = Xoshiro(2)
 
   a = rand(rng, n)
   b = shuffle(rng, [fill(missing, 100); rand(rng, n - 100)])
