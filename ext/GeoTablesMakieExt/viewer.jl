@@ -49,10 +49,11 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     opt
   end |> collect
 
-  # initialize figure and menu
+  # initialize figure
   fig = Makie.Figure()
   label = Makie.Label(fig[1, 1], "Variable")
   menu = Makie.Menu(fig[1, 2], options=options)
+  axis = embeddim(dom) === 3 ? Makie.LScene(fig[2, 1:2]) : Makie.Axis(fig[2, 1:2], aspect=Makie.DataAspect())
 
   # initialize observables
   vals = Makie.Observable{Any}()
@@ -61,7 +62,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     vals[] = Tables.getcolumn(cols, var) |> asvalues
   end
 
-  plot(vals) = Makie.plot(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
+  plot(vals) = Makie.plot!(axis, dom; color=vals, alpha, colormap, colorrange, kwargs...)
 
   needcbar(var) = !isconst[var] && !iscolor[var]
 
