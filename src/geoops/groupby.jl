@@ -13,7 +13,7 @@ Group geospatial `geotable` by columns `col₁`, `col₂`, ..., `colₙ`.
 
 Group geospatial `geotable` by columns that match with `regex`.
 
-# Examples
+## Examples
 
 ```julia
 @groupby(geotable, 1, 3, 5)

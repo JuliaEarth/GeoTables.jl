@@ -13,7 +13,7 @@ the geometries will be reduced using `Multi`.
 
 See also: [`@groupby`](@ref).
 
-# Examples
+## Examples
 
 ```julia
 @combine(geotable, :x_sum = sum(:x))

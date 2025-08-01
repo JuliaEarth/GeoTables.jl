@@ -10,7 +10,7 @@ computed with expressions `expr₁`, `expr₂`, ..., `exprₙ`.
 
 See also: [`@groupby`](@ref).
 
-# Examples
+## Examples
 
 ```julia
 @transform(geotable, :z = :x + 2*:y)

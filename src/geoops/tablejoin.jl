@@ -21,7 +21,7 @@ selected according to the scientific types: `mean` for continuous and `first` ot
 * `:left` - Returns all rows of `geotable` filling entries with `missing` when there is no match in `table`.
 * `:inner` - Returns the subset of rows of `geotable` that has a match in `table`.
 
-# Examples
+## Examples
 
 ```julia
 tablejoin(gtb, tab, on=:a)
