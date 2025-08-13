@@ -61,8 +61,7 @@ function _combine(geotable::AbstractGeoTable, names, columns)
   newtab = if isempty(names)
     nothing
   else
-    𝒯 = (; zip(names, columns)...)
-    𝒯 |> Tables.materializer(table)
+    (; zip(names, columns)...) |> Tables.materializer(table)
   end
 
   georef(newtab, newdom)
@@ -87,8 +86,7 @@ function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeo
   newnames = [gnames; names]
   newcolumns = [gcolumns; columns]
 
-  𝒯 = (; zip(newnames, newcolumns)...)
-  newtab = 𝒯 |> Tables.materializer(table)
+  newtab = (; zip(newnames, newcolumns)...) |> Tables.materializer(table)
 
   georef(newtab, newdom)
 end
