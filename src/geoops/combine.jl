@@ -83,11 +83,11 @@ function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeo
 
   grows = meta[:rows]
   gnames = meta[:names]
-  gcolumns = Any[[row[i] for row in grows] for i in 1:length(gnames)]
-  append!(gnames, names)
-  append!(gcolumns, columns)
+  gcolumns = [[row[i] for row in grows] for i in 1:length(gnames)]
+  newnames = [gnames; names]
+  newcolumns = [gcolumns; columns]
 
-  𝒯 = (; zip(gnames, gcolumns)...)
+  𝒯 = (; zip(newnames, newcolumns)...)
   newtab = 𝒯 |> Tables.materializer(table)
 
   georef(newtab, newdom)
