@@ -617,5 +617,12 @@
     @test c.x_sum == [sum(sdata.x)]
     @test domain(c) == GeometrySet([Multi(centroid.(domain(sdata)))])
     @test Tables.schema(values(c)).names == (:x_sum,)
+
+    # https://github.com/JuliaEarth/GeoStats.jl/issues/542
+    sdata = georef((; c=rand(1:2,10,10)))
+    p = @groupby(sdata, :c)
+    c = @combine(p, :s = sum(:c))
+    c = @combine(p, :s = sum(:c))
+    @test all(≤(200), c.s)
   end
 end
