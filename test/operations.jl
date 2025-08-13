@@ -619,7 +619,7 @@
     @test Tables.schema(values(c)).names == (:x_sum,)
 
     # https://github.com/JuliaEarth/GeoStats.jl/issues/542
-    sdata = georef((; c=rand(1:2,10,10)))
+    sdata = georef((; c=rand(1:2, 10, 10)))
     p = @groupby(sdata, :c)
     c = @combine(p, :s = sum(:c))
     c = @combine(p, :s = sum(:c))
