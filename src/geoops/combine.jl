@@ -49,13 +49,12 @@ end
 function _combine(geotable::AbstractGeoTable, names, columns)
   table = values(geotable)
 
-  newdom = if :geometry ∈ names
-    i = findfirst(==(:geometry), names)
-    popat!(names, i)
-    geoms = popat!(columns, i)
-    GeometrySet(geoms)
+  geoms = if :geometry ∈ names
+    ind = findfirst(==(:geometry), names)
+    popat!(names, ind)
+    popat!(columns, ind)
   else
-    GeometrySet([Multi(domain(geotable))])
+    [Multi(domain(geotable))]
   end
 
   newtab = if isempty(names)
@@ -64,6 +63,8 @@ function _combine(geotable::AbstractGeoTable, names, columns)
     (; zip(names, columns)...) |> Tables.materializer(table)
   end
 
+  newdom = GeometrySet(geoms)
+
   georef(newtab, newdom)
 end
 
@@ -71,13 +72,12 @@ function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeo
   table = values(parent(partition))
   meta = metadata(partition)
 
-  newdom = if :geometry ∈ names
-    i = findfirst(==(:geometry), names)
-    popat!(names, i)
-    geoms = popat!(columns, i)
-    GeometrySet(geoms)
+  geoms = if :geometry ∈ names
+    ind = findfirst(==(:geometry), names)
+    popat!(names, ind)
+    popat!(columns, ind)
   else
-    GeometrySet([Multi(domain(geotable)) for geotable in partition])
+    [Multi(domain(geotable)) for geotable in partition]
   end
 
   grows = meta[:rows]
@@ -88,9 +88,10 @@ function _combine(partition::Partition{T}, names, columns) where {T<:AbstractGeo
 
   newtab = (; zip(newnames, newcolumns)...) |> Tables.materializer(table)
 
+  newdom = GeometrySet(geoms)
+
   georef(newtab, newdom)
 end
 
-# utils
 _partexpr(colexpr) = :([$colexpr for geotable in partition])
 _dataexpr(colexpr) = :([$colexpr])
