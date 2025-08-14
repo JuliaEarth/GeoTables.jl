@@ -155,9 +155,10 @@ function _common_kwargs(geotable)
   # subheaders
   tuples = map(names) do name
     if name === :geometry
-      cname = CoordRefSystems.prettyname(crs(dom))
-      dname = CoordRefSystems.rmmodule(datum(crs(dom)))
-      header₁ = Meshes.prettyname(eltype(dom))
+      ename = prettyname(eltype(dom))
+      cname = prettyname(crs(dom))
+      dname = rmmodule(datum(crs(dom)))
+      header₁ = ename
       header₂ = "🖈 $cname{$dname}"
     else
       cols = Tables.columns(tab)

@@ -30,6 +30,9 @@ import TransformsBase: apply, revert, reapply
 import TableTraits
 import IteratorInterfaceExtensions
 
+# IO utils
+include("ioutils.jl")
+
 # abstract type
 include("abstractgeotable.jl")
 include("api/tables.jl")
