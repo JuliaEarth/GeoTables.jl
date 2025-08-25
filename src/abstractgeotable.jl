@@ -169,8 +169,8 @@ function _common_kwargs(geotable)
   (
     title=summary(geotable),
     column_labels=[labels₁, labels₂, labels₃],
-    alignment=:c,
     maximum_number_of_rows=10,
-    new_line_at_end=false
+    new_line_at_end=false,
+    alignment=:c
   )
 end
