@@ -143,21 +143,23 @@ if !Sys.isapple()
     gtb = georef((; a, b, c), pset)
     @test sprint(show, MIME("text/html"), gtb) == """
     <table>
-      <caption style = "text-align: left;">9×4 GeoTable over 9 PointSet</caption>
       <thead>
-        <tr class = "header">
-          <th style = "text-align: center;">a</th>
-          <th style = "text-align: center;">b</th>
-          <th style = "text-align: center;">c</th>
-          <th style = "text-align: center;">geometry</th>
+        <tr class = "title">
+          <td colspan = "4" style = "text-align: center; font-size: x-large; font-weight: bold;">9×4 GeoTable over 9 PointSet</td>
         </tr>
-        <tr class = "subheader">
+        <tr class = "columnLabelRow">
+          <th style = "text-align: center; font-weight: bold;">a</th>
+          <th style = "text-align: center; font-weight: bold;">b</th>
+          <th style = "text-align: center; font-weight: bold;">c</th>
+          <th style = "text-align: center; font-weight: bold;">geometry</th>
+        </tr>
+        <tr class = "columnLabelRow">
           <th style = "text-align: center;">Categorical</th>
           <th style = "text-align: center;">Continuous</th>
           <th style = "text-align: center;">Categorical</th>
           <th style = "text-align: center;">Point</th>
         </tr>
-        <tr class = "subheader headerLastRow">
+        <tr class = "columnLabelRow">
           <th style = "text-align: center;">[NoUnits]</th>
           <th style = "text-align: center;">[NoUnits]</th>
           <th style = "text-align: center;">[NoUnits]</th>
@@ -165,62 +167,61 @@ if !Sys.isapple()
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">0</td>
           <td style = "text-align: center;">2.34</td>
           <td style = "text-align: center;">txt1</td>
           <td style = "text-align: center;">(x: 1.0 m, y: 1.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">6</td>
           <td style = "text-align: center;">7.5</td>
           <td style = "text-align: center;">txt2</td>
           <td style = "text-align: center;">(x: 2.0 m, y: 2.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">6</td>
           <td style = "text-align: center;">0.06</td>
           <td style = "text-align: center;">txt3</td>
           <td style = "text-align: center;">(x: 3.0 m, y: 3.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">3</td>
           <td style = "text-align: center;">1.29</td>
           <td style = "text-align: center;">txt4</td>
           <td style = "text-align: center;">(x: 4.0 m, y: 4.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">9</td>
           <td style = "text-align: center;">3.64</td>
           <td style = "text-align: center;">txt5</td>
           <td style = "text-align: center;">(x: 5.0 m, y: 5.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">5</td>
           <td style = "text-align: center;">8.05</td>
           <td style = "text-align: center;">txt6</td>
           <td style = "text-align: center;">(x: 6.0 m, y: 6.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">2</td>
           <td style = "text-align: center;">0.11</td>
           <td style = "text-align: center;">txt7</td>
           <td style = "text-align: center;">(x: 7.0 m, y: 7.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">2</td>
           <td style = "text-align: center;">0.64</td>
           <td style = "text-align: center;">txt8</td>
           <td style = "text-align: center;">(x: 8.0 m, y: 8.0 m)</td>
         </tr>
-        <tr>
+        <tr class = "dataRow">
           <td style = "text-align: center;">8</td>
           <td style = "text-align: center;">8.46</td>
           <td style = "text-align: center;">txt9</td>
           <td style = "text-align: center;">(x: 9.0 m, y: 9.0 m)</td>
         </tr>
       </tbody>
-    </table>
-    """
+    </table>"""
   end
 end
