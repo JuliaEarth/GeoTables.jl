@@ -9,7 +9,7 @@ if !Sys.isapple()
     gtb = georef((; a, b, c), pset)
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet"
     @test sprint(show, MIME("text/plain"), gtb) == """
-    9×4 GeoTable over 9 PointSet
+                      9×4 GeoTable over 9 PointSet
     ┌─────────────┬────────────┬─────────────┬──────────────────────┐
     │      a      │     b      │      c      │       geometry       │
     │ Categorical │ Continuous │ Categorical │        Point         │
@@ -29,7 +29,7 @@ if !Sys.isapple()
     vgtb = view(gtb, 1:3)
     @test sprint(show, vgtb) == "3×4 SubGeoTable over 3 view(::PointSet, 1:3)"
     @test sprint(show, MIME("text/plain"), vgtb) == """
-    3×4 SubGeoTable over 3 view(::PointSet, 1:3)
+              3×4 SubGeoTable over 3 view(::PointSet, 1:3)
     ┌─────────────┬────────────┬─────────────┬──────────────────────┐
     │      a      │     b      │      c      │       geometry       │
     │ Categorical │ Continuous │ Categorical │        Point         │
@@ -43,7 +43,7 @@ if !Sys.isapple()
     gtb = georef((a=a * u"m/s", b=b * u"km/hr", c=c), pset)
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet"
     @test sprint(show, MIME("text/plain"), gtb) == """
-    9×4 GeoTable over 9 PointSet
+                        9×4 GeoTable over 9 PointSet
     ┌─────────────┬───────────────┬─────────────┬──────────────────────┐
     │      a      │       b       │      c      │       geometry       │
     │ Categorical │  Continuous   │ Categorical │        Point         │
@@ -63,7 +63,7 @@ if !Sys.isapple()
     gtb = georef((a=[missing; a[2:9]], b=[b[1:4]; missing; b[6:9]], c=[c[1:8]; missing]), pset)
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet"
     @test sprint(show, MIME("text/plain"), gtb) == """
-    9×4 GeoTable over 9 PointSet
+                      9×4 GeoTable over 9 PointSet
     ┌─────────────┬────────────┬─────────────┬──────────────────────┐
     │      a      │     b      │      c      │       geometry       │
     │ Categorical │ Continuous │ Categorical │        Point         │
@@ -83,7 +83,7 @@ if !Sys.isapple()
     gtb = georef((a=[missing; a[2:9]] * u"m/s", b=[b[1:4]; missing; b[6:9]] * u"km/hr", c=[c[1:8]; missing]), pset)
     @test sprint(show, gtb) == "9×4 GeoTable over 9 PointSet"
     @test sprint(show, MIME("text/plain"), gtb) == """
-    9×4 GeoTable over 9 PointSet
+                        9×4 GeoTable over 9 PointSet
     ┌─────────────┬───────────────┬─────────────┬──────────────────────┐
     │      a      │       b       │      c      │       geometry       │
     │ Categorical │  Continuous   │ Categorical │        Point         │
@@ -103,7 +103,7 @@ if !Sys.isapple()
     gtb = georef((; x=fill(missing, 9)), pset)
     @test sprint(show, gtb) == "9×2 GeoTable over 9 PointSet"
     @test sprint(show, MIME("text/plain"), gtb) == """
-    9×2 GeoTable over 9 PointSet
+        9×2 GeoTable over 9 PointSet
     ┌───────────┬──────────────────────┐
     │     x     │       geometry       │
     │  Missing  │        Point         │
