@@ -131,7 +131,7 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=:html, _common_kwargs(geotable)...)
+  pretty_table(io, geotable; backend=:html, _common_kwargs(geotable)..., renderer=:show)
 end
 
 function _common_kwargs(geotable)
@@ -148,7 +148,7 @@ function _common_kwargs(geotable)
       dname = rmmodule(datum(crs(dom)))
       label₁ = styled"{(weight=bold),cyan:$name}"
       label₂ = prettyname(eltype(dom))
-      label₃ = "🖈 $cname{$dname}" 
+      label₃ = "🖈 $cname{$dname}"
     else
       label₁ = styled"{(weight=bold),magenta:$name}"
       T = Tables.getcolumn(Tables.columns(tab), name) |> eltype

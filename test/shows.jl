@@ -148,10 +148,10 @@ if !Sys.isapple()
           <td colspan = "4" style = "text-align: center; font-size: x-large; font-weight: bold;">9×4 GeoTable over 9 PointSet</td>
         </tr>
         <tr class = "columnLabelRow">
-          <th style = "text-align: center; font-weight: bold;">\e[35m\e[1ma\e[39m\e[22m</th>
-          <th style = "text-align: center; font-weight: bold;">\e[35m\e[1mb\e[39m\e[22m</th>
-          <th style = "text-align: center; font-weight: bold;">\e[35m\e[1mc\e[39m\e[22m</th>
-          <th style = "text-align: center; font-weight: bold;">\e[36m\e[1mgeometry\e[39m\e[22m</th>
+          <th style = "text-align: center; font-weight: bold;">a</th>
+          <th style = "text-align: center; font-weight: bold;">b</th>
+          <th style = "text-align: center; font-weight: bold;">c</th>
+          <th style = "text-align: center; font-weight: bold;">geometry</th>
         </tr>
         <tr class = "columnLabelRow">
           <th style = "text-align: center;">Categorical</th>
