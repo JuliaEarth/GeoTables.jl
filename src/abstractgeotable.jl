@@ -134,8 +134,8 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
     io,
     geotable;
     backend=:text,
-    _common_kwargs(geotable)...
-    #header_crayon=colors,
+    _common_kwargs(geotable)...,
+    style=TextTableStyle(first_line_column_label=colors)
   )
 end
 
