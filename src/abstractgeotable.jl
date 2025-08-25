@@ -127,16 +127,7 @@ end
 Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  vcolor = crayon"bold magenta"
-  gcolor = crayon"bold (0,128,128)"
-  colors = [fill(vcolor, ncol(geotable) - 1); gcolor]
-  pretty_table(
-    io,
-    geotable;
-    backend=:text,
-    _common_kwargs(geotable)...,
-    style=TextTableStyle(first_line_column_label=colors)
-  )
+  pretty_table(io, geotable; backend=:text, _common_kwargs(geotable)...)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
@@ -148,7 +139,7 @@ function _common_kwargs(geotable)
   tab = values(geotable)
   names = propertynames(geotable)
 
-  labels₁ = string.(names)
+  labels₁ = AnnotatedString[]
   labels₂ = String[]
   labels₃ = String[]
   for name in names
@@ -157,23 +148,24 @@ function _common_kwargs(geotable)
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
       pname = "🖈 $cname{$dname}"
-      push!(labels₂, ename)
-      push!(labels₃, pname)
+      label₁ = styled"{(weight=bold),cyan:geometry}"
+      label₂ = ename
+      label₃ = pname 
     else
-      cols = Tables.columns(tab)
-      x = Tables.getcolumn(cols, name)
-      T = eltype(x)
+      label₁ = styled"{(weight=bold),magenta:$name}"
+      T = Tables.getcolumn(Tables.columns(tab), name) |> eltype
       if T <: Missing
-        push!(labels₂, "Missing")
-        push!(labels₃, "[NoUnits]")
+        label₂ = "Missing"
+        label₃ = "[NoUnits]"
       else
         S = nonmissingtype(T)
-        sname = string(nameof(scitype(S)))
-        uname = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
-        push!(labels₂, sname)
-        push!(labels₃, uname)
+        label₂ = string(nameof(scitype(S)))
+        label₃ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
+    push!(labels₁, label₁)
+    push!(labels₂, label₂)
+    push!(labels₃, label₃)
   end
 
   (
