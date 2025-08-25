@@ -139,10 +139,7 @@ function _common_kwargs(geotable)
   tab = values(geotable)
   names = propertynames(geotable)
 
-  labels₁ = AnnotatedString[]
-  labels₂ = String[]
-  labels₃ = String[]
-  for name in names
+  labels = map(names) do name
     if name === :geometry
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
@@ -161,10 +158,11 @@ function _common_kwargs(geotable)
         label₃ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
-    push!(labels₁, label₁)
-    push!(labels₂, label₂)
-    push!(labels₃, label₃)
+    label₁, label₂, label₃
   end
+  labels₁ = getindex.(labels, 1)
+  labels₂ = getindex.(labels, 2)
+  labels₃ = getindex.(labels, 3)
 
   (
     title=summary(geotable),
