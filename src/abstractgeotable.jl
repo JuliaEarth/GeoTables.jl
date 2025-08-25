@@ -148,38 +148,37 @@ function _common_kwargs(geotable)
   tab = values(geotable)
   names = propertynames(geotable)
 
-  # header
-  header = string.(names)
-
-  # subheaders
-  tuples = map(names) do name
+  labels₁ = string.(names)
+  labels₂ = String[]
+  labels₃ = String[]
+  for name in names
     if name === :geometry
       ename = prettyname(eltype(dom))
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
-      header₁ = ename
-      header₂ = "🖈 $cname{$dname}"
+      pname = "🖈 $cname{$dname}"
+      push!(labels₂, ename)
+      push!(labels₃, pname)
     else
       cols = Tables.columns(tab)
       x = Tables.getcolumn(cols, name)
       T = eltype(x)
       if T <: Missing
-        header₁ = "Missing"
-        header₂ = "[NoUnits]"
+        push!(labels₂, "Missing")
+        push!(labels₃, "[NoUnits]")
       else
         S = nonmissingtype(T)
-        header₁ = string(nameof(scitype(S)))
-        header₂ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
+        sname = string(nameof(scitype(S)))
+        uname = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
+        push!(labels₂, sname)
+        push!(labels₃, uname)
       end
     end
-    header₁, header₂
   end
-  subheader₁ = first.(tuples)
-  subheader₂ = last.(tuples)
 
   (
     title=summary(geotable),
-    column_labels=[header, subheader₁, subheader₂],
+    column_labels=[labels₁, labels₂, labels₃],
     alignment=:c,
     maximum_number_of_rows=10,
     new_line_at_end=false
