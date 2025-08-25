@@ -144,13 +144,11 @@ function _common_kwargs(geotable)
   labels₃ = String[]
   for name in names
     if name === :geometry
-      ename = prettyname(eltype(dom))
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
-      pname = "🖈 $cname{$dname}"
-      label₁ = styled"{(weight=bold),cyan:geometry}"
-      label₂ = ename
-      label₃ = pname 
+      label₁ = styled"{(weight=bold),cyan:$name}"
+      label₂ = prettyname(eltype(dom))
+      label₃ = "🖈 $cname{$dname}" 
     else
       label₁ = styled"{(weight=bold),magenta:$name}"
       T = Tables.getcolumn(Tables.columns(tab), name) |> eltype
