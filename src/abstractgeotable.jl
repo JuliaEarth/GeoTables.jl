@@ -127,21 +127,11 @@ end
 Base.show(io::IO, geotable::AbstractGeoTable) = summary(io, geotable)
 
 function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
-  fcolor = crayon"bold magenta"
-  gcolor = crayon"bold (0,128,128)"
-  hcolors = [fill(fcolor, ncol(geotable) - 1); gcolor]
-  pretty_table(
-    io,
-    geotable;
-    backend=Val(:text),
-    _common_kwargs(geotable)...,
-    header_crayon=hcolors,
-    newline_at_end=false
-  )
+  pretty_table(io, geotable; backend=:text, _common_kwargs(geotable)...)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=Val(:html), _common_kwargs(geotable)..., max_num_of_rows=10)
+  pretty_table(io, geotable; backend=:html, _common_kwargs(geotable)..., renderer=:show)
 end
 
 function _common_kwargs(geotable)
@@ -149,34 +139,36 @@ function _common_kwargs(geotable)
   tab = values(geotable)
   names = propertynames(geotable)
 
-  # header
-  header = string.(names)
-
-  # subheaders
-  tuples = map(names) do name
+  labels = map(names) do name
     if name === :geometry
-      ename = prettyname(eltype(dom))
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
-      header₁ = ename
-      header₂ = "🖈 $cname{$dname}"
+      label₁ = styled"{(weight=bold),cyan:$name}"
+      label₂ = prettyname(eltype(dom))
+      label₃ = "🖈 $cname{$dname}"
     else
-      cols = Tables.columns(tab)
-      x = Tables.getcolumn(cols, name)
-      T = eltype(x)
+      label₁ = styled"{(weight=bold),magenta:$name}"
+      T = Tables.getcolumn(Tables.columns(tab), name) |> eltype
       if T <: Missing
-        header₁ = "Missing"
-        header₂ = "[NoUnits]"
+        label₂ = "Missing"
+        label₃ = "[NoUnits]"
       else
         S = nonmissingtype(T)
-        header₁ = string(nameof(scitype(S)))
-        header₂ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
+        label₂ = string(nameof(scitype(S)))
+        label₃ = S <: AbstractQuantity ? "[$(unit(S))]" : "[NoUnits]"
       end
     end
-    header₁, header₂
+    label₁, label₂, label₃
   end
-  subheader₁ = first.(tuples)
-  subheader₂ = last.(tuples)
+  labels₁ = getindex.(labels, 1)
+  labels₂ = getindex.(labels, 2)
+  labels₃ = getindex.(labels, 3)
 
-  (title=summary(geotable), header=(header, subheader₁, subheader₂), alignment=:c, vcrop_mode=:bottom)
+  (
+    title=summary(geotable),
+    column_labels=[labels₁, labels₂, labels₃],
+    maximum_number_of_rows=10,
+    new_line_at_end=false,
+    alignment=:c
+  )
 end
