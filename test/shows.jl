@@ -140,8 +140,9 @@ if !Sys.isapple()
     │ (x: 9.0 m, y: 9.0 m) │
     └──────────────────────┘"""
 
+    # https://github.com/JuliaLang/StyledStrings.jl/issues/122
     gtb = georef((; a, b, c), pset)
-    @test sprint(show, MIME("text/html"), gtb) == """
+    @test_broken sprint(show, MIME("text/html"), gtb) == """
     <table>
       <thead>
         <tr class = "title">
