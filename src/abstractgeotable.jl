@@ -131,7 +131,14 @@ function Base.show(io::IO, ::MIME"text/plain", geotable::AbstractGeoTable)
 end
 
 function Base.show(io::IO, ::MIME"text/html", geotable::AbstractGeoTable)
-  pretty_table(io, geotable; backend=:html, _common_kwargs(geotable)..., renderer=:show)
+  pretty_table(
+    io,
+    geotable;
+    backend=:html,
+    _common_kwargs(geotable)...,
+    renderer=:show,
+    style=HtmlTableStyle(title=["font-size" => "14px"])
+  )
 end
 
 function _common_kwargs(geotable)
