@@ -84,7 +84,7 @@ export
   # georeferencing
   georef,
 
-  # plotting
+  # visualization
   viewer,
   cbar
 
