@@ -62,7 +62,7 @@ include("georef.jl")
 # geometric transforms
 include("geotransforms.jl")
 
-# plotting
+# visualization
 include("viewer.jl")
 
 export
