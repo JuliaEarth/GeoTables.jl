@@ -53,7 +53,11 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   fig = Makie.Figure()
   label = Makie.Label(fig[1, 1], "Variable")
   menu = Makie.Menu(fig[1, 2], options=options)
-  axis = embeddim(dom) === 3 ? Makie.LScene(fig[2, 1:2]) : Makie.Axis(fig[2, 1:2], aspect=Makie.DataAspect())
+  axis = if embeddim(dom) === 3
+    Makie.Axis3(fig[2, 1:2], viewmode=:free, aspect=:data)
+  else
+    Makie.Axis(fig[2, 1:2], aspect=Makie.DataAspect())
+  end
 
   # initialize observables
   vals = Makie.Observable{Any}()
