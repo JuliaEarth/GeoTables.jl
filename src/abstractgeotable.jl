@@ -150,14 +150,14 @@ function _common_kwargs(geotable)
     if name === :geometry
       cname = prettyname(crs(dom))
       dname = rmmodule(datum(crs(dom)))
-      label₁ = styled"{(weight=bold),cyan:$name}"
+      label₁ = styled"{(foreground=#008080,weight=bold):$name}"
       label₂ = prettyname(eltype(dom))
       label₃ = "🖈 $cname{$dname}"
     else
       label₁ = if _istarget(tab, name)
-        styled"{(weight=bold),magenta:$name}"
+        styled"{(foreground=#DB1F48,weight=bold):$name}"
       else
-        styled"{(weight=bold),yellow:$name}"
+        styled"{(foreground=#98AA7A,weight=bold):$name}"
       end
       T = Tables.getcolumn(Tables.columns(tab), name) |> eltype
       if T <: Missing
