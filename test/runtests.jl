@@ -1,6 +1,7 @@
 using GeoTables
 using TypedTables
 using TableTransforms
+using StatsLearnModels
 using CategoricalArrays
 using DataScienceTraits
 using CoordRefSystems

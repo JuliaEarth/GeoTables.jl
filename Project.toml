@@ -1,7 +1,7 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
-authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 version = "1.26.3"
+authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
@@ -25,10 +25,12 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+StatsLearnModels = "c146b59d-1589-421c-8e09-a22e554fd05c"
 TableTransforms = "0d432bfd-3ee1-4ac1-886a-39f05cc69a3e"
 
 [extensions]
 GeoTablesMakieExt = "Makie"
+GeoTablesStatsLearnModelsExt = "StatsLearnModels"
 GeoTablesTableTransformsExt = "TableTransforms"
 
 [compat]
@@ -46,6 +48,7 @@ Meshes = "0.55"
 PrettyTables = "3.0.2"
 Random = "1.10"
 Statistics = "1.10"
+StatsLearnModels = "1.2"
 StyledStrings = "1.0"
 TableTraits = "1.0"
 TableTransforms = "1.31"
