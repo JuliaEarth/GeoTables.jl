@@ -154,7 +154,11 @@ function _common_kwargs(geotable)
       label₂ = prettyname(eltype(dom))
       label₃ = "🖈 $cname{$dname}"
     else
-      label₁ = styled"{(weight=bold),magenta:$name}"
+      label₁ = if _istarget(tab, name)
+        styled"{(weight=bold),magenta:$name}"
+      else
+        styled"{(weight=bold),yellow:$name}"
+      end
       T = Tables.getcolumn(Tables.columns(tab), name) |> eltype
       if T <: Missing
         label₂ = "Missing"
@@ -179,3 +183,5 @@ function _common_kwargs(geotable)
     alignment=:c
   )
 end
+
+_istarget(tab, label) = false

@@ -68,11 +68,17 @@
   @test n.b == [3, 1]
   @test nelements(domain(n)) == 2
 
+  # learn transform
+  d = georef((x1=rand(10), x2=rand(10), y=rand(10)))
+  p = Learn(label(d, "y"))
+  n, c = apply(p, d)
+  @test n isa AbstractGeoTable
+  @test domain(n) == domain(d)
+
   # performance tests
+  rng = Xoshiro(2)
   sz = (100, 100)
   n = prod(sz)
-  rng = Xoshiro(2)
-
   a = rand(rng, n)
   b = shuffle(rng, [fill(missing, 100); rand(rng, n - 100)])
   coda = CoDaArray((c=rand(rng, n), d=rand(rng, n), e=rand(rng, n)))
