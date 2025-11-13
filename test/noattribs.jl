@@ -14,7 +14,7 @@
   @test gtb[end, :] == gtb[3, :]
   @test gtb[:, begin] == gtb[:, 1]
   @test gtb[:, end] == gtb[:, 1]
-  
+
   # GeoTableRows
   rows = Tables.rows(gtb)
   sch = Tables.schema(rows)

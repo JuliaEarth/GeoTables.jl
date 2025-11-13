@@ -24,10 +24,7 @@ function Base.size(geotable::AbstractGeoTable, ind::Integer)
   end
 end
 
-Base.axes(geotable::AbstractGeoTable) = (
-  Base.OneTo(size(geotable, 1)),
-  Base.OneTo(size(geotable, 2)),
-)
+Base.axes(geotable::AbstractGeoTable) = (Base.OneTo(size(geotable, 1)), Base.OneTo(size(geotable, 2)))
 
 Base.axes(geotable::AbstractGeoTable, ind::Integer) = Base.OneTo(size(geotable, ind))
 
