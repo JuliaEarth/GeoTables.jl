@@ -2,7 +2,19 @@
   pset = PointSet((0, 0), (1, 1), (2, 2))
   gtb = GeoTable(pset)
   @test ncol(gtb) == 1
-
+  @test size(gtb) == (3, 1)
+  @test size(gtb, 1) == 3
+  @test size(gtb, 2) == 1
+  @test axes(gtb) == (Base.OneTo(3), Base.OneTo(1))
+  @test axes(gtb, 1) == Base.OneTo(3)
+  @test axes(gtb, 2) == Base.OneTo(1)
+  @test gtb[begin:end, :] == gtb
+  @test gtb[:, begin:end] == gtb
+  @test gtb[begin, :] == gtb[1, :]
+  @test gtb[end, :] == gtb[3, :]
+  @test gtb[:, begin] == gtb[:, 1]
+  @test gtb[:, end] == gtb[:, 1]
+  
   # GeoTableRows
   rows = Tables.rows(gtb)
   sch = Tables.schema(rows)
