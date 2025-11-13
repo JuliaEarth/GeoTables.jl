@@ -20,7 +20,7 @@ function Base.size(geotable::AbstractGeoTable, ind::Integer)
   elseif ind == 2
     ncol(geotable)
   else
-    throw(ArgumentError("AbstractGeoTable have only two dimensions"))
+    throw(ArgumentError("GeoTables only have two dimensions"))
   end
 end
 
