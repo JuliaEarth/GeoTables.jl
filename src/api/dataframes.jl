@@ -15,13 +15,13 @@ end
 Base.size(geotable::AbstractGeoTable) = (nrow(geotable), ncol(geotable))
 
 function Base.size(geotable::AbstractGeoTable, ind::Integer)
-    if ind == 1
-        nrow(geotable)
-    elseif ind == 2
-        ncol(geotable)
-    else
-        throw(ArgumentError("AbstractGeoTable have only two dimensions"))
-    end
+  if ind == 1
+    nrow(geotable)
+  elseif ind == 2
+    ncol(geotable)
+  else
+    throw(ArgumentError("AbstractGeoTable have only two dimensions"))
+  end
 end
 
 Base.axes(geotable::AbstractGeoTable) = (
