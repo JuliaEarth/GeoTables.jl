@@ -12,6 +12,25 @@ function ncol(geotable::AbstractGeoTable)
   length(vars) + 1
 end
 
+Base.size(geotable::AbstractGeoTable) = (nrow(geotable), ncol(geotable))
+
+function Base.size(geotable::AbstractGeoTable, ind::Integer)
+  if ind == 1
+    nrow(geotable)
+  elseif ind == 2
+    ncol(geotable)
+  else
+    throw(ArgumentError("GeoTables only have two dimensions"))
+  end
+end
+
+Base.axes(geotable::AbstractGeoTable) = (
+  Base.OneTo(size(geotable, 1)),
+  Base.OneTo(size(geotable, 2)),
+)
+
+Base.axes(geotable::AbstractGeoTable, ind::Integer) = Base.OneTo(size(geotable, ind))
+
 Base.names(geotable::AbstractGeoTable) = string.(propertynames(geotable))
 
 function Base.propertynames(geotable::AbstractGeoTable)
