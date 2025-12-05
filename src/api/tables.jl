@@ -29,26 +29,26 @@ Base.length(rows::GeoTableRows) = nelements(rows.domain)
 # helper: iterate when there is no inner table (geometry only)
 function _iterate(dom, ::Nothing, state)
   domstate, _ = state
-  domiter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
-  isnothing(domiter) && return nothing
-  elm, newdomstate = domiter
-  return (; geometry=elm), (newdomstate, nothing)
+  diter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
+  isnothing(diter) && return nothing
+  elm, newdstate = diter
+  return (; geometry=elm), (newdstate, nothing)
 end
 
 # helper: iterate when inner table is present (geometry + attributes)
 function _iterate(dom, tab, state)
   domstate, tabstate = state
-  domiter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
-  isnothing(domiter) && return nothing
-  elm, newdomstate = domiter
-  tabiter = isnothing(tabstate) ? iterate(tab) : iterate(tab, tabstate)
-  if isnothing(tabiter)
-    return (; geometry=elm), (newdomstate, nothing)
+  diter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
+  isnothing(diter) && return nothing
+  elm, newdstate = diter
+  titer = isnothing(tabstate) ? iterate(tab) : iterate(tab, tabstate)
+  if isnothing(titer)
+    return (; geometry=elm), (newdstate, nothing)
   end
-  trow, newtabstate = tabiter
+  trow, newtabstate = titer
   names = Tables.columnnames(trow)
   pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-  return (; pairs..., geometry=elm), (newdomstate, newtabstate)
+  return (; pairs..., geometry=elm), (newdstate, newtabstate)
 end
 
 function Base.iterate(rows::GeoTableRows, state=nothing)
