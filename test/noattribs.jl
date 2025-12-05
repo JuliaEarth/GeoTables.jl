@@ -10,6 +10,9 @@
   @test axes(gtb, 2) == Base.OneTo(1)
   @test gtb[begin:end, :] == gtb
   @test gtb[:, begin:end] == gtb
+  @test gtb[:, begin:begin] == gtb
+  @test gtb[:, end:end] == gtb
+  @test gtb[:, 1:1] == gtb
   @test gtb[begin, :] == gtb[1, :]
   @test gtb[end, :] == gtb[3, :]
   @test gtb[:, begin] == gtb[:, 1]
