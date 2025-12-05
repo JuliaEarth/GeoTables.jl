@@ -27,7 +27,11 @@ end
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
 function Base.iterate(rows::GeoTableRows, state=nothing)
-  domstate, tabstate = state === nothing ? (nothing, nothing) : state
+  if state === nothing
+    domstate, tabstate = nothing, nothing
+  else
+    domstate, tabstate = state
+  end
   # Iterate domain
   domiter = domstate === nothing ? iterate(rows.domain) : iterate(rows.domain, domstate)
   domiter === nothing && return nothing
@@ -45,8 +49,7 @@ function Base.iterate(rows::GeoTableRows, state=nothing)
   # Construct row with table columns and geometry
   names = Tables.columnnames(trow)
   pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-  row = (; pairs..., geometry=elm)
-  return row, (newdomstate, newtabstate)
+  return (; pairs..., geometry=elm), (newdomstate, newtabstate)
 end
 
 function Tables.schema(rows::GeoTableRows)
