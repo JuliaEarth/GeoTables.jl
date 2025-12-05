@@ -55,6 +55,5 @@
     @test gtb.b[linds[4, 3]] ∈ v.b
     @test gtb.b[linds[5, 3]] ∈ v.b
     @test gtb.b[linds[6, 3]] ∈ v.b
-    @test gtb[:, 1:1] == gtb[:, [1]]
   end
 end

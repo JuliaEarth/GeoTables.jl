@@ -120,6 +120,10 @@
       @test isequal(data[:, a], [1, 2, 3, 4])
       @test isequal(data[:, b], [5, missing, 7, 8])
       @test isequal(data[:, geometry], grid)
+      @test data[:, begin:end] == data
+      @test data[:, begin:begin] == data[:, [1]]
+      @test data[:, end:end] == data[:, [3]]
+      @test data[:, 2:2] == data[:, [2]]
     end
     # regex
     @test data[3, r"a"] == (a=3, geometry=grid[3])
