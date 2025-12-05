@@ -26,6 +26,13 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
+function Base.iterate(rows::GeoTableRows, state=nothing)
+  # initialize state tuple if starting
+  effstate = isnothing(state) ? (nothing, nothing) : state
+  # dispatch to the correct helper based on rows.trows type
+  return _iterate(rows.domain, rows.trows, effstate)
+end
+
 # helper: iterate when there is no inner table (geometry only)
 function _iterate(dom, ::Nothing, state)
   dstate, _ = state
@@ -38,28 +45,17 @@ end
 # helper: iterate when inner table is present (geometry + attributes)
 function _iterate(dom, tab, state)
   dstate, tstate = state
-  # advance domain
+  # advance both iterators (lockstep)
   diter = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
+  titer = isnothing(tstate) ? iterate(tab) : iterate(tab, tstate)
+  # control flow based on domain only (design guarantee)
   isnothing(diter) && return nothing
   elm, newdstate = diter
-  # advance table
-  titer = isnothing(tstate) ? iterate(tab) : iterate(tab, tstate)
-  # if table ends before domain, return geometry only (fallback)
-  if isnothing(titer)
-    return (; geometry=elm), (newdstate, nothing)
-  end
   trow, newtstate = titer
   names = Tables.columnnames(trow)
-  # construct row using splatting (efficient and concise)
-  row = (; (nm => Tables.getcolumn(trow, nm) for nm in names)..., geometry=elm)
-  return row, (newdstate, newtstate)
-end
-
-function Base.iterate(rows::GeoTableRows, state=nothing)
-  # initialize state tuple if starting, otherwise use provided state
-  effstate = isnothing(state) ? (nothing, nothing) : state
-  # dispatch to the correct helper based on rows.trows type
-  return _iterate(rows.domain, rows.trows, effstate)
+  # construct row using splatting
+  val = (; (nm => Tables.getcolumn(trow, nm) for nm in names)..., geometry=elm)
+  return val, (newdstate, newtstate)
 end
 
 function Tables.schema(rows::GeoTableRows)
