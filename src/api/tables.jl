@@ -26,20 +26,43 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-function Base.iterate(rows::GeoTableRows, state=1)
-  if state > length(rows)
-    nothing
-  else
-    elm, _ = iterate(rows.domain, state)
-    row = if isnothing(rows.trows)
-      (; geometry=elm)
-    else
-      trow, _ = iterate(rows.trows, state)
-      names = Tables.columnnames(trow)
-      pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-      (; pairs..., geometry=elm)
+function Base.iterate(rows::GeoTableRows, state=nothing)
+  # We keep independent iterator states for the domain and the table rows
+  # because Tables.rows(...) iterators don't necessarily support integer
+  # indexing. State is a tuple (domain_state, trows_state) or `nothing`
+  if state === nothing
+    # initialize domain iterator
+    dom_iter = iterate(rows.domain)
+    dom_iter === nothing && return nothing
+    dom_elm, dom_state = dom_iter
+    if isnothing(rows.trows)
+      return (; geometry=dom_elm), (dom_state, nothing)
     end
-    row, state + 1
+    # initialize table rows iterator
+    t_iter = iterate(rows.trows)
+    t_iter === nothing && return (; geometry=dom_elm), (dom_state, nothing)
+    trow, t_state = t_iter
+    names = Tables.columnnames(trow)
+    pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+    return (; pairs..., geometry=dom_elm), (dom_state, t_state)
+  else
+    dom_state, t_state = state
+    # advance domain
+    dom_iter = iterate(rows.domain, dom_state)
+    dom_iter === nothing && return nothing
+    dom_elm, ndom_state = dom_iter
+    if isnothing(rows.trows)
+      return (; geometry=dom_elm), (ndom_state, nothing)
+    end
+    # advance table rows iterator using its stored state
+    t_iter = isnothing(t_state) ? iterate(rows.trows) : iterate(rows.trows, t_state)
+    if t_iter === nothing
+      return (; geometry=dom_elm), (ndom_state, nothing)
+    end
+    trow, nt_state = t_iter
+    names = Tables.columnnames(trow)
+    pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+    return (; pairs..., geometry=dom_elm), (ndom_state, nt_state)
   end
 end
 
