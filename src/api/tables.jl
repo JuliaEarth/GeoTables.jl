@@ -27,42 +27,54 @@ end
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
 function Base.iterate(rows::GeoTableRows, state=nothing)
-  # We keep independent iterator states for the domain and the table rows
-  # because Tables.rows(...) iterators don't necessarily support integer
-  # indexing. State is a tuple (domain_state, trows_state) or `nothing`
+  # If state is nothing, this is the first call (initialization).
+  # We initialize both iterators (domain and table rows) using the
+  # standard Julia iterator protocol: iterate(it) -> (item, state),
+  # then iterate(it, state) to advance. States are opaque values,
+  # not guaranteed to be integers.
   if state === nothing
-    # initialize domain iterator
-    dom_iter = iterate(rows.domain)
-    dom_iter === nothing && return nothing
-    dom_elm, dom_state = dom_iter
+    # 1. initialize domain iterator (geometry iterator)
+    domiter = iterate(rows.domain)
+    domiter === nothing && return nothing
+    domelm, domstate = domiter
+
+    # 2. if there is no attribute table, return geometry-only row
     if isnothing(rows.trows)
-      return (; geometry=dom_elm), (dom_state, nothing)
+      return (; geometry=domelm), (domstate, nothing)
     end
-    # initialize table rows iterator
-    t_iter = iterate(rows.trows)
-    t_iter === nothing && return (; geometry=dom_elm), (dom_state, nothing)
-    trow, t_state = t_iter
+
+    # 3. initialize attribute table iterator
+    titer = iterate(rows.trows)
+    titer === nothing && return nothing
+    trow, tstate = titer
+
+    # 4. build combined row and return initial iterator states
     names = Tables.columnnames(trow)
     pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-    return (; pairs..., geometry=dom_elm), (dom_state, t_state)
+    return (; pairs..., geometry=domelm), (domstate, tstate)
   else
-    dom_state, t_state = state
-    # advance domain
-    dom_iter = iterate(rows.domain, dom_state)
-    dom_iter === nothing && return nothing
-    dom_elm, ndom_state = dom_iter
+    # continuation: unpack opaque iterator states
+    domstate, tstate = state
+
+    # 1. advance domain using its stored state
+    domiter = iterate(rows.domain, domstate)
+    domiter === nothing && return nothing
+    domelm, ndomstate = domiter
+
+    # 2. if there is no attribute table, return geometry-only row
     if isnothing(rows.trows)
-      return (; geometry=dom_elm), (ndom_state, nothing)
+      return (; geometry=domelm), (ndomstate, nothing)
     end
-    # advance table rows iterator using its stored state
-    t_iter = isnothing(t_state) ? iterate(rows.trows) : iterate(rows.trows, t_state)
-    if t_iter === nothing
-      return (; geometry=dom_elm), (ndom_state, nothing)
-    end
-    trow, nt_state = t_iter
+
+    # 3. advance attribute table using its stored state
+    titer = iterate(rows.trows, tstate)
+    titer === nothing && return nothing
+    trow, ntstate = titer
+
+    # 4. build combined row and return new iterator states
     names = Tables.columnnames(trow)
     pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-    return (; pairs..., geometry=dom_elm), (ndom_state, nt_state)
+    return (; pairs..., geometry=domelm), (ndomstate, ntstate)
   end
 end
 
