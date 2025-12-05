@@ -26,36 +26,34 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-function Base.iterate(rows::GeoTableRows, state=nothing)
-  # initialize state tuple if starting
-  effstate = isnothing(state) ? (nothing, nothing) : state
-  # dispatch to the correct helper based on rows.trows type
-  return _iterate(rows.domain, rows.trows, effstate)
-end
-
 # helper: iterate when there is no inner table (geometry only)
 function _iterate(dom, ::Nothing, state)
-  dstate, _ = state
-  diter = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
-  isnothing(diter) && return nothing
-  elm, newdstate = diter
-  return (; geometry=elm), (newdstate, nothing)
+  domstate, _ = state
+  domiter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
+  isnothing(domiter) && return nothing
+  elm, newdomstate = domiter
+  return (; geometry=elm), (newdomstate, nothing)
 end
 
 # helper: iterate when inner table is present (geometry + attributes)
 function _iterate(dom, tab, state)
-  dstate, tstate = state
-  # advance both iterators (lockstep)
-  diter = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
-  titer = isnothing(tstate) ? iterate(tab) : iterate(tab, tstate)
-  # control flow based on domain only (design guarantee)
-  isnothing(diter) && return nothing
-  elm, newdstate = diter
-  trow, newtstate = titer
+  domstate, tabstate = state
+  domiter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
+  isnothing(domiter) && return nothing
+  elm, newdomstate = domiter
+  tabiter = isnothing(tabstate) ? iterate(tab) : iterate(tab, tabstate)
+  if isnothing(tabiter)
+    return (; geometry=elm), (newdomstate, nothing)
+  end
+  trow, newtabstate = tabiter
   names = Tables.columnnames(trow)
-  # construct row using splatting
-  val = (; (nm => Tables.getcolumn(trow, nm) for nm in names)..., geometry=elm)
-  return val, (newdstate, newtstate)
+  pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+  return (; pairs..., geometry=elm), (newdomstate, newtabstate)
+end
+
+function Base.iterate(rows::GeoTableRows, state=nothing)
+  effstate = isnothing(state) ? (nothing, nothing) : state
+  return _iterate(rows.domain, rows.trows, effstate)
 end
 
 function Tables.schema(rows::GeoTableRows)
