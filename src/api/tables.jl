@@ -26,22 +26,40 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-function Base.iterate(rows::GeoTableRows, state=nothing)
-  domstate, tabstate = state === nothing ? (nothing, nothing) : state
-  domiter = domstate === nothing ? iterate(rows.domain) : iterate(rows.domain, domstate)
-  domiter === nothing && return nothing
-  elm, newdomstate = domiter
-  if isnothing(rows.trows)
-    return (; geometry=elm), (newdomstate, nothing)
+# helper: iterate when there is no inner table (geometry only)
+function _iterate(dom, ::Nothing, state)
+  dstate, _ = state
+  diter = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
+  isnothing(diter) && return nothing
+  elm, newdstate = diter
+  return (; geometry=elm), (newdstate, nothing)
+end
+
+# helper: iterate when inner table is present (geometry + attributes)
+function _iterate(dom, tab, state)
+  dstate, tstate = state
+  # advance domain
+  diter = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
+  isnothing(diter) && return nothing
+  elm, newdstate = diter
+  # advance table
+  titer = isnothing(tstate) ? iterate(tab) : iterate(tab, tstate)
+  # if table ends before domain, return geometry only (fallback)
+  if isnothing(titer)
+    return (; geometry=elm), (newdstate, nothing)
   end
-  tabiter = tabstate === nothing ? iterate(rows.trows) : iterate(rows.trows, tabstate)
-  if tabiter === nothing
-    return (; geometry=elm), (newdomstate, nothing)
-  end
-  trow, newtabstate = tabiter
+  trow, newtstate = titer
   names = Tables.columnnames(trow)
-  pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-  return (; pairs..., geometry=elm), (newdomstate, newtabstate)
+  # construct row using splatting (efficient and concise)
+  row = (; (nm => Tables.getcolumn(trow, nm) for nm in names)..., geometry=elm)
+  return row, (newdstate, newtstate)
+end
+
+function Base.iterate(rows::GeoTableRows, state=nothing)
+  # initialize state tuple if starting, otherwise use provided state
+  effstate = isnothing(state) ? (nothing, nothing) : state
+  # dispatch to the correct helper based on rows.trows type
+  return _iterate(rows.domain, rows.trows, effstate)
 end
 
 function Tables.schema(rows::GeoTableRows)
