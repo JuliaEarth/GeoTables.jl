@@ -15,7 +15,7 @@
   @test gtb[:, begin] == gtb[:, 1]
   @test gtb[:, end] == gtb[:, 1]
   @test gtb[:, end:end] == gtb
-  @test gtb[:, 1:1] == gtb
+  @test gtb[:, begin:begin] == gtb
 
   # GeoTableRows
   rows = Tables.rows(gtb)
