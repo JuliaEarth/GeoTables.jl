@@ -26,34 +26,31 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-# helper: iterate when there is no inner table (geometry only)
-function _iterate(dom, ::Nothing, state)
-  domstate, _ = state
-  diter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
-  isnothing(diter) && return nothing
-  elm, newdstate = diter
-  return (; geometry=elm), (newdstate, nothing)
-end
-
-# helper: iterate when inner table is present (geometry + attributes)
-function _iterate(dom, tab, state)
-  domstate, tabstate = state
-  diter = isnothing(domstate) ? iterate(dom) : iterate(dom, domstate)
-  isnothing(diter) && return nothing
-  elm, newdstate = diter
-  titer = isnothing(tabstate) ? iterate(tab) : iterate(tab, tabstate)
-  if isnothing(titer)
-    return (; geometry=elm), (newdstate, nothing)
-  end
-  trow, newtabstate = titer
-  names = Tables.columnnames(trow)
-  pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-  return (; pairs..., geometry=elm), (newdstate, newtabstate)
-end
-
 function Base.iterate(rows::GeoTableRows, state=nothing)
-  effstate = isnothing(state) ? (nothing, nothing) : state
-  return _iterate(rows.domain, rows.trows, effstate)
+  tuplestate = isnothing(state) ? (nothing, nothing) : state
+  _iterate(rows.domain, rows.trows, tuplestate)
+end
+
+# iterate geometry only
+function _iterate(dom, ::Nothing, tuplestate)
+  dstate, _ = tuplestate
+  dnext = iterate(dom, dstate)
+  isnothing(dnext) && return nothing
+  geom, ndstate = dnext
+  (; geometry=geom), (ndstate, nothing)
+end
+
+# iterate geometry + attributes
+function _iterate(dom, trows, tuplestate)
+  dstate, tstate = tuplestate
+  dnext = iterate(dom, dstate)
+  isnothing(dnext) && return nothing
+  tnext = iterate(trows, tstate)
+  geom, ndstate = dnext
+  trow, ntstate = tnext
+  names = Tables.columnnames(trow)
+  attri = (nm => Tables.getcolumn(trow, nm) for nm in names)
+  (; attri..., geometry=geom), (ndstate, ntstate)
 end
 
 function Tables.schema(rows::GeoTableRows)
