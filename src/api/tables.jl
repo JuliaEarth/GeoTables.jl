@@ -26,31 +26,29 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-function Base.iterate(rows::GeoTableRows, state=nothing)
-  tuplestate = isnothing(state) ? (nothing, nothing) : state
-  _iterate(rows.domain, rows.trows, tuplestate)
-end
-
-# iterate geometry only
-function _iterate(dom, ::Nothing, tuplestate)
-  dstate, _ = tuplestate
-  dnext = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
-  isnothing(dnext) && return nothing
-  geom, ndstate = dnext
-  (; geometry=geom), (ndstate, nothing)
-end
-
-# iterate geometry + attributes
-function _iterate(dom, trows, tuplestate)
-  dstate, tstate = tuplestate
-  dnext = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
-  isnothing(dnext) && return nothing
-  geom, ndstate = dnext
-  tnext = isnothing(tstate) ? iterate(trows) : iterate(trows, tstate)
-  trow, ntstate = tnext
-  names = Tables.columnnames(trow)
-  attri = (nm => Tables.getcolumn(trow, nm) for nm in names)
-  (; attri..., geometry=geom), (ndstate, ntstate)
+function Base.iterate(rows::GeoTableRows, state=1)
+  if state > length(rows)
+    nothing
+  else
+    elm, _ = iterate(rows.domain, state)
+    row = if isnothing(rows.trows)
+      (; geometry=elm)
+    else
+      # Capture the result safely
+      itr = iterate(rows.trows, state)
+      # Check if the attribute iterator returned nothing
+      if isnothing(itr)
+        # Fallback: If attributes are exhausted or empty, return just geometry
+        (; geometry=elm)
+      else
+        trow, _ = itr
+        names = Tables.columnnames(trow)
+        pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+        (; pairs..., geometry=elm)
+      end
+    end
+    row, state + 1
+  end
 end
 
 function Tables.schema(rows::GeoTableRows)
