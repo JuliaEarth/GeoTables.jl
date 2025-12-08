@@ -34,7 +34,7 @@ end
 # iterate geometry only
 function _iterate(dom, ::Nothing, tuplestate)
   dstate, _ = tuplestate
-  dnext = iterate(dom, dstate)
+  dnext = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
   isnothing(dnext) && return nothing
   geom, ndstate = dnext
   (; geometry=geom), (ndstate, nothing)
@@ -43,10 +43,10 @@ end
 # iterate geometry + attributes
 function _iterate(dom, trows, tuplestate)
   dstate, tstate = tuplestate
-  dnext = iterate(dom, dstate)
+  dnext = isnothing(dstate) ? iterate(dom) : iterate(dom, dstate)
   isnothing(dnext) && return nothing
-  tnext = iterate(trows, tstate)
   geom, ndstate = dnext
+  tnext = isnothing(tstate) ? iterate(trows) : iterate(trows, tstate)
   trow, ntstate = tnext
   names = Tables.columnnames(trow)
   attri = (nm => Tables.getcolumn(trow, nm) for nm in names)
