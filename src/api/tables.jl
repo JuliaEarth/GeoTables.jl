@@ -34,11 +34,8 @@ function Base.iterate(rows::GeoTableRows, state=1)
     row = if isnothing(rows.trows)
       (; geometry=elm)
     else
-      # Capture the result safely
       itr = iterate(rows.trows, state)
-      # Check if the attribute iterator returned nothing
       if isnothing(itr)
-        # Fallback: If attributes are exhausted or empty, return just geometry
         (; geometry=elm)
       else
         trow, _ = itr
