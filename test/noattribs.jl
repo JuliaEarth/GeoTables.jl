@@ -1,6 +1,7 @@
 @testset "No attributes" begin
   pset = PointSet((0, 0), (1, 1), (2, 2))
   gtb = GeoTable(pset)
+  @test isnothing(values(gtb))
   @test ncol(gtb) == 1
   @test size(gtb) == (3, 1)
   @test size(gtb, 1) == 3
@@ -60,6 +61,23 @@
   # empty values table
   gtb = georef((a=rand(3), b=rand(3)), pset)
   egtb = gtb[:, 3:3]
+  @test isempty(values(egtb))
+  @test ncol(egtb) == 1
+  @test size(egtb) == (3, 1)
+  @test size(egtb, 1) == 3
+  @test size(egtb, 2) == 1
+  @test axes(egtb) == (Base.OneTo(3), Base.OneTo(1))
+  @test axes(egtb, 1) == Base.OneTo(3)
+  @test axes(egtb, 2) == Base.OneTo(1)
+  @test egtb[begin:end, :] == egtb
+  @test egtb[:, begin:end] == egtb
+  @test egtb[:, begin:begin] == egtb
+  @test egtb[:, end:end] == egtb
+  @test egtb[:, 1:1] == egtb
+  @test egtb[begin, :] == egtb[1, :]
+  @test egtb[end, :] == egtb[3, :]
+  @test egtb[:, begin] == egtb[:, 1]
+  @test egtb[:, end] == egtb[:, 1]
 
   # GeoTableRows
   rows = Tables.rows(egtb)
