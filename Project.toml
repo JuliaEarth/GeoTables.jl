@@ -1,6 +1,6 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
-version = "1.27.3"
+version = "1.28.0"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 
 [deps]
@@ -44,7 +44,7 @@ Dates = "1.10"
 Distributions = "0.25"
 IteratorInterfaceExtensions = "1.0"
 Makie = "0.24"
-Meshes = "0.55"
+Meshes = "0.56"
 PrettyTables = "3.0.2"
 Random = "1.10"
 Statistics = "1.10"
