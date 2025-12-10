@@ -25,6 +25,7 @@ testfiles = [
   "views.jl",
   "georef.jl",
   "noattribs.jl",
+  "emptytable.jl",
   "indices.jl",
   "operations.jl",
   "feature.jl",

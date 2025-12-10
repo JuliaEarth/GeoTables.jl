@@ -141,10 +141,10 @@ if !Sys.isapple()
     └──────────────────────┘"""
 
     # empty values table
-    gtb = georef((; a, b, c), pset)
-    egtb = gtb[:, 4:4]
-    @test sprint(show, egtb) == "9×1 GeoTable over 9 PointSet"
-    @test sprint(show, MIME("text/plain"), egtb) == """
+    ogtb = georef((; a, b, c), pset)
+    gtb = ogtb[:, 4:4]
+    @test sprint(show, gtb) == "9×1 GeoTable over 9 PointSet"
+    @test sprint(show, MIME("text/plain"), gtb) == """
     9×1 GeoTable over 9 PointSet
     ┌──────────────────────┐
     │       geometry       │
