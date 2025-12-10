@@ -317,13 +317,5 @@
     data₁ = dummy(nothing, pset₁)
     data₂ = dummy((a=rand(10), b=rand(10)), pset₂)
     @test_throws ArgumentError vcat(data₁, data₂, kind=:intersect)
-
-    # variables interface
-    data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), PointSet(rand(Point, 4)))
-    @test asarray(data, :a) == asarray(data, "a") == [1, 2, 3, 4]
-    @test asarray(data, :b) == asarray(data, "b") == [5, 6, 7, 8]
-    data = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), CartesianGrid(2, 2))
-    @test asarray(data, :a) == asarray(data, "a") == [1 3; 2 4]
-    @test asarray(data, :b) == asarray(data, "b") == [5 7; 6 8]
   end
 end

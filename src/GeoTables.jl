@@ -98,7 +98,6 @@ export
   AbstractGeoTable,
   GeoTable,
   domain,
-  asarray,
   nrow,
   ncol,
 
