@@ -29,16 +29,16 @@ Base.length(rows::GeoTableRows) = nelements(rows.domain)
 function Base.iterate(rows::GeoTableRows)
   domnext = iterate(rows.domain)
   trowsnext = isnothing(rows.trows) ? nothing : iterate(rows.trows)
-  _interate(domnext, trowsnext)
+  _iterate(domnext, trowsnext)
 end
 
 function Base.iterate(rows::GeoTableRows, (dstate, tstate))
   domnext = iterate(rows.domain, dstate)
   trowsnext = isnothing(rows.trows) || isnothing(tstate) ? nothing : iterate(rows.trows, tstate)
-  _interate(domnext, trowsnext)
+  _iterate(domnext, trowsnext)
 end
 
-function _interate(domnext, trowsnext)
+function _iterate(domnext, trowsnext)
   if isnothing(domnext)
     nothing
   else
