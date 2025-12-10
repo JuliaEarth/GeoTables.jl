@@ -34,10 +34,15 @@ function Base.iterate(rows::GeoTableRows, state=1)
     row = if isnothing(rows.trows)
       (; geometry=elm)
     else
-      trow, _ = iterate(rows.trows, state)
-      names = Tables.columnnames(trow)
-      pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-      (; pairs..., geometry=elm)
+      itr = iterate(rows.trows, state)
+      if isnothing(itr)
+        (; geometry=elm)
+      else
+        trow, _ = itr
+        names = Tables.columnnames(trow)
+        pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+        (; pairs..., geometry=elm)
+      end
     end
     row, state + 1
   end

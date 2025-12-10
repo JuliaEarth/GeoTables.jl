@@ -1,7 +1,10 @@
-@testset "No attributes" begin
+@testset "Empty values table" begin
+  # indexing only the last column of a geotable results in a geotable
+  # with an empty values table and a column of geometries
   pset = PointSet((0, 0), (1, 1), (2, 2))
-  gtb = GeoTable(pset)
-  @test isnothing(values(gtb))
+  ogtb = georef((a=rand(3), b=rand(3)), pset)
+  gtb = ogtb[:, 3:3]
+  @test isempty(values(gtb))
   @test ncol(gtb) == 1
   @test size(gtb) == (3, 1)
   @test size(gtb, 1) == 3
@@ -48,23 +51,15 @@
   @test hgtb.x == ngtb.x
   @test hgtb.geometry == pset
   npset = PointSet((4, 4), (5, 5), (6, 6))
-  ngtb = GeoTable(npset)
-  vgtb = vcat(gtb, ngtb)
+  ngtb = georef((; x=rand(3)), npset)
+  vgtb = vcat(gtb, ngtb[:, 2:2])
   @test propertynames(vgtb) == [:geometry]
   @test vgtb.geometry == PointSet([collect(pset); collect(npset)])
 
   # viewing
   v = view(gtb, [1, 3])
-  @test isnothing(values(v))
+  @test isempty(values(v))
   @test v.geometry == view(pset, [1, 3])
-
-  # grid indexing
-  grid = CartesianGrid(10, 10)
-  linds = LinearIndices(size(grid))
-  gtb = GeoTable(grid)
-  @test isnothing(values(gtb[(1:3, :), :]))
-  @test gtb[(1:3, :), :].geometry == grid[1:3, :]
-  @test gtb[(1:3, :), :].geometry isa CartesianGrid
 
   # throws
   @test_throws ErrorException gtb.test
