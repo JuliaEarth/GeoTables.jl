@@ -26,25 +26,31 @@ end
 
 Base.length(rows::GeoTableRows) = nelements(rows.domain)
 
-function Base.iterate(rows::GeoTableRows, state=1)
-  if state > length(rows)
+function Base.iterate(rows::GeoTableRows)
+  domnext = iterate(rows.domain)
+  trowsnext = isnothing(rows.trows) ? nothing : iterate(rows.trows)
+  _interate(domnext, trowsnext)
+end
+
+function Base.iterate(rows::GeoTableRows, (dstate, tstate))
+  domnext = iterate(rows.domain, dstate)
+  trowsnext = isnothing(rows.trows) || isnothing(tstate) ? nothing : iterate(rows.trows, tstate)
+  _interate(domnext, trowsnext)
+end
+
+function _interate(domnext, trowsnext)
+  if isnothing(domnext)
     nothing
   else
-    elm, _ = iterate(rows.domain, state)
-    row = if isnothing(rows.trows)
-      (; geometry=elm)
+    elm, dstate = domnext
+    if isnothing(trowsnext)
+      (; geometry=elm), (dstate, nothing)
     else
-      itr = iterate(rows.trows, state)
-      if isnothing(itr)
-        (; geometry=elm)
-      else
-        trow, _ = itr
-        names = Tables.columnnames(trow)
-        pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
-        (; pairs..., geometry=elm)
-      end
+      trow, tstate = trowsnext
+      names = Tables.columnnames(trow)
+      pairs = (nm => Tables.getcolumn(trow, nm) for nm in names)
+      (; pairs..., geometry=elm), (dstate, tstate)
     end
-    row, state + 1
   end
 end
 
