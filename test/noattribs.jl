@@ -57,6 +57,49 @@
   @test isnothing(values(v))
   @test v.geometry == view(pset, [1, 3])
 
+  # empty values table
+  gtb = georef((a=rand(3), b=rand(3)), pset)
+  egtb = gtb[:, 3:3]
+
+  # GeoTableRows
+  rows = Tables.rows(egtb)
+  sch = Tables.schema(rows)
+  @test sch.names == (:geometry,)
+  @test sch.types == (eltype(pset),)
+  row, state = iterate(rows)
+  @test Tables.columnnames(row) == (:geometry,)
+  @test Tables.getcolumn(row, :geometry) == pset[1]
+  row, state = iterate(rows, state)
+  @test Tables.columnnames(row) == (:geometry,)
+  @test Tables.getcolumn(row, :geometry) == pset[2]
+  row, state = iterate(rows, state)
+  @test Tables.columnnames(row) == (:geometry,)
+  @test Tables.getcolumn(row, :geometry) == pset[3]
+  @test isnothing(iterate(rows, state))
+
+  # dataframe interface
+  @test propertynames(egtb) == [:geometry]
+  @test egtb.geometry == pset
+  @test egtb[1:2, [:geometry]].geometry == view(pset, 1:2)
+  @test egtb[1, [:geometry]].geometry == pset[1]
+  @test egtb[1, :].geometry == pset[1]
+  @test egtb[:, [:geometry]] == egtb
+  ngtb = georef((; x=rand(3)), pset)
+  hgtb = hcat(egtb, ngtb)
+  @test propertynames(hgtb) == [:x, :geometry]
+  @test hgtb.x == ngtb.x
+  @test hgtb.geometry == pset
+  npset = PointSet((4, 4), (5, 5), (6, 6))
+  ngtb = GeoTable(npset)
+  vgtb = vcat(egtb, ngtb)
+  @test propertynames(vgtb) == [:geometry]
+  @test vgtb.geometry == PointSet([collect(pset); collect(npset)])
+
+  # viewing
+  v = view(egtb, [1, 3])
+  @test isempty(values(v))
+  @test v.geometry == view(pset, [1, 3])
+
   # grid indexing
   grid = CartesianGrid(10, 10)
   linds = LinearIndices(size(grid))

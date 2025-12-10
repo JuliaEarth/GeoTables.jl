@@ -140,6 +140,28 @@ if !Sys.isapple()
     │ (x: 9.0 m, y: 9.0 m) │
     └──────────────────────┘"""
 
+    # empty values table
+    gtb = georef((; a, b, c), pset)
+    egtb = gtb[:, 4:4]
+    @test sprint(show, egtb) == "9×1 GeoTable over 9 PointSet"
+    @test sprint(show, MIME("text/plain"), egtb) == """
+    9×1 GeoTable over 9 PointSet
+    ┌──────────────────────┐
+    │       geometry       │
+    │        Point         │
+    │ 🖈 Cartesian{NoDatum} │
+    ├──────────────────────┤
+    │ (x: 1.0 m, y: 1.0 m) │
+    │ (x: 2.0 m, y: 2.0 m) │
+    │ (x: 3.0 m, y: 3.0 m) │
+    │ (x: 4.0 m, y: 4.0 m) │
+    │ (x: 5.0 m, y: 5.0 m) │
+    │ (x: 6.0 m, y: 6.0 m) │
+    │ (x: 7.0 m, y: 7.0 m) │
+    │ (x: 8.0 m, y: 8.0 m) │
+    │ (x: 9.0 m, y: 9.0 m) │
+    └──────────────────────┘"""
+
     # https://github.com/JuliaLang/StyledStrings.jl/issues/122
     # gtb = georef((; a, b, c), pset)
     # @test sprint(show, MIME("text/html"), gtb) == """
