@@ -75,7 +75,8 @@
 
     # GeoTableRows iteration
     dom = CartesianGrid(2, 2)
-    dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
+    tab = Table(a=[1, 2, 3, 4], b=[5, 6, 7, 8])
+    dat = dummy(tab, dom)
     rows = Tables.rows(dat)
     row, state = iterate(rows)
     @test Tables.columnnames(row) == (:a, :b, :geometry)
