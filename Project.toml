@@ -1,6 +1,6 @@
 name = "GeoTables"
 uuid = "e502b557-6362-48c1-8219-d30d308dcdb0"
-version = "1.28.0"
+version = "1.28.1"
 authors = ["Júlio Hoffimann <julio.hoffimann@gmail.com> and contributors"]
 
 [deps]
