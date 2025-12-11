@@ -73,6 +73,33 @@
     @test Tables.subset(dat, 1, viewhint=true) isa NamedTuple
     @test Tables.subset(dat, 1, viewhint=false) isa NamedTuple
 
+    # GeoTableRows iteration
+    dom = CartesianGrid(2, 2)
+    tab = Table(a=[1, 2, 3, 4], b=[5, 6, 7, 8])
+    dat = dummy(tab, dom)
+    rows = Tables.rows(dat)
+    row, state = iterate(rows)
+    @test Tables.columnnames(row) == (:a, :b, :geometry)
+    @test Tables.getcolumn(row, :a) == dat.a[1]
+    @test Tables.getcolumn(row, :b) == dat.b[1]
+    @test Tables.getcolumn(row, :geometry) == dat.geometry[1]
+    row, state = iterate(rows, state)
+    @test Tables.columnnames(row) == (:a, :b, :geometry)
+    @test Tables.getcolumn(row, :a) == dat.a[2]
+    @test Tables.getcolumn(row, :b) == dat.b[2]
+    @test Tables.getcolumn(row, :geometry) == dat.geometry[2]
+    row, state = iterate(rows, state)
+    @test Tables.columnnames(row) == (:a, :b, :geometry)
+    @test Tables.getcolumn(row, :a) == dat.a[3]
+    @test Tables.getcolumn(row, :b) == dat.b[3]
+    @test Tables.getcolumn(row, :geometry) == dat.geometry[3]
+    row, state = iterate(rows, state)
+    @test Tables.columnnames(row) == (:a, :b, :geometry)
+    @test Tables.getcolumn(row, :a) == dat.a[4]
+    @test Tables.getcolumn(row, :b) == dat.b[4]
+    @test Tables.getcolumn(row, :geometry) == dat.geometry[4]
+    @test isnothing(iterate(rows, state))
+
     # TableTraits interface
     dom = CartesianGrid(2, 2)
     dat = dummy((a=[1, 2, 3, 4], b=[5, 6, 7, 8]), dom)
