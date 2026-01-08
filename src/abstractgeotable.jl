@@ -175,11 +175,20 @@ function _common_kwargs(geotable)
   labels₂ = getindex.(labels, 2)
   labels₃ = getindex.(labels, 3)
 
+  notes = ""
+  for rank in 0:(paramdim(dom) - 1)
+    rtab = values(geotable, rank)
+    if !isnothing(rtab)
+      notes *= "Additional variables at rank $rank. "
+    end
+  end
+
   (
     title=summary(geotable),
     column_labels=[labels₁, labels₂, labels₃],
     maximum_number_of_rows=10,
     new_line_at_end=false,
+    source_notes=notes,
     alignment=:c
   )
 end
