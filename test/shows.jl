@@ -163,7 +163,7 @@ if !Sys.isapple()
     └──────────────────────┘"""
 
     # vertex table
-    gtb = GeoTable(CartesianGrid(2, 2), vtable=(; a=rand(3*3), b=rand(3*3)))
+    gtb = GeoTable(CartesianGrid(2, 2), vtable=(; a=rand(3 * 3), b=rand(3 * 3)))
     @test sprint(show, gtb) == "4×1 GeoTable over 2×2 CartesianGrid"
     @test sprint(show, MIME("text/plain"), gtb) == """
                   4×1 GeoTable over 2×2 CartesianGrid
