@@ -162,6 +162,23 @@ if !Sys.isapple()
     │ (x: 9.0 m, y: 9.0 m) │
     └──────────────────────┘"""
 
+    # vertex table
+    gtb = GeoTable(CartesianGrid(2, 2), vtable=(; a=rand(3*3), b=rand(3*3)))
+    @test sprint(show, gtb) == "4×1 GeoTable over 2×2 CartesianGrid"
+    @test sprint(show, MIME("text/plain"), gtb) == """
+                  4×1 GeoTable over 2×2 CartesianGrid
+    ┌─────────────────────────────────────────────────────────────┐
+    │                          geometry                           │
+    │                         Quadrangle                          │
+    │                    🖈 Cartesian{NoDatum}                     │
+    ├─────────────────────────────────────────────────────────────┤
+    │ Quadrangle((x: 0.0 m, y: 0.0 m), ..., (x: 0.0 m, y: 1.0 m)) │
+    │ Quadrangle((x: 1.0 m, y: 0.0 m), ..., (x: 1.0 m, y: 1.0 m)) │
+    │ Quadrangle((x: 0.0 m, y: 1.0 m), ..., (x: 0.0 m, y: 2.0 m)) │
+    │ Quadrangle((x: 1.0 m, y: 1.0 m), ..., (x: 1.0 m, y: 2.0 m)) │
+    └─────────────────────────────────────────────────────────────┘
+    Additional variables at rank 0."""
+
     # https://github.com/JuliaLang/StyledStrings.jl/issues/122
     # gtb = georef((; a, b, c), pset)
     # @test sprint(show, MIME("text/html"), gtb) == """
