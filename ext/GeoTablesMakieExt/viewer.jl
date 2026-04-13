@@ -88,22 +88,18 @@ function viewer(
   # initialize visualization
   plot(vals)
 
-  sbar = isnothing(scalebar) ? defaultscalebar(dom) : scalebar
-
-  # render scale bar if requested
+  # consider adding scale bar
+  edim = embeddim(dom)
+  sbar = isnothing(scalebar) ? edim === 2 : scalebar
   if sbar
-    if embeddim(dom) === 3
-      @warn """
-      ScaleBar: 3D domain or unprojected geographic coordinates detected. 
-      2D linear scale bars are mathematically invalid in these spaces. Scale bar skipped.
-      """
+    if edim !== 2
+      @warn "scale bar is only implemented for 2D axis"
     else
-      # embeddim in strictly 2D domain, so we can add a scale bar
       scalebar!(axis)
     end
   end
 
-  # initialize colorbar if necessary
+  # add colorbar if necessary
   varcbar = if needcbar(var)
     colorbar(vals)
   else
@@ -144,8 +140,6 @@ isviewable(::Type{Colorful}, vals) = true
 isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
 isviewable(::Type{Categorical}, vals) = true
 isviewable(::Type{Distributional}, vals) = true
-
-defaultscalebar(dom) = embeddim(dom) == 2
 
 function scalebar!(axis; position=(0.85, 0.05), targetaxfrac=0.25, color=:black, linewidth=3.0, fontsize=16)
   # Generate a comprehensive array of valid multiplier values for the scale bar lengths.
