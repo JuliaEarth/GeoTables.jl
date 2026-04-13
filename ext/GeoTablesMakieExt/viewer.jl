@@ -2,7 +2,62 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorrange=nothing, kwargs...)
+function addscalebar!(axis; position=(0.85, 0.05), targetaxfrac=0.25, color=:black, linewidth=3.0, fontsize=16)
+  muls = [
+    p isa Int ? x * p : round(x * p, sigdigits=4) for
+    p in Real[[10.0^p for p in -50:-1]; [1, 10, 100, 1000, 10000]; [10.0^p for p in 5:50]] for x in [1, 2, 5]
+  ]
+
+  scaledata = Makie.lift(axis.finallimits) do rect
+    widthx = rect.widths[1]
+    safewidth = isfinite(widthx) && widthx > 0 ? widthx : 1.0
+
+    # find the best multiplier in axis units
+    mul = argmin(m -> abs(m - targetaxfrac * safewidth), muls)
+    lengthdata = mul
+
+    # relative length (0-1)
+    lengthrel = lengthdata / safewidth
+
+    avgpos = Makie.Point2f(position)
+    p1 = avgpos - Makie.Vec2f(lengthrel / 2, 0)
+    p2 = avgpos + Makie.Vec2f(lengthrel / 2, 0)
+
+    return (points=[p1, p2], text="$(mul)", textpos=avgpos)
+  end
+
+  # draw lines and text directly on the axis
+  Makie.lines!(
+    axis,
+    Makie.lift(x -> x.points, scaledata);
+    space=:relative,
+    color=color,
+    linewidth=linewidth,
+    xautolimits=false,
+    yautolimits=false
+  )
+  Makie.text!(
+    axis,
+    Makie.lift(x -> x.textpos, scaledata);
+    text=Makie.lift(x -> x.text, scaledata),
+    space=:relative,
+    align=(:center, :bottom),
+    offset=(0, 5),
+    color=color,
+    fontsize=fontsize,
+    xautolimits=false,
+    yautolimits=false
+  )
+end
+
+function viewer(
+  data::AbstractGeoTable;
+  alpha=nothing,
+  colormap=nothing,
+  colorrange=nothing,
+  scale::Bool=false,
+  kwargs...
+)
   # retrieve domain and element table
   dom, tab = domain(data), values(data)
 
@@ -80,6 +135,19 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
 
   # initialize visualization
   plot(vals)
+
+  # render scale bar if requested
+  if scale
+    if embeddim(dom) === 3
+      @warn """
+      ScaleBar: 3D domain or unprojected geographic coordinates detected. 
+      2D linear scale bars are mathematically invalid in these spaces. Scale bar skipped.
+      """
+    else
+      # embeddim in strictly 2D domain, so we can add a scale bar
+      addscalebar!(axis)
+    end
+  end
 
   # initialize colorbar if necessary
   varcbar = if needcbar(var)

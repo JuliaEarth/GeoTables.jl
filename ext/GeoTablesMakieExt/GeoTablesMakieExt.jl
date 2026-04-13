@@ -14,7 +14,7 @@ using DataScienceTraits
 using CategoricalArrays
 using Distributions: Distribution, location
 using Makie.Colors: Colorant, Gray
-using Meshes: embeddim
+using Meshes: embeddim, crs
 
 import Makie
 import Meshes: viz, viz!
