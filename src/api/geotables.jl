@@ -53,7 +53,7 @@ function _getgridindex(geotable, ijk::CartesianIndices, vars::Vector{Symbol})
     nothing
   else
     inds = _asliner(grid, ijk)
-    sub = Tables.subset(tab, inds)
+    sub = Tables.subset(tab, inds, viewhint=true)
     cols = Tables.columns(sub)
     pairs = (var => Tables.getcolumn(cols, var) for var in vars)
     (; pairs...) |> Tables.materializer(tab)

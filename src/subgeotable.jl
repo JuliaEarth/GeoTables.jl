@@ -36,7 +36,7 @@ function Base.values(v::SubGeoTable, rank=nothing)
   r = isnothing(rank) ? dim : rank
   table = values(geotable, r)
   if r == dim && !isnothing(table)
-    Tables.subset(table, inds)
+    Tables.subset(table, inds, viewhint=true)
   else
     nothing
   end

@@ -95,7 +95,7 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
-    row1 = Tables.subset(tab1, i)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
@@ -121,7 +121,7 @@ function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
-    row1 = Tables.subset(tab1, i)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 

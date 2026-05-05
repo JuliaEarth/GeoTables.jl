@@ -84,7 +84,7 @@ function _getindex(geotable::AbstractGeoTable, inds::AbstractVector{Int}, vars::
     !isempty(vars) && _noattrs_error()
     nothing
   else
-    sub = Tables.subset(tab, inds)
+    sub = Tables.subset(tab, inds, viewhint=true)
     cols = Tables.columns(sub)
     pairs = (var => Tables.getcolumn(cols, var) for var in vars)
     (; pairs...) |> Tables.materializer(tab)
@@ -100,7 +100,7 @@ function _getindex(geotable::AbstractGeoTable, ind::Int, vars::AbstractVector{Sy
     !isempty(vars) && _noattrs_error()
     (; geometry=dom[ind])
   else
-    row = Tables.subset(tab, ind)
+    row = Tables.subset(tab, ind, viewhint=true)
     pairs = (var => Tables.getcolumn(row, var) for var in vars)
     (; pairs..., geometry=dom[ind])
   end
