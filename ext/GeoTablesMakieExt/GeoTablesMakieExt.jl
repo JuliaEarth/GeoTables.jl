@@ -23,6 +23,7 @@ import GeoTables: viewer, cbar
 const CategArray{T,N} = Union{CategoricalArray{T,N},SubArray{T,N,<:CategoricalArray}}
 
 include("colorbar.jl")
+include("scalebar.jl")
 include("viewer.jl")
 
 # ----------------

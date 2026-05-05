@@ -2,7 +2,14 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorrange=nothing, kwargs...)
+function viewer(
+  data::AbstractGeoTable;
+  alpha=nothing,
+  colormap=nothing,
+  colorrange=nothing,
+  scalebar=nothing,
+  kwargs...
+)
   # retrieve domain and element table
   dom, tab = domain(data), values(data)
 
@@ -81,7 +88,18 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   # initialize visualization
   plot(vals)
 
-  # initialize colorbar if necessary
+  # consider adding scale bar
+  edim = embeddim(dom)
+  sbar = isnothing(scalebar) ? edim === 2 : scalebar
+  if sbar
+    if edim !== 2
+      @warn "scale bar is only implemented for 2D axis"
+    else
+      scalebar!(axis)
+    end
+  end
+
+  # add colorbar if necessary
   varcbar = if needcbar(var)
     colorbar(vals)
   else
