@@ -119,7 +119,7 @@ function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
-    row1 = Tables.subset(tab1, i)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
@@ -170,7 +170,7 @@ function _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
-    row1 = Tables.subset(tab1, i)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
   end
 
@@ -190,7 +190,7 @@ function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
     end
   end
 
-  sub = Tables.subset(tab1, inds)
+  sub = Tables.subset(tab1, inds, viewhint=true)
   cols = Tables.columns(sub)
   pairs1 = (var => Tables.getcolumn(cols, var) for var in vars1)
   pairs2 = (var => gencol(var) for var in vars2)
