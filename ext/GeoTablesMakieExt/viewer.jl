@@ -53,11 +53,6 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   fig = Makie.Figure()
   label = Makie.Label(fig[1, 1], "Variable")
   menu = Makie.Menu(fig[1, 2], options=options)
-  axis = if embeddim(dom) === 3
-    Makie.Axis3(fig[2, 1:2], perspectiveness=0.5, viewmode=:free, aspect=:data)
-  else
-    Makie.Axis(fig[2, 1:2], aspect=Makie.DataAspect())
-  end
 
   # initialize observables
   vals = Makie.Observable{Any}()
@@ -66,9 +61,9 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
     vals[] = Tables.getcolumn(cols, var) |> asvalues
   end
 
-  plot(vals) = Makie.plot!(axis, dom; color=vals, alpha, colormap, colorrange, kwargs...)
-
   needcbar(var) = !isconst[var] && !iscolor[var]
+
+  vizdom(vals) = viz(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
 
   colorbar(vals) = cbar(fig[2, 3], vals; alpha, colormap, colorrange)
 
@@ -79,14 +74,10 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
   setvals(var)
 
   # initialize visualization
-  plot(vals)
+  vizdom(vals)
 
   # initialize colorbar if necessary
-  varcbar = if needcbar(var)
-    colorbar(vals)
-  else
-    nothing
-  end
+  varcbar = needcbar(var) ? colorbar(vals) : nothing
 
   # map menu option to corresponding variable
   varfrom = Dict(zip(options, viewable))
