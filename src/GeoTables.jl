@@ -40,7 +40,14 @@ include("api/tables.jl")
 include("api/dataframes.jl")
 include("api/geotables.jl")
 
-# geometric operations
+# concrete types
+include("geotable.jl")
+include("subgeotable.jl")
+
+# georeferencing
+include("georef.jl")
+
+# operations
 include("geoops/utils.jl")
 include("geoops/macros.jl")
 include("geoops/geojoin.jl")
@@ -49,21 +56,12 @@ include("geoops/groupby.jl")
 include("geoops/transform.jl")
 include("geoops/combine.jl")
 
-# concrete types
-include("geotable.jl")
-include("subgeotable.jl")
-
-# indices specializations
-include("indices.jl")
-
-# georeferencing
-include("georef.jl")
-
-# geometric transforms
-include("geotransforms.jl")
-
 # visualization
 include("viewer.jl")
+
+# specializations
+include("indices.jl")
+include("transforms.jl")
 
 function __init__()
   # register error hint for visualization functions
@@ -101,15 +99,15 @@ export
   nrow,
   ncol,
 
-  # geometric operations
+  # georeferencing
+  georef,
+
+  # operations
   geojoin,
   tablejoin,
   @groupby,
   @transform,
   @combine,
-
-  # georeferencing
-  georef,
 
   # visualization
   viewer,
