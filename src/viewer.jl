@@ -19,12 +19,11 @@ Julia v1.9 or later versions of the language.
 function viewer end
 
 """
-    cbar(fig[row, col], values; kwargs...)
+    cbar(fig[row, col], values; colormap=:viridis, colorrange=:extrema)
 
-Add a colorbar to `fig[row, col]` with the `values`.
-
-Color options are forwarded via `kwargs` to the
-`Colorfy.Colorfier` struct.
+Add a colorbar to `fig[row, col]` for the given
+`values` and options for the `colorfy` function
+from the Colorfy.jl package.
 
 ### Notes
 
