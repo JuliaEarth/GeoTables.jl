@@ -2,14 +2,20 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function cbar(fig, values; alpha=nothing, colormap=nothing, colorrange=nothing)
-  vals = Makie.to_value(values)
-  alphas = asobservable(isnothing(alpha) ? Colorfy.defaultalphas(vals) : alpha)
-  cscheme = asobservable(isnothing(colormap) ? Colorfy.defaultcolorscheme(vals) : colormap)
-  crange = asobservable(isnothing(colorrange) ? Colorfy.defaultcolorrange(vals) : colorrange)
-  colorfier = Makie.@lift Colorfier(vals; alphas=$alphas, colorscheme=$cscheme, colorrange=$crange)
+function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
+  v = asobservable(values)
+  s = asobservable(colormap)
+  r = asobservable(colorrange)
 
-  args = Makie.@lift cbarargs($colorfier)
+  args = Makie.@lift begin
+    v′, _, s′, r′ = Colorfy.handleargs($v, 1.0, $s, $r)
+    cmap = cbarcolormap(v′, s′)
+    limits = cbarlimits(v′, r′)
+    ticks = cbarticks(v′, limits)
+    tickformat = cbartickformat(v′)
+    (cmap, limits, ticks, tickformat)
+  end
+
   cmap = Makie.@lift $args[1]
   limits = Makie.@lift $args[2]
   ticks = Makie.@lift $args[3]
@@ -18,22 +24,11 @@ function cbar(fig, values; alpha=nothing, colormap=nothing, colorrange=nothing)
   Makie.Colorbar(fig; colormap=cmap, limits, ticks, tickformat)
 end
 
-function cbarargs(colorfier)
-  values = Colorfy.values(colorfier)
-  colorscheme = Colorfy.colorscheme(colorfier)
-  colorrange = Colorfy.colorrange(colorfier)
-  colormap = cbarcolormap(values, colorscheme)
-  limits = cbarlimits(values, colorrange)
-  ticks = cbarticks(values, limits)
-  tickformat = cbartickformat(values)
-  (colormap, limits, ticks, tickformat)
-end
-
 cbarcolormap(values, colorscheme) = colorscheme
 function cbarcolormap(values::CategArray, colorscheme)
-  nlevels = length(levels(values))
-  categcolors = colorscheme[range(0, nlevels > 1 ? 1 : 0, length=nlevels)]
-  Makie.cgrad(categcolors, nlevels, categorical=true)
+  n = length(levels(values))
+  cs = colorscheme[range(n > 1 ? 0 : 1, 1, length=n)]
+  Makie.cgrad(cs, n, categorical=true)
 end
 
 cbarlimits(values, colorrange) = colorrange isa NTuple{2} ? asfloat.(colorrange) : extrema(asfloat, skipinvalid(values))

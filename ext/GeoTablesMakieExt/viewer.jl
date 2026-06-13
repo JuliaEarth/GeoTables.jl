@@ -2,7 +2,7 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorrange=nothing, kwargs...)
+function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange=:extrema, kwargs...)
   # retrieve domain and element table
   dom, tab = domain(data), values(data)
 
@@ -65,7 +65,7 @@ function viewer(data::AbstractGeoTable; alpha=nothing, colormap=nothing, colorra
 
   vizdom(vals) = viz(fig[2, 1:2], dom; color=vals, alpha, colormap, colorrange, kwargs...)
 
-  colorbar(vals) = cbar(fig[2, 3], vals; alpha, colormap, colorrange)
+  colorbar(vals) = cbar(fig[2, 3], vals; colormap, colorrange)
 
   # select first viewable variable
   var = first(viewable)
