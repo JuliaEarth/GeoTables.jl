@@ -62,5 +62,5 @@ asfloat(x::Distribution) = float(location(x))
 
 asstring(x) = sprint(print, x, context=:compact => true)
 
-asobservable(x) = Makie.Observable(x)
-asobservable(x::Makie.Observable) = x
+asobservable(x) = Makie.Observable{Any}(x)
+asobservable(x::Makie.Observable) = Makie.Observable{Any}(x[])
