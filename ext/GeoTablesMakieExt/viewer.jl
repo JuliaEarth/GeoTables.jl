@@ -20,16 +20,16 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   if isempty(viewable)
     throw(AssertionError("""
       Could not find viewable variables, i.e., variables that can be
-      converted to colors with the `ascolors` trait. Please make sure
+      converted to colors with the `Colorfy.jl` module. Please make sure
       that the scientific type of variables is correct.
       """))
   end
 
   # unique values for each variable (excluding invalid values)
-  valids = Dict(var => uniquevalid(Tables.getcolumn(cols, var)) for var in viewable)
+  uniquefor = Dict(var => uniquevalid(Tables.getcolumn(cols, var)) for var in viewable)
 
   # constant variables
-  isconst = Dict(var => valids[var].length ≤ 1 for var in viewable)
+  isconst = Dict(var => uniquefor[var].length ≤ 1 for var in viewable)
 
   # distributional variables
   isdist = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Distributional for var in viewable)
@@ -40,7 +40,7 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   # list of menu options
   options = map(viewable) do var
     opt = if isconst[var]
-      val = valids[var].first
+      val = uniquefor[var].first
       "$var = $val (constant)"
     else
       "$var"
