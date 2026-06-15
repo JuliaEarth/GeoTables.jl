@@ -2,6 +2,13 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
+const CategArray{T,N} = Union{CategoricalArray{T,N},SubArray{T,N,<:CategoricalArray}}
+
+maybecategorical(x) = elscitype(x) <: Categorical ? ascategorical(x) : x
+
+ascategorical(x) = categorical(x)
+ascategorical(x::CategArray) = x
+
 asfloat(x) = float(x)
 asfloat(x::Quantity) = float(ustrip(x))
 asfloat(x::Distribution) = float(location(x))
@@ -21,3 +28,10 @@ function uniquevalid(vals)
   v = iszero(n) ? missing : first(u)
   (length=n, first=v)
 end
+
+isviewable(vals) = isviewable(elscitype(vals))
+isviewable(::Type) = false
+isviewable(::Type{Colorful}) = true
+isviewable(::Type{Continuous}) = true
+isviewable(::Type{Categorical}) = true
+isviewable(::Type{Distributional}) = true

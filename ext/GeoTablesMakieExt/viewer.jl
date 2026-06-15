@@ -60,7 +60,7 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   vals = Makie.Observable{Any}()
 
   function setvals(var)
-    vals[] = Tables.getcolumn(cols, var) |> asvalues
+    vals[] = Tables.getcolumn(cols, var) |> maybecategorical
   end
 
   needcbar(var) = !isconst[var] && !iscolor[var]
@@ -103,15 +103,3 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
 
   fig
 end
-
-asvalues(x) = elscitype(x) <: Categorical ? ascateg(x) : x
-
-ascateg(x) = categorical(x)
-ascateg(x::CategArray) = x
-
-isviewable(vals) = isviewable(elscitype(vals))
-isviewable(::Type) = false
-isviewable(::Type{Colorful}) = true
-isviewable(::Type{Continuous}) = true
-isviewable(::Type{Categorical}) = true
-isviewable(::Type{Distributional}) = true
