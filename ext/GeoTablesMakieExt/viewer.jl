@@ -20,13 +20,16 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   if isempty(viewable)
     throw(AssertionError("""
       Could not find viewable variables, i.e., variables that can be
-      converted to colors with the `ascolors` trait. Please make sure
+      converted to colors with the `Colorfy.jl` module. Please make sure
       that the scientific type of variables is correct.
       """))
   end
 
+  # unique values for each variable (excluding invalid values)
+  uniquefor = Dict(var => uniquevalid(Tables.getcolumn(cols, var)) for var in viewable)
+
   # constant variables
-  isconst = Dict(var => allequal(skipinvalid(Tables.getcolumn(cols, var))) for var in viewable)
+  isconst = Dict(var => uniquefor[var].length ≤ 1 for var in viewable)
 
   # distributional variables
   isdist = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Distributional for var in viewable)
@@ -37,8 +40,7 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   # list of menu options
   options = map(viewable) do var
     opt = if isconst[var]
-      vals = Tables.getcolumn(cols, var)
-      val = first(skipinvalid(vals))
+      val = uniquefor[var].first
       "$var = $val (constant)"
     else
       "$var"
@@ -58,7 +60,7 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   vals = Makie.Observable{Any}()
 
   function setvals(var)
-    vals[] = Tables.getcolumn(cols, var) |> asvalues
+    vals[] = Tables.getcolumn(cols, var) |> maybecategorical
   end
 
   needcbar(var) = !isconst[var] && !iscolor[var]
@@ -101,15 +103,3 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
 
   fig
 end
-
-asvalues(x) = elscitype(x) <: Categorical ? ascateg(x) : x
-
-ascateg(x) = categorical(x)
-ascateg(x::CategArray) = x
-
-isviewable(vals) = isviewable(elscitype(vals), vals)
-isviewable(::Type, vals) = false
-isviewable(::Type{Colorful}, vals) = true
-isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
-isviewable(::Type{Categorical}, vals) = true
-isviewable(::Type{Distributional}, vals) = true
