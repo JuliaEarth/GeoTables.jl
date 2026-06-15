@@ -25,8 +25,11 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
       """))
   end
 
+  # unique values for each variable (excluding invalid values)
+  valids = Dict(var => uniquevalid(Tables.getcolumn(cols, var)) for var in viewable)
+
   # constant variables
-  isconst = Dict(var => allequal(skipinvalid(Tables.getcolumn(cols, var))) for var in viewable)
+  isconst = Dict(var => valids[var].length ≤ 1 for var in viewable)
 
   # distributional variables
   isdist = Dict(var => elscitype(Tables.getcolumn(cols, var)) <: Distributional for var in viewable)
@@ -37,8 +40,7 @@ function viewer(data::AbstractGeoTable; alpha=1.0, colormap=:viridis, colorrange
   # list of menu options
   options = map(viewable) do var
     opt = if isconst[var]
-      vals = Tables.getcolumn(cols, var)
-      val = first(skipinvalid(vals))
+      val = valids[var].first
       "$var = $val (constant)"
     else
       "$var"
@@ -107,9 +109,9 @@ asvalues(x) = elscitype(x) <: Categorical ? ascateg(x) : x
 ascateg(x) = categorical(x)
 ascateg(x::CategArray) = x
 
-isviewable(vals) = isviewable(elscitype(vals), vals)
-isviewable(::Type, vals) = false
-isviewable(::Type{Colorful}, vals) = true
-isviewable(::Type{Continuous}, vals) = !all(isinvalid, vals)
-isviewable(::Type{Categorical}, vals) = true
-isviewable(::Type{Distributional}, vals) = true
+isviewable(vals) = isviewable(elscitype(vals))
+isviewable(::Type) = false
+isviewable(::Type{Colorful}) = true
+isviewable(::Type{Continuous}) = true
+isviewable(::Type{Categorical}) = true
+isviewable(::Type{Distributional}) = true

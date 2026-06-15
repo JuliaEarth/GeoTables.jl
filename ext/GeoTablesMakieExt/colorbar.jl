@@ -48,19 +48,7 @@ function cbartickformat(values)
   end
 end
 
-isinvalid(v) = ismissing(v) || (v isa Number && !isfinite(v))
-skipinvalid(vals) = Iterators.filter(!isinvalid, vals)
-
 function tick2level(tick, levels)
   i = trunc(Int, tick)
   isassigned(levels, i) ? asstring(levels[i]) : ""
 end
-
-asfloat(x) = float(x)
-asfloat(x::Quantity) = float(ustrip(x))
-asfloat(x::Distribution) = float(location(x))
-
-asstring(x) = sprint(print, x, context=:compact => true)
-
-asobservable(x) = Makie.Observable{Any}(x)
-asobservable(x::Makie.Observable) = Makie.Observable{Any}(x[])
