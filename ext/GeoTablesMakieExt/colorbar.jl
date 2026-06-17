@@ -9,7 +9,7 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
 
   args = Makie.@lift begin
     v′, _, s′, r′ = Colorfy.handleargs($v, 1.0, $s, $r)
-    cmap = cbarcolormap(v′, s′)
+    cmap = cbarcolormap(v′, s′, r′)
     limits = cbarlimits(v′, r′)
     ticks = cbarticks(v′, limits)
     tickformat = cbartickformat(v′)
@@ -24,20 +24,30 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
   Makie.Colorbar(fig; colormap=cmap, limits, ticks, tickformat)
 end
 
-cbarcolormap(values, colorscheme) = colorscheme
-function cbarcolormap(values::CategArray, colorscheme)
+cbarcolormap(values, colorscheme, colorrange) = colorscheme
+function cbarcolormap(values::CategArray, colorscheme, colorrange)
   n = length(levels(values))
-  cs = colorscheme[range(n > 1 ? 0 : 1, 1, length=n)]
+  cs = get(colorscheme, 1:n, colorrange)
   Makie.cgrad(cs, n, categorical=true)
 end
 
-cbarlimits(values, colorrange) = colorrange isa NTuple{2} ? asfloat.(colorrange) : extrema(asfloat, skipinvalid(values))
-cbarlimits(values::CategArray, colorrange) = (0.0, asfloat(length(levels(values))))
+function cbarlimits(values, colorrange)
+  # see ColorSchemes.get for the logic behind these limits
+  if colorrange == :clamp
+    (0.0, 1.0)
+  elseif colorrange == :extrema
+    extrema(float, skipmissing(Colorfy.nominal(values)))
+  elseif colorrange == :centered
+    maximum(float ∘ abs, skipmissing(Colorfy.nominal(values))) .* (-1, 1)
+  else
+    Tuple(Colorfy.nominal(collect(colorrange)))
+  end
+end
+cbarlimits(values::CategArray, colorrange) = promote(0.0, length(levels(values)))
 
 cbarticks(values, limits) = range(limits..., 5)
 cbarticks(values::CategArray, limits) = 0:length(levels(values))
 
-cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 function cbartickformat(values)
   T = nonmissingtype(eltype(values))
   if T <: Quantity
@@ -47,6 +57,7 @@ function cbartickformat(values)
     ticks -> map(asstring, ticks)
   end
 end
+cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 
 function tick2level(tick, levels)
   i = trunc(Int, tick)
