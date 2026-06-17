@@ -38,18 +38,18 @@ function cbarlimits(values, colorrange)
   if elscitype(values) <: Categorical
     (0.0, float(length(levels(values))))
   else
-     # see Colorfy.get for the logic behind these limits
-     if colorrange == :clamp
-       (0.0, 1.0)
-     elseif colorrange == :extrema
-       n = skipmissing(Colorfy.nominal(values))
-       extrema(float, n)
-     elseif colorrange == :centered
-       n = skipmissing(Colorfy.nominal(values))
-       maximum(float ∘ abs, n) .* (-1, 1)
-     else
-       Tuple(Colorfy.nominal(collect(colorrange)))
-     end
+    # see Colorfy.get for the logic behind these limits
+    if colorrange == :clamp
+      (0.0, 1.0)
+    elseif colorrange == :extrema
+      n = skipmissing(Colorfy.nominal(values))
+      extrema(float, n)
+    elseif colorrange == :centered
+      n = skipmissing(Colorfy.nominal(values))
+      maximum(float ∘ abs, n) .* (-1, 1)
+    else
+      Tuple(Colorfy.nominal(collect(colorrange)))
+    end
   end
 end
 
