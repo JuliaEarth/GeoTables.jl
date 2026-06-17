@@ -9,7 +9,7 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
 
   args = Makie.@lift begin
     v′, _, s′, r′ = Colorfy.handleargs($v, 1.0, $s, $r)
-    cmap = cbarcolormap(v′, s′)
+    cmap = cbarcolormap(v′, s′, r′)
     limits = cbarlimits(v′, r′)
     ticks = cbarticks(v′, limits)
     tickformat = cbartickformat(v′)
@@ -24,16 +24,21 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
   Makie.Colorbar(fig; colormap=cmap, limits, ticks, tickformat)
 end
 
-cbarcolormap(values, colorscheme) = colorscheme
-function cbarcolormap(values::CategArray, colorscheme)
+cbarcolormap(values, colorscheme, colorrange) = colorscheme
+function cbarcolormap(values::CategArray, colorscheme, colorrange)
   n = length(levels(values))
-  cs = colorscheme[range(n > 1 ? 0 : 1, 1, length=n)]
+  cs = get(colorscheme, 1:n, colorrange)
   Makie.cgrad(cs, n, categorical=true)
 end
 
 function cbarlimits(values, colorrange)
-  if colorrange == :extrema
+  # see ColorSchemes.get for the logic behind these limits
+  if colorrange == :clamp
+    (0.0, 1.0)
+  elseif colorrange == :extrema
     extrema(float, skipmissing(Colorfy.nominal(values)))
+  elseif colorrange == :centered
+    maximum(float ∘ abs, skipmissing(Colorfy.nominal(values))) .* (-1, 1)
   else
     Tuple(Colorfy.nominal(collect(colorrange)))
   end
