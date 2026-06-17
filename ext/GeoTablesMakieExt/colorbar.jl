@@ -24,40 +24,54 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
   Makie.Colorbar(fig; colormap=cmap, limits, ticks, tickformat)
 end
 
-cbarcolormap(values, colorscheme, colorrange) = colorscheme
-function cbarcolormap(values::CategVector, colorscheme, colorrange)
-  n = length(levels(values))
-  cs = get(colorscheme, 1:n, colorrange)
-  Makie.cgrad(cs, n, categorical=true)
+function cbarcolormap(values, colorscheme, colorrange)
+  if elscitype(values) <: Categorical
+    n = length(levels(values))
+    c = get(colorscheme, 1:n, colorrange)
+    Makie.cgrad(c, n, categorical=true)
+  else
+    colorscheme
+  end
 end
 
 function cbarlimits(values, colorrange)
-  # see ColorSchemes.get for the logic behind these limits
-  if colorrange == :clamp
-    (0.0, 1.0)
-  elseif colorrange == :extrema
-    extrema(float, skipmissing(Colorfy.nominal(values)))
-  elseif colorrange == :centered
-    maximum(float ∘ abs, skipmissing(Colorfy.nominal(values))) .* (-1, 1)
+  if elscitype(values) <: Categorical
+    promote(0.0, length(levels(values)))
   else
-    Tuple(Colorfy.nominal(collect(colorrange)))
+     # see Colorfy.getlimits for the logic behind these limits
+     if colorrange == :clamp
+       (0.0, 1.0)
+     elseif colorrange == :extrema
+       extrema(float, skipmissing(values))
+     elseif colorrange == :centered
+       maximum(float ∘ abs, skipmissing(values)) .* (-1, 1)
+     else
+       Tuple(Colorfy.nominal(collect(colorrange)))
+     end
   end
 end
-cbarlimits(values::CategVector, colorrange) = promote(0.0, length(levels(values)))
 
-cbarticks(values, limits) = range(limits..., 5)
-cbarticks(values::CategVector, limits) = 0:length(levels(values))
+function cbarticks(values, limits)
+  if elscitype(values) <: Categorical
+    0:length(levels(values))
+  else
+    range(limits..., 5)
+  end
+end
 
 function cbartickformat(values)
-  T = nonmissingtype(eltype(values))
-  if T <: Quantity
-    u = unit(T)
-    ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
+  if elscitype(values) <: Categorical
+    ticks -> map(t -> tick2level(t, levels(values)), ticks)
   else
-    ticks -> map(asstring, ticks)
+    T = nonmissingtype(eltype(values))
+    if T <: Quantity
+      u = unit(T)
+      ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
+    else
+      ticks -> map(asstring, ticks)
+    end
   end
 end
-cbartickformat(values::CategVector) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 
 function tick2level(tick, levels)
   i = trunc(Int, tick)

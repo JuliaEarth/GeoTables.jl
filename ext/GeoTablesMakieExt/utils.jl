@@ -2,16 +2,11 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const CategVector = AbstractVector{<:CategoricalValue}
-
 # -------------------------------
 # utilities for vector of values
 # -------------------------------
 
-maybecategorical(v) = elscitype(v) <: Categorical ? ascategorical(v) : v
-
-ascategorical(v) = categorical(v)
-ascategorical(v::CategVector) = v
+maybecategorical(v) = elscitype(v) <: Categorical ? categorical(v) : v
 
 function uniquevalid(v)
   u = unique(skipinvalid(v))
