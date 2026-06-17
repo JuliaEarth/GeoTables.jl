@@ -38,7 +38,7 @@ function cbarlimits(values, colorrange)
   if elscitype(values) <: Categorical
     (0.0, float(length(levels(values))))
   else
-     # see Colorfy.getlimits for the logic behind these limits
+     # see Colorfy.get for the logic behind these limits
      if colorrange == :clamp
        (0.0, 1.0)
      elseif colorrange == :extrema
@@ -63,15 +63,13 @@ end
 
 function cbartickformat(values)
   if elscitype(values) <: Categorical
-    ticks -> map(t -> tick2level(t, levels(values)), ticks)
+    l = levels(values)
+    ticks -> map(t -> tick2level(t, l), ticks)
+  elseif elscitype(values) <: Continuous
+    u = unit(eltype(values))
+    ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
   else
-    T = nonmissingtype(eltype(values))
-    if T <: Quantity
-      u = unit(T)
-      ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
-    else
-      ticks -> map(asstring, ticks)
-    end
+    ticks -> map(t -> asstring(t), ticks)
   end
 end
 

@@ -9,7 +9,7 @@ using GeoTables
 using Dates
 using Tables
 using Colorfy
-using Unitful
+using Unitful: unit
 using DataScienceTraits
 using CategoricalArrays
 
