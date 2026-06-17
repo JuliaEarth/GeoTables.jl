@@ -43,7 +43,6 @@ cbarlimits(values::CategArray, colorrange) = promote(0.0, length(levels(values))
 cbarticks(values, limits) = range(limits..., 5)
 cbarticks(values::CategArray, limits) = 0:length(levels(values))
 
-cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 function cbartickformat(values)
   T = nonmissingtype(eltype(values))
   if T <: Quantity
@@ -53,6 +52,7 @@ function cbartickformat(values)
     ticks -> map(asstring, ticks)
   end
 end
+cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 
 function tick2level(tick, levels)
   i = trunc(Int, tick)
