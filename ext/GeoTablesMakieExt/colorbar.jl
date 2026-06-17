@@ -25,7 +25,7 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
 end
 
 cbarcolormap(values, colorscheme, colorrange) = colorscheme
-function cbarcolormap(values::CategArray, colorscheme, colorrange)
+function cbarcolormap(values::CategVector, colorscheme, colorrange)
   n = length(levels(values))
   cs = get(colorscheme, 1:n, colorrange)
   Makie.cgrad(cs, n, categorical=true)
@@ -43,10 +43,10 @@ function cbarlimits(values, colorrange)
     Tuple(Colorfy.nominal(collect(colorrange)))
   end
 end
-cbarlimits(values::CategArray, colorrange) = promote(0.0, length(levels(values)))
+cbarlimits(values::CategVector, colorrange) = promote(0.0, length(levels(values)))
 
 cbarticks(values, limits) = range(limits..., 5)
-cbarticks(values::CategArray, limits) = 0:length(levels(values))
+cbarticks(values::CategVector, limits) = 0:length(levels(values))
 
 function cbartickformat(values)
   T = nonmissingtype(eltype(values))
@@ -57,7 +57,7 @@ function cbartickformat(values)
     ticks -> map(asstring, ticks)
   end
 end
-cbartickformat(values::CategArray) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
+cbartickformat(values::CategVector) = ticks -> map(t -> tick2level(t, levels(values)), ticks)
 
 function tick2level(tick, levels)
   i = trunc(Int, tick)
