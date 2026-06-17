@@ -31,8 +31,14 @@ function cbarcolormap(values::CategArray, colorscheme)
   Makie.cgrad(cs, n, categorical=true)
 end
 
-cbarlimits(values, colorrange) = colorrange isa NTuple{2} ? asfloat.(colorrange) : extrema(asfloat, skipinvalid(values))
-cbarlimits(values::CategArray, colorrange) = (0.0, asfloat(length(levels(values))))
+function cbarlimits(values, colorrange)
+  if colorrange == :extrema
+    extrema(float, skipmissing(Colorfy.nominal(values)))
+  else
+    Tuple(Colorfy.nominal(collect(colorrange)))
+  end
+end
+cbarlimits(values::CategArray, colorrange) = promote(0.0, length(levels(values)))
 
 cbarticks(values, limits) = range(limits..., 5)
 cbarticks(values::CategArray, limits) = 0:length(levels(values))

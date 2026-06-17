@@ -9,10 +9,6 @@ maybecategorical(x) = elscitype(x) <: Categorical ? ascategorical(x) : x
 ascategorical(x) = categorical(x)
 ascategorical(x::CategArray) = x
 
-asfloat(x) = float(x)
-asfloat(x::Quantity) = float(ustrip(x))
-asfloat(x::Distribution) = float(location(x))
-
 asstring(x) = sprint(print, x, context=:compact => true)
 
 asobservable(x) = Makie.Observable{Any}(x)
