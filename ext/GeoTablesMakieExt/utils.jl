@@ -2,32 +2,35 @@
 # Licensed under the MIT License. See LICENCE in the project root.
 # ------------------------------------------------------------------
 
-const CategArray{T,N} = Union{CategoricalArray{T,N},SubArray{T,N,<:CategoricalArray}}
+# -------------------------------
+# utilities for vector of values
+# -------------------------------
 
-maybecategorical(x) = elscitype(x) <: Categorical ? ascategorical(x) : x
+maybecategorical(v) = elscitype(v) <: Categorical ? categorical(v) : v
 
-ascategorical(x) = categorical(x)
-ascategorical(x::CategArray) = x
-
-asstring(x) = sprint(print, x, context=:compact => true)
-
-asobservable(x) = Makie.Observable{Any}(x)
-asobservable(x::Makie.Observable) = Makie.Observable{Any}(x[])
-
-isinvalid(v) = ismissing(v) || (v isa Number && !isfinite(v))
-
-skipinvalid(vals) = Iterators.filter(!isinvalid, vals)
-
-function uniquevalid(vals)
-  u = unique(skipinvalid(vals))
+function uniquevalid(v)
+  u = unique(skipinvalid(v))
   n = length(u)
-  v = iszero(n) ? missing : first(u)
-  (length=n, first=v)
+  f = iszero(n) ? missing : first(u)
+  (length=n, first=f)
 end
 
-isviewable(vals) = isviewable(elscitype(vals))
+skipinvalid(v) = Iterators.filter(!isinvalid, v)
+
+isviewable(v) = isviewable(elscitype(v))
 isviewable(::Type) = false
 isviewable(::Type{Colorful}) = true
 isviewable(::Type{Continuous}) = true
 isviewable(::Type{Categorical}) = true
 isviewable(::Type{Distributional}) = true
+
+# ---------------------------
+# utilities for single value
+# ---------------------------
+
+isinvalid(x) = ismissing(x) || (x isa Number && !isfinite(x))
+
+asstring(x) = sprint(print, x, context=:compact => true)
+
+asobservable(x) = Makie.Observable{Any}(x)
+asobservable(x::Makie.Observable) = Makie.Observable{Any}(x[])

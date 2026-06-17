@@ -9,12 +9,9 @@ using GeoTables
 using Dates
 using Tables
 using Colorfy
-using Unitful
+using Unitful: unit
 using DataScienceTraits
 using CategoricalArrays
-using Distributions: Distribution, location
-using Makie.Colors: Colorant, Gray
-using Meshes: embeddim
 
 import Makie
 import Meshes: viz, viz!
