@@ -12,9 +12,6 @@ using Colorfy
 using Unitful
 using DataScienceTraits
 using CategoricalArrays
-using Distributions: Distribution, location
-using Makie.Colors: Colorant, Gray
-using Meshes: embeddim
 
 import Makie
 import Meshes: viz, viz!

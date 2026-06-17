@@ -36,7 +36,7 @@ end
 
 function cbarlimits(values, colorrange)
   if elscitype(values) <: Categorical
-    promote(0.0, length(levels(values)))
+    (0.0, float(length(levels(values))))
   else
      # see Colorfy.getlimits for the logic behind these limits
      if colorrange == :clamp
