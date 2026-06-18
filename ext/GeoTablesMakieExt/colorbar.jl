@@ -8,7 +8,7 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
   r = asobservable(colorrange)
 
   args = Makie.@lift begin
-    v′, _, s′, r′ = Colorfy.handleargs($v, 1.0, $s, $r)
+    v′, _, s′, r′ = Colorfy.preprocess($v, 1.0, $s, $r)
     cmap = cbarcolormap(v′, s′, r′)
     limits = cbarlimits(v′, r′)
     ticks = cbarticks(v′, limits)
@@ -25,18 +25,21 @@ function cbar(fig, values; colormap=:viridis, colorrange=:extrema)
 end
 
 function cbarcolormap(values, colorscheme, colorrange)
-  if elscitype(values) <: Categorical
-    n = length(levels(values))
+  n = Colorfy.nlevels(values)
+  if n > 1
+    # build discrete color scheme
     c = get(colorscheme, 1:n, colorrange)
     Makie.cgrad(c, n, categorical=true)
   else
+    # return color scheme as is
     colorscheme
   end
 end
 
 function cbarlimits(values, colorrange)
-  if elscitype(values) <: Categorical
-    (0.0, float(length(levels(values))))
+  n = Colorfy.nlevels(values)
+  if n > 1
+    (0.0, float(n))
   else
     # see Colorfy.get for the logic behind these limits
     if colorrange == :clamp
@@ -54,16 +57,14 @@ function cbarlimits(values, colorrange)
 end
 
 function cbarticks(values, limits)
-  if elscitype(values) <: Categorical
-    0:length(levels(values))
-  else
-    range(limits..., 5)
-  end
+  n = Colorfy.nlevels(values)
+  n > 1 ? (0:n) : range(limits..., 5)
 end
 
 function cbartickformat(values)
-  if elscitype(values) <: Categorical
-    l = levels(values)
+  n = Colorfy.nlevels(values)
+  if n > 1
+    l = Colorfy.levels(values)
     ticks -> map(t -> tick2level(t, l), ticks)
   elseif elscitype(values) <: Continuous
     u = unit(eltype(values))
