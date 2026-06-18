@@ -58,23 +58,18 @@ end
 
 function cbarticks(values, limits)
   n = Colorfy.nlevels(values)
-  n > 1 ? (0:n) : range(limits..., 5)
+  n > 1 ? range(1, n) .- 0.5 : range(limits..., 5)
 end
 
 function cbartickformat(values)
   n = Colorfy.nlevels(values)
   if n > 1
     l = Colorfy.levels(values)
-    ticks -> map(t -> tick2level(t, l), ticks)
+    ticks -> map(t -> asstring(l[ceil(Int, t)]), ticks)
   elseif elscitype(values) <: Continuous
     u = unit(eltype(values))
     ticks -> map(t -> asstring(t) * " " * asstring(u), ticks)
   else
     ticks -> map(t -> asstring(t), ticks)
   end
-end
-
-function tick2level(tick, levels)
-  i = trunc(Int, tick)
-  isassigned(levels, i) ? asstring(levels[i]) : ""
 end

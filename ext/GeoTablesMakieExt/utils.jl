@@ -23,6 +23,7 @@ isviewable(::Type{Colorful}) = true
 isviewable(::Type{Continuous}) = true
 isviewable(::Type{Categorical}) = true
 isviewable(::Type{Distributional}) = true
+isviewable(::Type{Compositional}) = true
 
 # ---------------------------
 # utilities for single value
