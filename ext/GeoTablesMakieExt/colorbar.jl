@@ -42,16 +42,13 @@ function cbarlimits(values, colorrange)
     (0.0, float(n))
   else
     # see Colorfy.get for the logic behind these limits
-    if colorrange == :clamp
-      (0.0, 1.0)
-    elseif colorrange == :extrema
-      n = skipmissing(Colorfy.nominal(values))
-      extrema(float, n)
+    if colorrange == :extrema
+      extrema(float, skipmissing(Colorfy.nominal(values)))
     elseif colorrange == :centered
-      n = skipmissing(Colorfy.nominal(values))
-      maximum(float ∘ abs, n) .* (-1, 1)
+      maximum(abs, skipmissing(Colorfy.nominal(values))) .* (-1, 1)
     else
-      Tuple(Colorfy.nominal(collect(colorrange)))
+      crange = promote(colorrange...)
+      Tuple(Colorfy.nominal(collect(crange)))
     end
   end
 end
