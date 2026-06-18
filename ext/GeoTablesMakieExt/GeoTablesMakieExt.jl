@@ -9,9 +9,10 @@ using GeoTables
 using Dates
 using Tables
 using Colorfy
-using Unitful: unit
 using DataScienceTraits
-using CategoricalArrays
+
+using CategoricalArrays: categorical # for categorical columns
+using Unitful: unit # for units in colorbar ticks
 
 import Makie
 import Meshes: viz, viz!
