@@ -18,9 +18,13 @@ import Makie
 import Meshes: viz, viz!
 import GeoTables: viewer, cbar
 
+# viewer and cbar
 include("utils.jl")
 include("viewer.jl")
 include("colorbar.jl")
+
+# precompile workloads
+include("precompile.jl")
 
 # ----------------
 # COMMON MISTAKES
