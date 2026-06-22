@@ -4,8 +4,8 @@
 
 using PrecompileTools
 
-using Meshes: CartesianGrid
-using Unitful: K
+using Meshes
+using Unitful
 
 @setup_workload begin
   # popular scientific types
