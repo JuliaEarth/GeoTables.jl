@@ -11,9 +11,9 @@ using Unitful
   # popular scientific types
   vars = (
     rand(4),
-    rand(4) * K,
+    rand(4) * u"K",
     rand(1:3, 4),
-    rand(1:3, 4) * K,
+    rand(1:3, 4) * u"K",
     rand(Bool, 4),
     rand(["yes", "no"], 4)
   )
