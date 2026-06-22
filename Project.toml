@@ -30,7 +30,7 @@ StatsLearnModels = "c146b59d-1589-421c-8e09-a22e554fd05c"
 TableTransforms = "0d432bfd-3ee1-4ac1-886a-39f05cc69a3e"
 
 [extensions]
-GeoTablesMakieExt = "Makie"
+GeoTablesMakieExt = ["CategoricalArrays", "Colorfy", "Makie", "Meshes", "Unitful"]
 GeoTablesStatsLearnModelsExt = "StatsLearnModels"
 GeoTablesTableTransformsExt = "TableTransforms"
 
