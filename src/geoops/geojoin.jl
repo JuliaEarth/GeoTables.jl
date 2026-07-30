@@ -89,16 +89,14 @@ function _geojoin(
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
 
-  if kind === :inner
-    _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
-  else
-    _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
-  end
+  _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
 end
 
-function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
+  boxes1 = boundingbox.(collect(dom1))
+  boxes2 = boundingbox.(collect(dom2))
   tab1 = values(gtb1)
   tab2 = values(gtb2)
   cols1 = Tables.columns(tab1)
@@ -114,16 +112,25 @@ function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # aggregation functions
   agg = _aggdict(selector, aggfuns, cols2, vars2)
 
+  # flag predicates for which overlapping bounding boxes are necessary
+  use_bbox = any(p -> pred === p, (intersects, issubset, isequal))
+
   # rows to join
   nrows = nrow(gtb1)
   rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
+    box1 = boxes1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
+    if use_bbox
+    [row2 for (geom2, box2, row2) in zip(dom2, boxes2, rows2) 
+      if intersects(box1, box2) && pred(geom1, geom2) && onpred(row1, row2)]
+    else
+      [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
+    end
   end
 
-  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+  kind == :left ? _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2) : _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
 end
 
 function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
@@ -145,36 +152,6 @@ function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
   georef(newtab, dom1)
-end
-
-function _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
-  dom1 = domain(gtb1)
-  dom2 = domain(gtb2)
-  tab1 = values(gtb1)
-  tab2 = values(gtb2)
-  cols1 = Tables.columns(tab1)
-  cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
-  vars2 = Tables.columnnames(cols2)
-
-  # remove "on" variables from gtb2
-  if !isnothing(onvars)
-    vars2 = setdiff(vars2, onvars)
-  end
-
-  # aggregation functions
-  agg = _aggdict(selector, aggfuns, cols2, vars2)
-
-  # rows to join
-  nrows = nrow(gtb1)
-  rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
-    geom1 = element(dom1, i)
-    row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
-  end
-
-  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
 end
 
 function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
