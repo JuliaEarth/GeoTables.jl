@@ -92,7 +92,7 @@ function _geojoin(
   _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
 end
 
-function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
+function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   boxes1 = map(boundingbox, dom1)
