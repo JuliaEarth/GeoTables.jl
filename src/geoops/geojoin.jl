@@ -89,7 +89,7 @@ function _geojoin(
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
 
-  _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
+  _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 end
 
 function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
