@@ -130,7 +130,11 @@ function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
     end
   end
 
-  kind == :left ? _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2) : _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+  if kind == :left
+    _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+  else
+    _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+  end
 end
 
 function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
