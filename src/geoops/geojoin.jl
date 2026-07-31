@@ -123,8 +123,17 @@ function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
     box1 = boxes1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-    [row2 for (geom2, box2, row2) in zip(dom2, boxes2, rows2) 
-      if intersects(box1, box2) && pred(geom1, geom2) && onpred(row1, row2)]
+      matches = eltype(rows2)[]
+      for j in 1:nrow(gtb2)
+        box2 = boxes2[j]
+        intersects(box1, box2) || continue
+        row2 = rows2[j]
+        onpred(row1, row2) || continue
+        geom2 = element(dom2, j)
+        pred(geom1, geom2) || continue
+        push!(matches, row2)
+      end
+      matches
     else
       [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
     end
