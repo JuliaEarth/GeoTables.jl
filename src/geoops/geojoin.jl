@@ -95,8 +95,6 @@ end
 function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
-  boxes1 = map(boundingbox, dom1)
-  boxes2 = map(boundingbox, dom2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
   cols1 = Tables.columns(tab1)
@@ -114,20 +112,23 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 
   # flag predicates for which overlapping bounding boxes are necessary
   usebbox = pred ∈ (intersects, issubset, isequal)
+  if usebbox
+    boxes1 = map(boundingbox, dom1)
+    boxes2 = map(boundingbox, dom2)
+  end
 
   # rows to join
   nrows = nrow(gtb1)
-  rows2 = Tables.rows(tab2)
   jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
     box1 = boxes1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      matches = eltype(rows2)[]
+      matches = typeof(Tables.subset(tab2, 1, viewhint=true))[]
       for j in 1:nrow(gtb2)
         box2 = boxes2[j]
         intersects(box1, box2) || continue
-        row2 = rows2[j]
+        row2 = Tables.subset(tab2, j, viewhint=true)
         onpred(row1, row2) || continue
         geom2 = element(dom2, j)
         pred(geom1, geom2) || continue
@@ -135,6 +136,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
       end
       matches
     else
+      rows2 = Tables.rows(tab2)
       [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
     end
   end
