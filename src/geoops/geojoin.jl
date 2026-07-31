@@ -122,7 +122,7 @@ function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
     geom1 = element(dom1, i)
     box1 = boxes1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
-    if use_bbox
+    if usebbox
     [row2 for (geom2, box2, row2) in zip(dom2, boxes2, rows2) 
       if intersects(box1, box2) && pred(geom1, geom2) && onpred(row1, row2)]
     else
