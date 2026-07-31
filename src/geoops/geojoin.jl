@@ -113,7 +113,7 @@ function _geojoinalg(gtb1, gtb2, selector, aggfuns, kind, pred, onvars, onpred)
   agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # flag predicates for which overlapping bounding boxes are necessary
-  use_bbox = any(p -> pred === p, (intersects, issubset, isequal))
+  usebbox = pred ∈ (intersects, issubset, isequal)
 
   # rows to join
   nrows = nrow(gtb1)
