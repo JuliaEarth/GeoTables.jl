@@ -182,8 +182,9 @@ function _innerjoinpos(jrows, agg, gtb1, vars2)
   # row indices of gtb1 to preserve
   inds = findall(!isempty, jrows)
 
-  sub = Tables.subset(tab1, inds, viewhint=true)
-  cols1 = Tables.columns(sub)
+  # extract subtable of attributes
+  sub1 = Tables.subset(tab1, inds, viewhint=true)
+  cols1 = Tables.columns(sub1)
   vars1 = Tables.columnnames(cols1)
 
   # generate joined column
@@ -195,7 +196,7 @@ function _innerjoinpos(jrows, agg, gtb1, vars2)
     end
   end
 
-  pairs1 = (var => Tables.getcolumn(cols, var) for var in vars1)
+  pairs1 = (var => Tables.getcolumn(cols1, var) for var in vars1)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
