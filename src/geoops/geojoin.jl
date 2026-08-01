@@ -121,7 +121,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   nrows = nrow(gtb1)
   jrows = _tmap(1:nrows) do i
     geom1 = element(dom1, i)
-    box1 = boxes1[i]
+    usebbox && (box1 = boxes1[i])
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
       matches = typeof(Tables.subset(tab2, 1, viewhint=true))[]
@@ -142,13 +142,19 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 
   if kind == :left
-    _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+    _leftjoinpos(jrows, agg, gtb1, vars2)
   else
-    _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+    _innerjoinpos(jrows, agg, gtb1, vars2)
   end
 end
 
-function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+function _leftjoinpos(jrows, agg, gtb1, vars2)
+  dom1 = domain(gtb1)
+  tab1 = values(gtb1)
+  cols1 = Tables.columns(tab1)
+  vars1 = Tables.columnnames(cols1)
+  nrows = nrow(gtb1)
+
   # generate joined column
   function gencol(var)
     map(1:nrows) do i
@@ -169,9 +175,16 @@ function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+function _innerjoinpos(jrows, agg, gtb1, vars2)
+  dom1 = domain(gtb1)
+  tab1 = values(gtb1)
+
   # row indices of gtb1 to preserve
   inds = findall(!isempty, jrows)
+
+  sub = Tables.subset(tab1, inds, viewhint=true)
+  cols1 = Tables.columns(sub)
+  vars1 = Tables.columnnames(cols1)
 
   # generate joined column
   function gencol(var)
@@ -182,8 +195,6 @@ function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
     end
   end
 
-  sub = Tables.subset(tab1, inds, viewhint=true)
-  cols = Tables.columns(sub)
   pairs1 = (var => Tables.getcolumn(cols, var) for var in vars1)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
