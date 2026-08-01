@@ -2,8 +2,6 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-const GEOJOINKINDS = [:left, :inner]
-
 """
     geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
 
@@ -51,8 +49,8 @@ function _geojoin(
   pred=intersects,
   on=nothing
 )
-  if kind ∉ GEOJOINKINDS
-    throw(ArgumentError("invalid kind of join, use one these $GEOJOINKINDS"))
+  if kind ∉ (:left, :inner)
+    throw(ArgumentError("invalid kind of join, use one of :left or :inner"))
   end
 
   vars1 = Tables.schema(values(gtb1)).names
@@ -97,9 +95,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
-  cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
 
   # remove "on" variables from gtb2
@@ -118,9 +114,8 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 
   # rows to join
-  nrows = nrow(gtb1)
-  jrows = _tmap(1:nrows) do i
-    geom1 = element(dom1, i)
+  jrows = _tmap(1:nrow(gtb1)) do i
+    geo1 = dom1[i]
     usebbox && (box1 = boxes1[i])
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
@@ -130,14 +125,14 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
         intersects(box1, box2) || continue
         row2 = Tables.subset(tab2, j, viewhint=true)
         onpred(row1, row2) || continue
-        geom2 = element(dom2, j)
-        pred(geom1, geom2) || continue
+        geo2 = dom2[j]
+        pred(geo1, geo2) || continue
         push!(matches, row2)
       end
       matches
     else
       rows2 = Tables.rows(tab2)
-      [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
+      [row2 for (geo2, row2) in zip(dom2, rows2) if pred(geo1, geo2) && onpred(row1, row2)]
     end
   end
 
