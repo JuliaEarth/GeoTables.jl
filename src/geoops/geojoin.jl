@@ -2,8 +2,6 @@
 # Licensed under the MIT License. See LICENSE in the project root.
 # ------------------------------------------------------------------
 
-const GEOJOINKINDS = [:left, :inner]
-
 """
     geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
 
@@ -51,8 +49,8 @@ function _geojoin(
   pred=intersects,
   on=nothing
 )
-  if kind ∉ GEOJOINKINDS
-    throw(ArgumentError("invalid kind of join, use one these $GEOJOINKINDS"))
+  if kind ∉ (:left, :inner)
+    throw(ArgumentError("invalid kind of join, use one of :left or :inner"))
   end
 
   vars1 = Tables.schema(values(gtb1)).names
@@ -89,21 +87,15 @@ function _geojoin(
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
 
-  if kind === :inner
-    _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
-  else
-    _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
-  end
+  _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 end
 
-function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
   tab2 = values(gtb2)
-  cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
 
   # remove "on" variables from gtb2
@@ -114,19 +106,51 @@ function _geoleftjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # aggregation functions
   agg = _aggdict(selector, aggfuns, cols2, vars2)
 
-  # rows to join
-  nrows = nrow(gtb1)
-  rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
-    geom1 = element(dom1, i)
-    row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
+  # flag predicates for which overlapping bounding boxes are necessary
+  usebbox = pred ∈ (intersects, issubset, isequal)
+  if usebbox
+    boxes1 = map(boundingbox, dom1)
+    boxes2 = map(boundingbox, dom2)
   end
 
-  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+  # rows to join
+  jrows = _tmap(1:nrow(gtb1)) do i
+    geo1 = dom1[i]
+    row1 = Tables.subset(tab1, i, viewhint=true)
+    if usebbox
+      box1 = boxes1[i]
+      row2 = Tables.subset(tab2, 1, viewhint=true)
+      matches = typeof(row2)[]
+      for j in 1:nrow(gtb2)
+        box2 = boxes2[j]
+        intersects(box1, box2) || continue
+        row2 = Tables.subset(tab2, j, viewhint=true)
+        onpred(row1, row2) || continue
+        geo2 = dom2[j]
+        pred(geo1, geo2) || continue
+        push!(matches, row2)
+      end
+      matches
+    else
+      rows2 = Tables.rows(tab2)
+      [row2 for (geo2, row2) in zip(dom2, rows2) if pred(geo1, geo2) && onpred(row1, row2)]
+    end
+  end
+
+  if kind == :left
+    _leftjoinpos(jrows, agg, gtb1, vars2)
+  elseif kind == :inner
+    _innerjoinpos(jrows, agg, gtb1, vars2)
+  end
 end
 
-function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+function _leftjoinpos(jrows, agg, gtb1, vars2)
+  dom1 = domain(gtb1)
+  tab1 = values(gtb1)
+  cols1 = Tables.columns(tab1)
+  vars1 = Tables.columnnames(cols1)
+  nrows = nrow(gtb1)
+
   # generate joined column
   function gencol(var)
     map(1:nrows) do i
@@ -147,39 +171,17 @@ function _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
   georef(newtab, dom1)
 end
 
-function _geoinnerjoin(gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
+function _innerjoinpos(jrows, agg, gtb1, vars2)
   dom1 = domain(gtb1)
-  dom2 = domain(gtb2)
   tab1 = values(gtb1)
-  tab2 = values(gtb2)
-  cols1 = Tables.columns(tab1)
-  cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
-  vars2 = Tables.columnnames(cols2)
 
-  # remove "on" variables from gtb2
-  if !isnothing(onvars)
-    vars2 = setdiff(vars2, onvars)
-  end
-
-  # aggregation functions
-  agg = _aggdict(selector, aggfuns, cols2, vars2)
-
-  # rows to join
-  nrows = nrow(gtb1)
-  rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
-    geom1 = element(dom1, i)
-    row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for (geom2, row2) in zip(dom2, rows2) if pred(geom1, geom2) && onpred(row1, row2)]
-  end
-
-  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
-end
-
-function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
   # row indices of gtb1 to preserve
   inds = findall(!isempty, jrows)
+
+  # extract subtable of attributes
+  sub1 = Tables.subset(tab1, inds, viewhint=true)
+  cols1 = Tables.columns(sub1)
+  vars1 = Tables.columnnames(cols1)
 
   # generate joined column
   function gencol(var)
@@ -190,9 +192,7 @@ function _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
     end
   end
 
-  sub = Tables.subset(tab1, inds, viewhint=true)
-  cols = Tables.columns(sub)
-  pairs1 = (var => Tables.getcolumn(cols, var) for var in vars1)
+  pairs1 = (var => Tables.getcolumn(cols1, var) for var in vars1)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 

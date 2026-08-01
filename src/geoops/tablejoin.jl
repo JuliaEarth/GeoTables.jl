@@ -77,12 +77,9 @@ function _tablejoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfun
 end
 
 function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
-  dom1 = domain(gtb)
   tab1 = values(gtb)
   tab2 = tab
-  cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
 
   # remove "on" variables from gtb2
@@ -99,16 +96,13 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+  _leftjoinpos(jrows, agg, gtb, vars2)
 end
 
 function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
-  dom1 = domain(gtb)
   tab1 = values(gtb)
   tab2 = tab
-  cols1 = Tables.columns(tab1)
   cols2 = Tables.columns(tab2)
-  vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
 
   # remove "on" variables from gtb2
@@ -125,5 +119,5 @@ function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+  _innerjoinpos(jrows, agg, gtb, vars2)
 end
