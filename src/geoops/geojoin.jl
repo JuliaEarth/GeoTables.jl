@@ -138,7 +138,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 
   if kind == :left
     _leftjoinpos(jrows, agg, gtb1, vars2)
-  else
+  elseif kind == :inner
     _innerjoinpos(jrows, agg, gtb1, vars2)
   end
 end
