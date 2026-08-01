@@ -99,7 +99,7 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  _leftjoinpos(nrows, jrows, agg, dom1, tab1, cols1, vars1, vars2)
+  _leftjoinpos(jrows, agg, gtb, vars2)
 end
 
 function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
@@ -125,5 +125,5 @@ function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
     [row2 for row2 in rows2 if onpred(row1, row2)]
   end
 
-  _innerjoinpos(jrows, agg, dom1, tab1, vars1, vars2)
+  _innerjoinpos(jrows, agg, gtb, vars2)
 end
