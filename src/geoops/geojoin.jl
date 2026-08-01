@@ -116,10 +116,11 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # rows to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
-    usebbox && (box1 = boxes1[i])
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      matches = typeof(Tables.subset(tab2, 1, viewhint=true))[]
+      box1 = boxes1[i]
+      row2 = Tables.subset(tab2, 1, viewhint=true)
+      matches = typeof(row2)[]
       for j in 1:nrow(gtb2)
         box2 = boxes2[j]
         intersects(box1, box2) || continue
