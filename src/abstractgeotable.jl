@@ -155,7 +155,7 @@ function _common_kwargs(geotable)
       label₃ = "🖈 $cname{$dname}"
     else
       label₁ = if _istarget(tab, name)
-        styled"{(foreground=#DB1F48,weight=bold):$name}"
+        styled"{(foreground=#FF7E70,weight=bold):$name}"
       else
         styled"{(foreground=#98AA7A,weight=bold):$name}"
       end
