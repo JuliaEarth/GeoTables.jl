@@ -128,14 +128,14 @@ _getindex(geotable::AbstractGeoTable, ind::Int, var::Symbol) = getproperty(geota
 _getindex(geotable::AbstractGeoTable, ::Colon, var::Symbol) = getproperty(geotable, var)
 
 """
-    hcat(geotables...)
+    hcat(geotable, geotables...)
   
-Horizontally concatenate the `geotables` that have the same domain.
+Horizontally concatenate the `geotable` with `geotables` that have the same domain.
 
 If a geotable has the same column names as others,
 an underscore will be added to these names to make them unique.
 """
-Base.hcat(geotables::AbstractGeoTable...) = reduce(hcat, geotables)
+Base.hcat(geotable::AbstractGeoTable, geotables::AbstractGeoTable...) = reduce(hcat, geotables, init=geotable)
 
 function Base.hcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable)
   dom = domain(geotable1)
@@ -184,9 +184,9 @@ end
 const VCATKINDS = [:union, :intersect]
 
 """
-    vcat(geotables...; kind=:union)
+    vcat(geotable, geotables...; kind=:union)
   
-Vertically concatenate the `geotables` using a certain `kind` of vcat.
+Vertically concatenate the `geotable` with `geotables` using a certain `kind` of vcat.
 
 ## Kinds
 
@@ -195,7 +195,7 @@ Vertically concatenate the `geotables` using a certain `kind` of vcat.
 * `:intersect` - Only columns that are present in all geotables are returned and, 
   if there is no intersection, an error will be thrown.
 """
-Base.vcat(geotables::AbstractGeoTable...; kwars...) = reduce((gtb1, gtb2) -> vcat(gtb1, gtb2; kwars...), geotables)
+Base.vcat(geotable::AbstractGeoTable, geotables::AbstractGeoTable...; kwars...) = reduce((gtb1, gtb2) -> vcat(gtb1, gtb2; kwars...), geotables, init=geotable)
 
 function Base.vcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable; kind=:union)
   if kind ∉ VCATKINDS
