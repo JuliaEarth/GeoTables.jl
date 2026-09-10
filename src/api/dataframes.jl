@@ -195,7 +195,8 @@ Vertically concatenate the `geotable` with `geotables` using a certain `kind` of
 * `:intersect` - Only columns that are present in all geotables are returned and, 
   if there is no intersection, an error will be thrown.
 """
-Base.vcat(geotable::AbstractGeoTable, geotables::AbstractGeoTable...; kwars...) = reduce((gtb1, gtb2) -> vcat(gtb1, gtb2; kwars...), geotables, init=geotable)
+Base.vcat(geotable::AbstractGeoTable, geotables::AbstractGeoTable...; kwars...) =
+  reduce((gtb1, gtb2) -> vcat(gtb1, gtb2; kwars...), geotables, init=geotable)
 
 function Base.vcat(geotable1::AbstractGeoTable, geotable2::AbstractGeoTable; kind=:union)
   if kind ∉ VCATKINDS
