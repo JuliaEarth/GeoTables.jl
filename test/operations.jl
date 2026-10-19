@@ -1,9 +1,9 @@
 @testset "Operations" begin
   @testset "geojoin" begin
-    poly1 = PolyArea((1, 1), (5, 1), (3, 3))
-    poly2 = PolyArea((6, 0), (10, 0), (10, 8))
-    poly3 = PolyArea((1, 4), (4, 4), (6, 6), (3, 6))
-    poly4 = PolyArea((1, 8), (4, 7), (7, 8), (5, 10), (3, 10))
+    poly1 = Pgon((1, 1), (5, 1), (3, 3))
+    poly2 = Pgon((6, 0), (10, 0), (10, 8))
+    poly3 = Pgon((1, 4), (4, 4), (6, 6), (3, 6))
+    poly4 = Pgon((1, 8), (4, 7), (7, 8), (5, 10), (3, 10))
     pset = PointSet((3, 2), (3, 3), (9, 2), (8, 2), (6, 4), (4, 5), (3, 5), (5, 9), (3, 9))
     gset = GeometrySet([poly1, poly2, poly3, poly4])
     grid = CartesianGrid(10, 10)
