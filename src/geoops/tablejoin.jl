@@ -91,12 +91,12 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   # rows to join
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
+  matchgroups = _tmap(1:nrows) do i
     row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for row2 in rows2 if onpred(row1, row2)]
+    [j for (j, row2) in enumerate(rows2) if onpred(row1, row2)]
   end
 
-  _leftjoinpos(jrows, agg, gtb, vars2)
+  _leftjoinpos(matchgroups, agg, gtb, vars2, cols2)
 end
 
 function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
@@ -114,10 +114,10 @@ function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   # rows to join
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
+  matchgroups = _tmap(1:nrows) do i
     row1 = Tables.subset(tab1, i, viewhint=true)
-    [row2 for row2 in rows2 if onpred(row1, row2)]
+    [j for (j, row2) in enumerate(rows2) if onpred(row1, row2)]
   end
 
-  _innerjoinpos(jrows, agg, gtb, vars2)
+  _innerjoinpos(matchgroups, agg, gtb, vars2, cols2)
 end

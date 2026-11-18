@@ -57,3 +57,24 @@ function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
 end
+
+function _uniquenames(gtb1, gtb2, onvars=nothing)
+  vars1 = Tables.schema(values(gtb1)).names
+  vars2 = Tables.schema(values(gtb2)).names
+  # make variable names unique
+  if !isdisjoint(vars1, vars2)
+    # repeated variable names
+    vars = vars1 ∩ vars2
+    if !isnothing(onvars)
+      vars = setdiff(vars, onvars)
+    end
+    newvars = map(vars) do var
+      while var ∈ vars1
+        var = Symbol(var, :_)
+      end
+      var
+    end
+    gtb2 = _rename(gtb2, vars, newvars)
+  end
+  gtb1, gtb2
+end
