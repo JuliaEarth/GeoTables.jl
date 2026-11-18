@@ -104,7 +104,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
   end
 
   # rows indices to join
-  matchgroups = _tmap(1:nrow(gtb1)) do i
+  jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
     if usesearchmethod
@@ -128,13 +128,13 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
   end
 
   if kind == :left
-    _leftjoinpos(matchgroups, agg, gtb1, vars2, cols2)
+    _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   elseif kind == :inner
-    _innerjoinpos(matchgroups, agg, gtb1, vars2, cols2)
+    _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
   end
 end
 
-function _leftjoinpos(matchgroups, agg, gtb1, vars2, cols2)
+function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
   cols1 = Tables.columns(tab1)
@@ -144,8 +144,8 @@ function _leftjoinpos(matchgroups, agg, gtb1, vars2, cols2)
   function gencol(var)
     column = Tables.getcolumn(cols2, var)
 
-    map(eachindex(matchgroups)) do i
-      group = matchgroups[i]
+    map(eachindex(jrows)) do i
+      group = jrows[i]
       if isempty(group)
         missing
       else
@@ -162,12 +162,12 @@ function _leftjoinpos(matchgroups, agg, gtb1, vars2, cols2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(matchgroups, agg, gtb1, vars2, cols2)
+function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
 
   # row indices of gtb1 to preserve
-  inds = findall(!isempty, matchgroups)
+  inds = findall(!isempty, jrows)
 
   # extract subtable of attributes
   sub1 = Tables.subset(tab1, inds, viewhint=true)
@@ -179,7 +179,7 @@ function _innerjoinpos(matchgroups, agg, gtb1, vars2, cols2)
     column = Tables.getcolumn(cols2, var)
 
     map(inds) do i
-      group = matchgroups[i]
+      group = jrows[i]
       vs = [column[j] for j in group]
       agg[var] == collect ? vs : agg[var](vs)
     end
