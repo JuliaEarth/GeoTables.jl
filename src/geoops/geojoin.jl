@@ -113,53 +113,56 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     boxes2 = map(boundingbox, dom2)
   end
 
-  # rows to join
+  # row indices to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
-    row1 = Tables.subset(tab1, i, viewhint=true)
+    row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
     if usebbox
       box1 = boxes1[i]
-      row2 = Tables.subset(tab2, 1, viewhint=true)
-      matches = typeof(row2)[]
+      matches = Int[]
       for j in 1:nrow(gtb2)
         box2 = boxes2[j]
         intersects(box1, box2) || continue
-        row2 = Tables.subset(tab2, j, viewhint=true)
-        onpred(row1, row2) || continue
-        geo2 = dom2[j]
-        pred(geo1, geo2) || continue
-        push!(matches, row2)
+        if !isnothing(row1)
+          row2 = Tables.subset(tab2, j, viewhint=true)
+          onpred(row1, row2) || continue
+        end
+        pred(geo1, dom2[j]) || continue
+        push!(matches, j)
       end
       matches
     else
-      rows2 = Tables.rows(tab2)
-      [row2 for (geo2, row2) in zip(dom2, rows2) if pred(geo1, geo2) && onpred(row1, row2)]
+      [
+        j for (j, geo2) in enumerate(dom2) if
+        (isnothing(row1) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, geo2)
+      ]
     end
   end
 
   if kind == :left
-    _leftjoinpos(jrows, agg, gtb1, vars2)
+    _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   elseif kind == :inner
-    _innerjoinpos(jrows, agg, gtb1, vars2)
+    _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
   end
 end
 
-function _leftjoinpos(jrows, agg, gtb1, vars2)
+function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
   cols1 = Tables.columns(tab1)
   vars1 = Tables.columnnames(cols1)
-  nrows = nrow(gtb1)
 
   # generate joined column
   function gencol(var)
-    map(1:nrows) do i
-      rows = jrows[i]
-      if isempty(rows)
+    column = Tables.getcolumn(cols2, var)
+
+    map(eachindex(jrows)) do i
+      group = jrows[i]
+      if isempty(group)
         missing
       else
-        vs = _colvalues(rows, var)
-        agg[var](vs)
+        vs = [column[j] for j in group]
+        agg[var] == collect ? vs : agg[var](vs)
       end
     end
   end
@@ -171,7 +174,7 @@ function _leftjoinpos(jrows, agg, gtb1, vars2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(jrows, agg, gtb1, vars2)
+function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
 
@@ -185,10 +188,12 @@ function _innerjoinpos(jrows, agg, gtb1, vars2)
 
   # generate joined column
   function gencol(var)
+    column = Tables.getcolumn(cols2, var)
+
     map(inds) do i
-      rows = jrows[i]
-      vs = _colvalues(rows, var)
-      agg[var](vs)
+      group = jrows[i]
+      vs = [column[j] for j in group]
+      agg[var] == collect ? vs : agg[var](vs)
     end
   end
 
@@ -224,8 +229,6 @@ function _adjustcrs(gtb1, gtb2)
 end
 
 _isvarequal(row1, row2, var) = isequal(Tables.getcolumn(row1, var), Tables.getcolumn(row2, var))
-
-_colvalues(rows, var) = [Tables.getcolumn(row, var) for row in rows]
 
 function _aggdict(selector, aggfuns, cols, vars)
   svars = selector(vars)
