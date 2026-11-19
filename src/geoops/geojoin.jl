@@ -100,7 +100,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
   usesearchmethod = pred ∈ (intersects, issubset, isequal)
   if usesearchmethod
     method = searchmethod(dom2)
-    boxes = boundingbox.(dom1)
+    boxes = map(boundingbox, dom1)
   end
 
   # rows indices to join
