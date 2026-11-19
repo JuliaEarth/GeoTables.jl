@@ -99,7 +99,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
   # flag predicates for which overlapping bounding boxes are necessary
   usesearchmethod = pred ∈ (intersects, issubset, isequal)
   if usesearchmethod
-    tree = searchmethod(dom2).tree
+    method = searchmethod(dom2)
     boxes = boundingbox.(dom1)
   end
 
@@ -108,15 +108,15 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
     geo1 = dom1[i]
     row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
     if usesearchmethod
-      matchinds = Int[]
-      box1 = boxes[i]
-      Meshes.foreachcandidate(box1, tree) do j
+      matchinds = search(boxes[i], method)
+      filter!(matchinds) do j
+        # check "on" predicate first
         if !isnothing(row1)
           row2 = Tables.subset(tab2, j, viewhint=true)
-          onpred(row1, row2) || return
+          onpred(row1, row2) || return false
         end
-        pred(geo1, dom2[j]) || return
-        push!(matchinds, j)
+        # check spatial predicate next
+        pred(geo1, dom2[j])
       end
       sort!(matchinds)
     else
