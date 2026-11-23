@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------
 
 """
-	geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing, searchmethod=BBoxSearch)
+	geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
 
 Joins `geotable₁` with `geotable₂` using a certain `kind` of join and predicate function `pred`
 that takes two geometries and returns a boolean (`(g1, g2) -> g1 ⊆ g2`).
@@ -15,9 +15,6 @@ The variable value match use the `isequal` function.
 Whenever two or more matches are encountered, aggregate `varᵢ` with aggregation function `aggᵢ`.
 If no aggregation function is provided for a variable, then the aggregation function will be
 selected according to the scientific types: `mean` for continuous and `first` otherwise.
-
-The `searchmethod` keyword specifies the neighor search method used for broad-phase pruning, when
-supported by the predicate. It defaults to BBoxSearch (Bounding Volume Hierarchy).
 
 ## Kinds
 
@@ -50,8 +47,7 @@ function _geojoin(
   aggfuns::Vector{Function};
   kind=:left,
   pred=intersects,
-  on=nothing,
-  searchmethod=BBoxSearch
+  on=nothing
 )
   if kind ∉ (:left, :inner)
     throw(ArgumentError("invalid kind of join, use one of :left or :inner"))
@@ -77,10 +73,10 @@ function _geojoin(
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
 
-  _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, searchmethod)
+  _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 end
 
-function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, searchmethod)
+function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
@@ -97,17 +93,17 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred, s
   agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # flag predicates for which overlapping bounding boxes are necessary
-  usesearchmethod = pred ∈ (intersects, issubset, isequal)
-  if usesearchmethod
-    method = searchmethod(dom2)
+  usebboxsearch = pred ∈ (intersects, issubset, isequal)
+  if usebboxsearch
     boxes = map(boundingbox, dom1)
+    method = BBoxSearch(dom2)
   end
 
   # rows indices to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
-    if usesearchmethod
+    if usebboxsearch
       matchinds = search(boxes[i], method)
       filter!(matchinds) do j
         # check "on" predicate first

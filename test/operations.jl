@@ -439,72 +439,72 @@
     table = (x=rand(10), y=rand(10))
     sdata = georef(table, rand(Point, 10))
 
-    ndata = @transform(sdata, :z=:x - 2 * :y)
+    ndata = @transform(sdata, :z = :x - 2 * :y)
     @test ndata.z == sdata.x .- 2 .* sdata.y
 
-    ndata = @transform(sdata, :z=:x - :y, :w=:x + :y)
+    ndata = @transform(sdata, :z = :x - :y, :w = :x + :y)
     @test ndata.z == sdata.x .- sdata.y
     @test ndata.w == sdata.x .+ sdata.y
 
-    ndata = @transform(sdata, :sinx=sin(:x), :cosy=cos(:y))
+    ndata = @transform(sdata, :sinx = sin(:x), :cosy = cos(:y))
     @test ndata.sinx == sin.(sdata.x)
     @test ndata.cosy == cos.(sdata.y)
 
     # user defined functions & :geometry
     dist(point) = norm(to(point))
-    ndata = @transform(sdata, :dist_to_origin=dist(:geometry))
+    ndata = @transform(sdata, :dist_to_origin = dist(:geometry))
     @test ndata.dist_to_origin == dist.(domain(sdata))
 
     # replace :geometry column
     testfunc(point) = Point((to(point) .+ 1u"m")...)
-    ndata = @transform(sdata, :geometry=testfunc(:geometry))
+    ndata = @transform(sdata, :geometry = testfunc(:geometry))
     @test domain(ndata) == GeometrySet(testfunc.(domain(sdata)))
 
     # unexported functions
-    ndata = @transform(sdata, :logx=Base.log(:x), :expy=Base.exp(:y))
+    ndata = @transform(sdata, :logx = Base.log(:x), :expy = Base.exp(:y))
     @test ndata.logx == log.(sdata.x)
     @test ndata.expy == exp.(sdata.y)
 
     # column name interpolation
-    ndata = @transform(sdata, {"z"}={"x"} - 2 * {"y"})
+    ndata = @transform(sdata, {"z"} = {"x"} - 2 * {"y"})
     @test ndata.z == sdata.x .- 2 .* sdata.y
 
     xnm, ynm, znm = :x, :y, :z
-    ndata = @transform(sdata, {znm}={xnm} - 2 * {ynm})
+    ndata = @transform(sdata, {znm} = {xnm} - 2 * {ynm})
     @test ndata.z == sdata.x .- 2 .* sdata.y
 
     # variable interpolation
     k = 10
-    ndata = @transform(sdata, :z=k + :y, :w=:x - k)
+    ndata = @transform(sdata, :z = k + :y, :w = :x - k)
     @test ndata.z == k .+ sdata.y
     @test ndata.w == sdata.x .- k
 
     # contant columns
     k = 1
-    ndata = @transform(sdata, :z=k, :w=5, :a=1.5, :b="test")
+    ndata = @transform(sdata, :z = k, :w = 5, :a = 1.5, :b = "test")
     @test ndata.z == fill(k, nrow(sdata))
     @test ndata.w == fill(5, nrow(sdata))
     @test ndata.a == fill(1.5, nrow(sdata))
     @test ndata.b == fill("test", nrow(sdata))
 
     # string literals
-    ndata = @transform(sdata, :x_str=join([:x, "test"]))
+    ndata = @transform(sdata, :x_str = join([:x, "test"]))
     @test ndata.x_str == [join([x, "test"]) for x in sdata.x]
 
     # obj.field syntax
-    ndata = @transform(sdata, :cx=coords(:geometry).x)
+    ndata = @transform(sdata, :cx = coords(:geometry).x)
     @test ndata.cx == [coords(p).x for p in sdata.geometry]
 
     # column replacement
     table = (x=rand(10), y=rand(10), z=rand(10))
     sdata = georef(table, rand(Point, 10))
 
-    ndata = @transform(sdata, :z=:x + :y, :w=:x - :y)
+    ndata = @transform(sdata, :z = :x + :y, :w = :x - :y)
     @test ndata.z == sdata.x .+ sdata.y
     @test ndata.w == sdata.x .- sdata.y
     @test Tables.schema(values(ndata)).names == (:x, :y, :z, :w)
 
-    ndata = @transform(sdata, :x=:y, :y=:z, :z=:x)
+    ndata = @transform(sdata, :x = :y, :y = :z, :z = :x)
     @test ndata.x == sdata.y
     @test ndata.y == sdata.z
     @test ndata.z == sdata.x
@@ -516,7 +516,7 @@
     table = (; x, y)
     sdata = georef(table, rand(Point, 8))
 
-    ndata = @transform(sdata, :z=:x * :y, :w=:x / :y)
+    ndata = @transform(sdata, :z = :x * :y, :w = :x / :y)
     @test isequal(ndata.z, sdata.x .* sdata.y)
     @test isequal(ndata.w, sdata.x ./ sdata.y)
 
@@ -528,7 +528,7 @@
     sdata = georef(table, rand(Point, 8))
 
     p = @groupby(sdata, :x, :y)
-    np = @transform(p, :z=2 * :x + :y)
+    np = @transform(p, :z = 2 * :x + :y)
     @test np.object.z == 2 .* sdata.x .+ sdata.y
     @test indices(np) == indices(p)
     @test metadata(np) == metadata(p)
@@ -538,12 +538,12 @@
     sdata = georef(table, CartesianGrid(5, 5))
     opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
 
-    ndata = @transform(sdata |> opr, :z=:x - 2 * :y)
+    ndata = @transform(sdata |> opr, :z = :x - 2 * :y)
     @test ndata.z == sdata.x .- 2 .* sdata.y
     @test ndata.geometry == GeometrySet(centroid.(domain(sdata)))
 
-    @test_throws ArgumentError @transform(p, :x=3 * :x)
-    @test_throws ArgumentError @transform(p, :y=3 * :y)
+    @test_throws ArgumentError @transform(p, :x = 3 * :x)
+    @test_throws ArgumentError @transform(p, :y = 3 * :y)
   end
 
   @testset "@combine" begin
@@ -554,36 +554,36 @@
     grid = CartesianGrid(2, 4)
     sdata = georef(table, grid)
 
-    c = @combine(sdata, :x_sum=sum(:x))
+    c = @combine(sdata, :x_sum = sum(:x))
     @test c.x_sum == [sum(sdata.x)]
     @test domain(c) == GeometrySet([Multi(domain(sdata))])
     @test Tables.schema(values(c)).names == (:x_sum,)
 
-    c = @combine(sdata, :y_mean=mean(:y), :z_median=median(:z))
+    c = @combine(sdata, :y_mean = mean(:y), :z_median = median(:z))
     @test c.y_mean == [mean(sdata.y)]
     @test c.z_median == [median(sdata.z)]
     @test domain(c) == GeometrySet([Multi(domain(sdata))])
     @test Tables.schema(values(c)).names == (:y_mean, :z_median)
 
     # combine geometry column
-    c = @combine(sdata, :geometry=centroid(:geometry))
+    c = @combine(sdata, :geometry = centroid(:geometry))
     @test isnothing(values(c))
     @test domain(c) == GeometrySet([centroid(domain(sdata))])
-    c = @combine(sdata, :y_mean=mean(:y), :geometry=centroid(:geometry))
+    c = @combine(sdata, :y_mean = mean(:y), :geometry = centroid(:geometry))
     @test c.y_mean == [mean(sdata.y)]
     @test domain(c) == GeometrySet([centroid(domain(sdata))])
 
     # column name interpolation
-    c = @combine(sdata, {"z"}=sum({"x"}) + prod({"y"}))
+    c = @combine(sdata, {"z"} = sum({"x"}) + prod({"y"}))
     @test c.z == [sum(sdata.x) + prod(sdata.y)]
 
     xnm, ynm, znm = :x, :y, :z
-    c = @combine(sdata, {znm}=sum({xnm}) + prod({ynm}))
+    c = @combine(sdata, {znm} = sum({xnm}) + prod({ynm}))
     @test c.z == [sum(sdata.x) + prod(sdata.y)]
 
     # Partition
     p = @groupby(sdata, :x)
-    c = @combine(p, :y_sum=sum(:y), :z_prod=prod(:z))
+    c = @combine(p, :y_sum = sum(:y), :z_prod = prod(:z))
     @test c.x == [first(data.x) for data in p]
     @test c.y_sum == [sum(data.y) for data in p]
     @test c.z_prod == [prod(data.z) for data in p]
@@ -591,7 +591,7 @@
     @test Tables.schema(values(c)).names == (:x, :y_sum, :z_prod)
 
     p = @groupby(sdata, :x, :y)
-    c = @combine(p, :z_mean=mean(:z))
+    c = @combine(p, :z_mean = mean(:z))
     @test c.x == [first(data.x) for data in p]
     @test c.y == [first(data.y) for data in p]
     @test c.z_mean == [mean(data.z) for data in p]
@@ -600,11 +600,11 @@
 
     # combine geometry column
     p = @groupby(sdata, :x, :y)
-    c = @combine(p, :geometry=centroid(:geometry))
+    c = @combine(p, :geometry = centroid(:geometry))
     @test c.x == [first(data.x) for data in p]
     @test c.y == [first(data.y) for data in p]
     @test domain(c) == GeometrySet([centroid(domain(data)) for data in p])
-    c = @combine(p, :z_mean=mean(:z), :geometry=centroid(:geometry))
+    c = @combine(p, :z_mean = mean(:z), :geometry = centroid(:geometry))
     @test c.x == [first(data.x) for data in p]
     @test c.y == [first(data.y) for data in p]
     @test c.z_mean == [mean(data.z) for data in p]
@@ -613,7 +613,7 @@
     # expression as first argument
     opr(sdata) = georef(values(sdata), GeometrySet(centroid.(domain(sdata))))
 
-    c = @combine(sdata |> opr, :x_sum=sum(:x))
+    c = @combine(sdata |> opr, :x_sum = sum(:x))
     @test c.x_sum == [sum(sdata.x)]
     @test domain(c) == GeometrySet([Multi(centroid.(domain(sdata)))])
     @test Tables.schema(values(c)).names == (:x_sum,)
@@ -621,8 +621,8 @@
     # https://github.com/JuliaEarth/GeoStats.jl/issues/542
     sdata = georef((; c=rand(1:2, 10, 10)))
     p = @groupby(sdata, :c)
-    c = @combine(p, :s=sum(:c))
-    c = @combine(p, :s=sum(:c))
+    c = @combine(p, :s = sum(:c))
+    c = @combine(p, :s = sum(:c))
     @test all(≤(200), c.s)
   end
 end
