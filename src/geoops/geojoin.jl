@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------
 
 """
-	geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
+    geojoin(geotable₁, geotable₂, var₁ => agg₁, ..., varₙ => aggₙ; kind=:left, pred=intersects, on=nothing)
 
 Joins `geotable₁` with `geotable₂` using a certain `kind` of join and predicate function `pred`
 that takes two geometries and returns a boolean (`(g1, g2) -> g1 ⊆ g2`).
@@ -93,18 +93,18 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   agg = _aggdict(selector, aggfuns, cols2, vars2)
 
   # flag predicates for which overlapping bounding boxes are necessary
-  usebboxsearch = pred ∈ (intersects, issubset, isequal)
-  if usebboxsearch
+  usebbox = pred ∈ (intersects, issubset, isequal)
+  if usebbox
     boxes = map(boundingbox, dom1)
-    method = BBoxSearch(dom2)
+    searcher = BBoxSearch(dom2)
   end
 
   # rows indices to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
-    if usebboxsearch
-      matchinds = search(boxes[i], method)
+    if usebbox
+      matchinds = search(boxes[i], searcher)
       filter!(matchinds) do j
         # check "on" predicate first
         if !isnothing(row1)
