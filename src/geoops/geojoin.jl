@@ -95,7 +95,6 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # flag predicates for which overlapping bounding boxes are necessary
   usebbox = pred ∈ (intersects, issubset, isequal)
   if usebbox
-    boxes = map(boundingbox, dom1)
     searcher = BBoxSearch(dom2)
   end
 
@@ -104,7 +103,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     geo1 = dom1[i]
     row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      matchinds = search(boxes[i], searcher)
+      matchinds = search(geo1, searcher)
       filter!(matchinds) do j
         # check "on" predicate first
         if !isnothing(row1)
