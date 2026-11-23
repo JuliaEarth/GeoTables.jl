@@ -54,7 +54,7 @@ function _tablejoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfun
   end
 
   # make variable names unique
-  _, tab = _uniquenames(values(gtb), tab, onvars)
+  tab = _uniquenames(values(gtb), tab, onvars)
 
   gtb = _adjustunits(gtb)
   tab = _adjustunits(tab)

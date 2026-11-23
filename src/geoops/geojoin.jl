@@ -68,7 +68,8 @@ function _geojoin(
   # adjust CRS of the second geotable if necessary
   gtb2 = _adjustcrs(gtb1, gtb2)
 
-  gtb1, gtb2 = _uniquenames(gtb1, gtb2, onvars)
+  # make variable names unique
+  gtb2 = _uniquenames(gtb1, gtb2, onvars)
 
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)

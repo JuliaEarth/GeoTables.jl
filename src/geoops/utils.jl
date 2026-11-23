@@ -60,9 +60,9 @@ end
 
 function _uniquenames(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable, onvars=nothing)
   tab2 = values(gtb2)
-  _, newtab2 = _uniquenames(values(gtb1), tab2, onvars)
+  newtab2 = _uniquenames(values(gtb1), tab2, onvars)
   newgtb2 = newtab2 === tab2 ? gtb2 : georef(newtab2, domain(gtb2))
-  gtb1, newgtb2
+  newgtb2
 end
 
 function _uniquenames(tab1, tab2, onvars=nothing)
@@ -83,5 +83,5 @@ function _uniquenames(tab1, tab2, onvars=nothing)
     end
     tab2 = _rename(tab2, vars, newvars)
   end
-  tab1, tab2
+  tab2
 end
