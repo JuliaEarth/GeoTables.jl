@@ -54,17 +54,7 @@ function _tablejoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfun
   end
 
   # make variable names unique
-  if !isdisjoint(vars1, vars2)
-    # repeated variable names
-    vars = setdiff(vars1 ∩ vars2, onvars)
-    newvars = map(vars) do var
-      while var ∈ vars1
-        var = Symbol(var, :_)
-      end
-      var
-    end
-    tab = _rename(tab, vars, newvars)
-  end
+  _, tab = _uniquenames(values(gtb), tab, onvars)
 
   gtb = _adjustunits(gtb)
   tab = _adjustunits(tab)
