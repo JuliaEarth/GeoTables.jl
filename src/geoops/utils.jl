@@ -59,8 +59,9 @@ function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
 end
 
 function _uniquenames(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable, onvars=nothing)
+  tab1 = values(gtb1)
   tab2 = values(gtb2)
-  newtab2 = _uniquenames(values(gtb1), tab2, onvars)
+  newtab2 = _uniquenames(tab1, tab2, onvars)
   newgtb2 = newtab2 === tab2 ? gtb2 : georef(newtab2, domain(gtb2))
   newgtb2
 end
