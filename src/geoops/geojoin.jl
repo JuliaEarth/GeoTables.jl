@@ -115,12 +115,12 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   # rows indices to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
-    row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
       matchinds = search(geo1, searcher)
       filter!(matchinds) do j
         # check "on" predicate first
-        if !isnothing(row1)
+        if !isnothing(onvars)
           row2 = Tables.subset(tab2, j, viewhint=true)
           onpred(row1, row2) || return false
         end
@@ -131,7 +131,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
     else
       [
         j for (j, geo2) in enumerate(dom2) if
-        (isnothing(row1) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, geo2)
+        (isnothing(onvars) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, geo2)
       ]
     end
   end
