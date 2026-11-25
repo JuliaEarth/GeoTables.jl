@@ -149,12 +149,11 @@ function _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   # generate joined column
   function gencol(var)
     vals = Tables.getcolumn(cols2, var)
-    map(eachindex(jinds)) do i
-      group = jinds[i]
-      if isempty(group)
+    map(jinds) do matches
+      if isempty(matches)
         missing
       else
-        vs = [vals[j] for j in group]
+        vs = [vals[j] for j in matches]
         agg[var] == collect ? vs : agg[var](vs)
       end
     end
@@ -183,8 +182,8 @@ function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   function gencol(var)
     vals = Tables.getcolumn(cols2, var)
     map(inds) do i
-      group = jinds[i]
-      vs = [vals[j] for j in group]
+      matches = jinds[i]
+      vs = [vals[j] for j in matches]
       agg[var] == collect ? vs : agg[var](vs)
     end
   end
