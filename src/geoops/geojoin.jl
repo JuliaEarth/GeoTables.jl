@@ -108,17 +108,15 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 
   # flag predicates for which overlapping bounding boxes are necessary
   usebbox = pred ∈ (intersects, issubset, isequal)
-  if usebbox
-    searcher = BBoxSearch(dom2)
-  end
+  usebbox && (searcher = BBoxSearch(dom2))
 
   # rows indices to join
   jrows = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      matchinds = search(geo1, searcher)
-      filter!(matchinds) do j
+      inds = search(geo1, searcher)
+      filter!(inds) do j
         # check "on" predicate first
         if !isnothing(onvars)
           row2 = Tables.subset(tab2, j, viewhint=true)
@@ -127,12 +125,11 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
         # check spatial predicate next
         pred(geo1, dom2[j])
       end
-      sort!(matchinds)
+      sort!(inds)
     else
-      [
-        j for (j, geo2) in enumerate(dom2) if
-        (isnothing(onvars) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, geo2)
-      ]
+      filter(1:nelements(dom2)) do j
+        (isnothing(onvars) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, dom2[j])
+      end
     end
   end
 
