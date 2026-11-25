@@ -111,7 +111,7 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   usebbox && (searcher = BBoxSearch(dom2))
 
   # rows indices to join
-  jrows = _tmap(1:nrow(gtb1)) do i
+  jinds = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
@@ -134,13 +134,13 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
   end
 
   if kind == :left
-    _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
+    _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   elseif kind == :inner
-    _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
+    _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   end
 end
 
-function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
+function _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
   cols1 = Tables.columns(tab1)
@@ -150,8 +150,8 @@ function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   function gencol(var)
     column = Tables.getcolumn(cols2, var)
 
-    map(eachindex(jrows)) do i
-      group = jrows[i]
+    map(eachindex(jinds)) do i
+      group = jinds[i]
       if isempty(group)
         missing
       else
@@ -168,12 +168,12 @@ function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
+function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
 
   # row indices of gtb1 to preserve
-  inds = findall(!isempty, jrows)
+  inds = findall(!isempty, jinds)
 
   # extract subtable of attributes
   sub1 = Tables.subset(tab1, inds, viewhint=true)
@@ -185,7 +185,7 @@ function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
     column = Tables.getcolumn(cols2, var)
 
     map(inds) do i
-      group = jrows[i]
+      group = jinds[i]
       vs = [column[j] for j in group]
       agg[var] == collect ? vs : agg[var](vs)
     end
