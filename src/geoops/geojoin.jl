@@ -171,17 +171,17 @@ function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   tab1 = values(gtb1)
 
   # row indices of gtb1 to preserve
-  inds = findall(!isempty, jinds)
+  matchinds = findall(!isempty, jinds)
 
   # extract subtable of attributes
-  sub1 = Tables.subset(tab1, inds, viewhint=true)
+  sub1 = Tables.subset(tab1, matchinds, viewhint=true)
   cols1 = Tables.columns(sub1)
   vars1 = Tables.columnnames(cols1)
 
   # generate joined column
   function gencol(var)
     vals = Tables.getcolumn(cols2, var)
-    map(inds) do i
+    map(matchinds) do i
       matches = jinds[i]
       vs = [vals[j] for j in matches]
       agg[var] == collect ? vs : agg[var](vs)
@@ -192,7 +192,7 @@ function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
-  newdom = view(dom1, inds)
+  newdom = view(dom1, matchinds)
   georef(newtab, newdom)
 end
 
