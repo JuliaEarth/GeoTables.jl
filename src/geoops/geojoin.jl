@@ -108,58 +108,53 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 
   # flag predicates for which overlapping bounding boxes are necessary
   usebbox = pred ∈ (intersects, issubset, isequal)
-  if usebbox
-    boxes1 = map(boundingbox, dom1)
-    boxes2 = map(boundingbox, dom2)
-  end
+  usebbox && (searcher = BBoxSearch(dom2))
 
-  # rows to join
-  jrows = _tmap(1:nrow(gtb1)) do i
+  # rows indices to join
+  jinds = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
     row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      box1 = boxes1[i]
-      row2 = Tables.subset(tab2, 1, viewhint=true)
-      matches = typeof(row2)[]
-      for j in 1:nrow(gtb2)
-        box2 = boxes2[j]
-        intersects(box1, box2) || continue
-        row2 = Tables.subset(tab2, j, viewhint=true)
-        onpred(row1, row2) || continue
-        geo2 = dom2[j]
-        pred(geo1, geo2) || continue
-        push!(matches, row2)
+      inds = search(geo1, searcher)
+      filter!(inds) do j
+        # check "on" predicate first
+        if !isnothing(onvars)
+          row2 = Tables.subset(tab2, j, viewhint=true)
+          onpred(row1, row2) || return false
+        end
+        # check spatial predicate next
+        pred(geo1, dom2[j])
       end
-      matches
+      sort!(inds)
     else
-      rows2 = Tables.rows(tab2)
-      [row2 for (geo2, row2) in zip(dom2, rows2) if pred(geo1, geo2) && onpred(row1, row2)]
+      filter(1:nelements(dom2)) do j
+        (isnothing(onvars) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, dom2[j])
+      end
     end
   end
 
   if kind == :left
-    _leftjoinpos(jrows, agg, gtb1, vars2)
+    _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   elseif kind == :inner
-    _innerjoinpos(jrows, agg, gtb1, vars2)
+    _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   end
 end
 
-function _leftjoinpos(jrows, agg, gtb1, vars2)
+function _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
   cols1 = Tables.columns(tab1)
   vars1 = Tables.columnnames(cols1)
-  nrows = nrow(gtb1)
 
   # generate joined column
   function gencol(var)
-    map(1:nrows) do i
-      rows = jrows[i]
-      if isempty(rows)
+    vals = Tables.getcolumn(cols2, var)
+    map(jinds) do matches
+      if isempty(matches)
         missing
       else
-        vs = _colvalues(rows, var)
-        agg[var](vs)
+        vs = [vals[j] for j in matches]
+        agg[var] == collect ? vs : agg[var](vs)
       end
     end
   end
@@ -171,24 +166,25 @@ function _leftjoinpos(jrows, agg, gtb1, vars2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(jrows, agg, gtb1, vars2)
+function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
 
   # row indices of gtb1 to preserve
-  inds = findall(!isempty, jrows)
+  matchinds = findall(!isempty, jinds)
 
   # extract subtable of attributes
-  sub1 = Tables.subset(tab1, inds, viewhint=true)
+  sub1 = Tables.subset(tab1, matchinds, viewhint=true)
   cols1 = Tables.columns(sub1)
   vars1 = Tables.columnnames(cols1)
 
   # generate joined column
   function gencol(var)
-    map(inds) do i
-      rows = jrows[i]
-      vs = _colvalues(rows, var)
-      agg[var](vs)
+    vals = Tables.getcolumn(cols2, var)
+    map(matchinds) do i
+      matches = jinds[i]
+      vs = [vals[j] for j in matches]
+      agg[var] == collect ? vs : agg[var](vs)
     end
   end
 
@@ -196,7 +192,7 @@ function _innerjoinpos(jrows, agg, gtb1, vars2)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
-  newdom = view(dom1, inds)
+  newdom = view(dom1, matchinds)
   georef(newtab, newdom)
 end
 
@@ -224,8 +220,6 @@ function _adjustcrs(gtb1, gtb2)
 end
 
 _isvarequal(row1, row2, var) = isequal(Tables.getcolumn(row1, var), Tables.getcolumn(row2, var))
-
-_colvalues(rows, var) = [Tables.getcolumn(row, var) for row in rows]
 
 function _aggdict(selector, aggfuns, cols, vars)
   svars = selector(vars)
