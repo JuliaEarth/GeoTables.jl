@@ -64,22 +64,12 @@ function _overlayintersection(dom1, dom2)
     candidates = search(geo1, searcher)
     isempty(candidates) && return rows
 
-    parts1 = Meshes.flatten(geo1)
-    boxes1 = map(boundingbox, parts1)
-
     # iterate over candidates in gtb2 that have overlapping bounding boxes with the geometry in gtb1
-    for j in candidates
-      parts2 = Meshes.flatten(dom2[j])
-      boxes2 = map(boundingbox, parts2)
+    for j in search(geo1, searcher)
+      I = intersection(geo1, dom2[j])
+      type(I) == NotIntersecting && continue
 
-      for (g1, box1) in zip(parts1, boxes1), (g2, box2) in zip(parts2, boxes2)
-        intersects(box1, box2) || continue
-
-        I = intersection(g1, g2)
-        type(I) == NotIntersecting && continue
-
-        push!(rows, (i, j, get(I)))
-      end
+      push!(rows, (i, j, get(I)))
     end
     rows
   end
