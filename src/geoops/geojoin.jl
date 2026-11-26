@@ -69,20 +69,7 @@ function _geojoin(
   gtb2 = _adjustcrs(gtb1, gtb2)
 
   # make variable names unique
-  if !isdisjoint(vars1, vars2)
-    # repeated variable names
-    vars = vars1 ∩ vars2
-    if !isnothing(onvars)
-      vars = setdiff(vars, onvars)
-    end
-    newvars = map(vars) do var
-      while var ∈ vars1
-        var = Symbol(var, :_)
-      end
-      var
-    end
-    gtb2 = _rename(gtb2, vars, newvars)
-  end
+  gtb2 = _uniquenames(gtb1, gtb2, onvars)
 
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)

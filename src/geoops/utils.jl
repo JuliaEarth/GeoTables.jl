@@ -57,3 +57,34 @@ function _absunit(::Type{Q}, x) where {Q<:AffineQuantity}
   u = absoluteunit(unit(Q))
   map(v -> uconvert(u, v), x)
 end
+
+function _uniquenames(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable, onvars=nothing)
+  tab1 = values(gtb1)
+  tab2 = values(gtb2)
+  newtab2 = _uniquenames(tab1, tab2, onvars)
+  newgtb2 = newtab2 === tab2 ? gtb2 : georef(newtab2, domain(gtb2))
+  newgtb2
+end
+
+function _uniquenames(tab1, tab2, onvars=nothing)
+  vars1 = Tables.columnnames(Tables.columns(tab1))
+  vars2 = Tables.columnnames(Tables.columns(tab2))
+  # make variable names unique
+  if !isdisjoint(vars1, vars2)
+    # repeated variable names
+    vars = vars1 ∩ vars2
+    if !isnothing(onvars)
+      vars = setdiff(vars, onvars)
+    end
+    newvars = map(vars) do var
+      newvar = var
+      while newvar ∈ vars1
+        newvar = Symbol(newvar, :_)
+      end
+      newvar
+    end
+    _rename(tab2, vars, newvars)
+  else
+    tab2
+  end
+end
