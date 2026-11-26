@@ -69,20 +69,7 @@ function _geojoin(
   gtb2 = _adjustcrs(gtb1, gtb2)
 
   # make variable names unique
-  if !isdisjoint(vars1, vars2)
-    # repeated variable names
-    vars = vars1 ∩ vars2
-    if !isnothing(onvars)
-      vars = setdiff(vars, onvars)
-    end
-    newvars = map(vars) do var
-      while var ∈ vars1
-        var = Symbol(var, :_)
-      end
-      var
-    end
-    gtb2 = _rename(gtb2, vars, newvars)
-  end
+  gtb2 = _uniquenames(gtb1, gtb2, onvars)
 
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
@@ -108,45 +95,39 @@ function _geojoinof(kind, gtb1, gtb2, selector, aggfuns, pred, onvars, onpred)
 
   # flag predicates for which overlapping bounding boxes are necessary
   usebbox = pred ∈ (intersects, issubset, isequal)
-  if usebbox
-    boxes1 = map(boundingbox, dom1)
-    boxes2 = map(boundingbox, dom2)
-  end
+  usebbox && (searcher = BBoxSearch(dom2))
 
-  # row indices to join
-  jrows = _tmap(1:nrow(gtb1)) do i
+  # rows indices to join
+  jinds = _tmap(1:nrow(gtb1)) do i
     geo1 = dom1[i]
-    row1 = isnothing(onvars) ? nothing : Tables.subset(tab1, i, viewhint=true)
+    row1 = Tables.subset(tab1, i, viewhint=true)
     if usebbox
-      box1 = boxes1[i]
-      matches = Int[]
-      for j in 1:nrow(gtb2)
-        box2 = boxes2[j]
-        intersects(box1, box2) || continue
-        if !isnothing(row1)
+      inds = search(geo1, searcher)
+      filter!(inds) do j
+        # check "on" predicate first
+        if !isnothing(onvars)
           row2 = Tables.subset(tab2, j, viewhint=true)
-          onpred(row1, row2) || continue
+          onpred(row1, row2) || return false
         end
-        pred(geo1, dom2[j]) || continue
-        push!(matches, j)
+        # check spatial predicate next
+        pred(geo1, dom2[j])
       end
-      matches
+      sort!(inds)
     else
-      [
-        j for (j, geo2) in enumerate(dom2) if
-        (isnothing(row1) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, geo2)
-      ]
+      filter(1:nelements(dom2)) do j
+        (isnothing(onvars) || onpred(row1, Tables.subset(tab2, j, viewhint=true))) && pred(geo1, dom2[j])
+      end
     end
   end
 
   if kind == :left
-    _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
+    _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   elseif kind == :inner
-    _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
+    _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   end
 end
 
-function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
+function _leftjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
   cols1 = Tables.columns(tab1)
@@ -154,14 +135,12 @@ function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
 
   # generate joined column
   function gencol(var)
-    column = Tables.getcolumn(cols2, var)
-
-    map(eachindex(jrows)) do i
-      group = jrows[i]
-      if isempty(group)
+    vals = Tables.getcolumn(cols2, var)
+    map(jinds) do matches
+      if isempty(matches)
         missing
       else
-        vs = [column[j] for j in group]
+        vs = [vals[j] for j in matches]
         agg[var] == collect ? vs : agg[var](vs)
       end
     end
@@ -174,25 +153,24 @@ function _leftjoinpos(jrows, agg, gtb1, vars2, cols2)
   georef(newtab, dom1)
 end
 
-function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
+function _innerjoinpos(jinds, agg, gtb1, vars2, cols2)
   dom1 = domain(gtb1)
   tab1 = values(gtb1)
 
   # row indices of gtb1 to preserve
-  inds = findall(!isempty, jrows)
+  matchinds = findall(!isempty, jinds)
 
   # extract subtable of attributes
-  sub1 = Tables.subset(tab1, inds, viewhint=true)
+  sub1 = Tables.subset(tab1, matchinds, viewhint=true)
   cols1 = Tables.columns(sub1)
   vars1 = Tables.columnnames(cols1)
 
   # generate joined column
   function gencol(var)
-    column = Tables.getcolumn(cols2, var)
-
-    map(inds) do i
-      group = jrows[i]
-      vs = [column[j] for j in group]
+    vals = Tables.getcolumn(cols2, var)
+    map(matchinds) do i
+      matches = jinds[i]
+      vs = [vals[j] for j in matches]
       agg[var] == collect ? vs : agg[var](vs)
     end
   end
@@ -201,7 +179,7 @@ function _innerjoinpos(jrows, agg, gtb1, vars2, cols2)
   pairs2 = (var => gencol(var) for var in vars2)
   newtab = (; pairs1..., pairs2...) |> Tables.materializer(tab1)
 
-  newdom = view(dom1, inds)
+  newdom = view(dom1, matchinds)
   georef(newtab, newdom)
 end
 

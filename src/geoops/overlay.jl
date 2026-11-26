@@ -22,7 +22,7 @@ function overlay(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; method=:interse
   gtb2 = _adjustcrs(gtb1, gtb2)
 
   # avoid repeated attribute names
-  gtb1, gtb2 = _uniquenames(gtb1, gtb2)
+  gtb2 = _uniquenames(gtb1, gtb2)
 
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
@@ -60,15 +60,13 @@ function _overlay(gtb1, gtb2, method, searchmethod)
 end
 
 function _overlayintersection(dom1, dom2, searchmethod)
-  tree = searchmethod(dom2).tree
-  boxes = boundingbox.(dom1)
+  searcher = searchmethod(dom2)
   # iterate over geometries in gtb1 and find matches in gtb2
   rowgroups = _tmap(eachindex(dom1)) do i
     geo1 = dom1[i]
-    box1 = boxes[i]
     rows = Tuple{Int,Int,Geometry}[]
     # iterate over candidates in gtb2 that have overlapping bounding boxes with the geometry in gtb1
-    Meshes.foreachcandidate(box1, tree) do j
+    for j in search(geo1, searcher)
       geo2 = dom2[j]
       # flatten Multi geometries on both sides
       for g1 in Meshes.flatten(geo1)

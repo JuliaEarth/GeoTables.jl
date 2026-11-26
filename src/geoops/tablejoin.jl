@@ -54,17 +54,7 @@ function _tablejoin(gtb::AbstractGeoTable, tab, selector::ColumnSelector, aggfun
   end
 
   # make variable names unique
-  if !isdisjoint(vars1, vars2)
-    # repeated variable names
-    vars = setdiff(vars1 ∩ vars2, onvars)
-    newvars = map(vars) do var
-      while var ∈ vars1
-        var = Symbol(var, :_)
-      end
-      var
-    end
-    tab = _rename(tab, vars, newvars)
-  end
+  tab = _uniquenames(values(gtb), tab, onvars)
 
   gtb = _adjustunits(gtb)
   tab = _adjustunits(tab)
@@ -91,12 +81,12 @@ function _tableleftjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   # rows to join
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
+  jinds = _tmap(1:nrows) do i
     row1 = Tables.subset(tab1, i, viewhint=true)
     [j for (j, row2) in enumerate(rows2) if onpred(row1, row2)]
   end
 
-  _leftjoinpos(jrows, agg, gtb, vars2, cols2)
+  _leftjoinpos(jinds, agg, gtb, vars2, cols2)
 end
 
 function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
@@ -114,10 +104,10 @@ function _tableinnerjoin(gtb, tab, selector, aggfuns, onvars, onpred)
   # rows to join
   nrows = nrow(gtb)
   rows2 = Tables.rows(tab2)
-  jrows = _tmap(1:nrows) do i
+  jinds = _tmap(1:nrows) do i
     row1 = Tables.subset(tab1, i, viewhint=true)
     [j for (j, row2) in enumerate(rows2) if onpred(row1, row2)]
   end
 
-  _innerjoinpos(jrows, agg, gtb, vars2, cols2)
+  _innerjoinpos(jinds, agg, gtb, vars2, cols2)
 end
