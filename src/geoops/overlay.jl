@@ -65,7 +65,7 @@ function _overlayintersection(dom1, dom2)
     isempty(candidates) && return rows
 
     # iterate over candidates in gtb2 that have overlapping bounding boxes with the geometry in gtb1
-    for j in search(geo1, searcher)
+    for j in candidates
       I = intersection(geo1, dom2[j])
       type(I) == NotIntersecting && continue
 
