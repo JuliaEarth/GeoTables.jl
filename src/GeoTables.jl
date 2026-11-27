@@ -105,8 +105,8 @@ export
 
   # operations
   geojoin,
-  overlay,
   tablejoin,
+  overlay,
   @groupby,
   @transform,
   @combine,

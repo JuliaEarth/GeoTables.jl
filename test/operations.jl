@@ -646,7 +646,7 @@
     @test ogtb.b == inds
 
     # point-polygon intersection
-    ogtb = overlay(gtb2, gtb1, method=:intersection)
+    ogtb = overlay(gtb2, gtb1)
     @test propertynames(ogtb) == [:b, :a, :geometry]
     @test ogtb.geometry == view(pset, inds)
     @test ogtb.b == inds
@@ -704,7 +704,7 @@
     @test area.(ogtb.geometry) ≈ [6.5, 5.5] * u"m^2"
 
     # unsupported method and empty result
-    @test_throws ArgumentError overlay(gtb1, gtb2, method=:union)
+    @test_throws ArgumentError overlay(gtb1, gtb2, kind=:union)
     gtb4 = georef((; d=[1]), GeometrySet([Box((20, 20), (21, 21))]))
     @test_throws "GeoTables currently cannot materialize an empty overlay." overlay(gtb1, gtb4)
   end

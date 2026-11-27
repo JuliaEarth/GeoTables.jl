@@ -1,20 +1,15 @@
 """
-	overlay(geotable₁, geotable₂;
-						method=:intersection)
+    overlay(geotable₁, geotable₂; kind=:intersection)
 
-Computes a spatial overlay between two geotables.
+Overlays `geotable₁` with `geotable₂` using a certain `kind` of overlay.
 
-Unlike [`geojoin`](@ref), overlay operations generate new geometries.
-Each resulting geometry is associated with the attributes of the input
-geometries from which it originated.
+## Kinds
 
-## Methods
-
-* `:intersection` - portions shared by both geotables
+* `:intersection` - regions shared by both geotables
 """
-function overlay(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; method=:intersection)
-  if method ∉ (:intersection,)
-    throw(ArgumentError("invalid overlay method, only :intersection is implemented at the moment."))
+function overlay(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; kind=:intersection)
+  if kind ∉ (:intersection,)
+    throw(ArgumentError("invalid overlay, only :intersection is implemented at the moment."))
   end
 
   # use the CRS and units of the first geotable
@@ -26,10 +21,10 @@ function overlay(gtb1::AbstractGeoTable, gtb2::AbstractGeoTable; method=:interse
   gtb1 = _adjustunits(gtb1)
   gtb2 = _adjustunits(gtb2)
 
-  _overlay(gtb1, gtb2, method)
+  _overlay(gtb1, gtb2, kind)
 end
 
-function _overlay(gtb1, gtb2, method)
+function _overlay(gtb1, gtb2, kind)
   dom1 = domain(gtb1)
   dom2 = domain(gtb2)
   tab1 = values(gtb1)
@@ -39,7 +34,7 @@ function _overlay(gtb1, gtb2, method)
   vars1 = Tables.columnnames(cols1)
   vars2 = Tables.columnnames(cols2)
 
-  if method == :intersection
+  if kind == :intersection
     rows = _overlayintersection(dom1, dom2)
   end
   isempty(rows) && error("GeoTables currently cannot materialize an empty overlay.")
@@ -57,21 +52,16 @@ end
 
 function _overlayintersection(dom1, dom2)
   searcher = BBoxSearch(dom2)
-  # iterate over geometries in gtb1 and find matches in gtb2
-  rowgroups = _tmap(eachindex(dom1)) do i
+  groups = _tmap(eachindex(dom1)) do i
     geo1 = dom1[i]
     rows = Tuple{Int,Int,Geometry}[]
-    candidates = search(geo1, searcher)
-    isempty(candidates) && return rows
-
-    # iterate over candidates in gtb2 that have overlapping bounding boxes with the geometry in gtb1
-    for j in candidates
+    inds = search(geo1, searcher)
+    for j in inds
       I = intersection(geo1, dom2[j])
       type(I) == NotIntersecting && continue
-
       push!(rows, (i, j, get(I)))
     end
     rows
   end
-  reduce(vcat, rowgroups)
+  reduce(vcat, groups)
 end
